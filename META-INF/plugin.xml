@@ -1,0 +1,34 @@
+<idea-plugin version="2">
+  <name>GWT-Platform IDEA Plugin</name>
+  <description>A plugin to help with common GWT-Platform project tasks</description>
+  <version>1.0</version>
+  <vendor>ArcBees</vendor>
+  <idea-version since-build="8000"/>
+
+  <application-components>
+    <!-- Add your application components here -->
+  </application-components>
+
+  <project-components>
+    <!-- Add your project components here -->
+  </project-components>
+
+  <actions>
+    <group id="GwtpGroup" text="GWT-Platform" popup="true">
+      <action id="Gwtp.CreatePresenter" class="com.arcbees.gwtpidea.action.CreatePresenter"
+              text="GWT-Platform _Presenter" description="Create GWTP presenter" />
+      <action id="Gwtp.CreateView" class="com.arcbees.gwtpidea.action.CreateView" text="GWT-Platform _View"
+              description="Create GWTP View and UiBinder XML"/>
+      <action id="Gwtp.CreateEvent" class="com.arcbees.gwtpidea.action.CreateEvent" text="GWT-Platform _Event"
+              description="Create GWT-Platform event"/>
+      <action id="Gwtp.CreateDispatch" class="com.arcbees.gwtpidea.action.CreateDispatch"
+              text="GWT-Platform _Action / Result" description="Create GWT-Platform action / result pair"/>
+
+      <add-to-group group-id="NewGroup" anchor="after" relative-to-action="GWT"/>
+    </group>
+  </actions>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+  </extensions>
+</idea-plugin>
