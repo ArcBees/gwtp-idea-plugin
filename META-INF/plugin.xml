@@ -29,6 +29,6 @@
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
+    <fileTemplateGroup implementation="com.arcbees.gwtpidea.GwtpFileTemplateProvider"/>
   </extensions>
 </idea-plugin>
