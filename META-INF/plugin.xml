@@ -33,10 +33,26 @@
   </project-components>
 
   <actions>
-    <!-- Add your actions here -->
+      <group id="GWTP.ActionGroup" popup="true" text="GWTP" description="ads"
+             icon="/com/arcbees/plugin/idea/icons/addgwtp_16X16.png">
+
+          <!--<action id="GWTP.NewApplication" text="GWTP application"-->
+                  <!--description="Create new application"-->
+                  <!--class="ro.redeul.google.go.actions.NewGoApplicationAction">-->
+          <!--</action>-->
+
+          <add-to-group group-id="NewGroup" anchor="before"
+                        relative-to-action="NewFile"/>
+      </group>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
+
+      <moduleType id="GO_APP_ENGINE_MODULE"
+                  implementationClass="com.arcbees.plugin.idea.moduletypes.CreateProjectModuleType"
+                  classpathProvider="true"/>
+
   </extensions>
+
+  <!--<depends>org.jetbrains.idea.maven</depends>-->
 </idea-plugin>
