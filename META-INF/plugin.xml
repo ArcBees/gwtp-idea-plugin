@@ -48,7 +48,7 @@
 
   <extensions defaultExtensionNs="com.intellij">
 
-      <moduleType id="GO_APP_ENGINE_MODULE"
+      <moduleType id="GWTP_CREATE_PROJECT_MODULE"
                   implementationClass="com.arcbees.plugin.idea.moduletypes.CreateProjectModuleType"
                   classpathProvider="true"/>
 
