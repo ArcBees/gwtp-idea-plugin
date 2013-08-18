@@ -16,46 +16,37 @@
 
 package com.arcbees.plugin.idea.wizards;
 
-import com.intellij.ide.util.newProjectWizard.StepSequence;
-import com.intellij.ide.util.newProjectWizard.modes.WizardMode;
-import com.intellij.ide.util.projectWizard.ProjectBuilder;
+import com.arcbees.plugin.idea.moduletypes.CreateProjectBuilder;
+import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class CreateProjectWizard extends WizardMode {
-    @NotNull
-    @Override
-    public String getDisplayName(WizardContext wizardContext) {
-        return null;
-    }
+import javax.swing.*;
 
-    @NotNull
-    @Override
-    public String getDescription(WizardContext wizardContext) {
-        return null;
-    }
+public class CreateProjectWizard extends ModuleWizardStep {
+    private final CreateProjectBuilder createProjectBuilder;
+    private final WizardContext wizardContext;
+    private final ModulesProvider modulesProvider;
 
-    @Override
-    public boolean isAvailable(WizardContext wizardContext) {
-        return false;
-    }
+    private JPanel mainPanel;
+    private JTextField artifactId;
+    private JTextField groupId;
+    private JTable archetypes;
 
-    @Nullable
-    @Override
-    protected StepSequence createSteps(WizardContext wizardContext, @NotNull ModulesProvider modulesProvider) {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public ProjectBuilder getModuleBuilder() {
-        return null;
+    public CreateProjectWizard(CreateProjectBuilder createProjectBuilder, WizardContext wizardContext,
+                               ModulesProvider modulesProvider) {
+        this.createProjectBuilder = createProjectBuilder;
+        this.wizardContext = wizardContext;
+        this.modulesProvider = modulesProvider;
     }
 
     @Override
-    public void onChosen(boolean b) {
+    public JComponent getComponent() {
+        return mainPanel;
+    }
 
+    @Override
+    public void updateDataModel() {
+        // TODO
     }
 }

@@ -16,11 +16,13 @@
 
 package com.arcbees.plugin.idea.moduletypes;
 
-import com.intellij.ide.util.projectWizard.JavaModuleBuilder;
-import com.intellij.ide.util.projectWizard.ModuleBuilderListener;
-import com.intellij.ide.util.projectWizard.SourcePathsBuilder;
+import com.arcbees.plugin.idea.wizards.CreateProjectWizard;
+import com.intellij.ide.util.projectWizard.*;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleType;
+import com.intellij.openapi.projectRoots.JavaSdk;
+import com.intellij.openapi.projectRoots.SdkTypeId;
+import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
 import org.jetbrains.annotations.NotNull;
 
 public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePathsBuilder, ModuleBuilderListener {
@@ -36,5 +38,22 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
     @Override
     public ModuleType getModuleType() {
         return CreateProjectModuleType.getInstance();
+    }
+
+    @Override
+    public String getGroupName() {
+        return CreateProjectModuleType.GWT_GROUP;
+    }
+
+    @Override
+    public boolean isSuitableSdkType(SdkTypeId sdk) {
+        return sdk == JavaSdk.getInstance();
+    }
+
+    @Override
+    public ModuleWizardStep[] createWizardSteps(WizardContext wizardContext, ModulesProvider modulesProvider) {
+        return new ModuleWizardStep[] {
+                new CreateProjectWizard(this, wizardContext, modulesProvider)
+        };
     }
 }

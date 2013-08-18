@@ -23,7 +23,9 @@ import com.intellij.openapi.module.ModuleTypeManager;
 import javax.swing.*;
 
 public class CreateProjectModuleType extends ModuleType<CreateProjectBuilder> {
-    public static final String MODULE_TYPE_ID = "GWTP_CREATE_PROJECT";
+    // TODO register its own group
+    public static final String GWT_GROUP = "Java";
+    public static final String MODULE_TYPE_ID = "GWTP_CREATE_PROJECT_MODULE";
 
     public CreateProjectModuleType() {
         super(MODULE_TYPE_ID);
@@ -50,7 +52,8 @@ public class CreateProjectModuleType extends ModuleType<CreateProjectBuilder> {
 
     @Override
     public Icon getBigIcon() {
-        return PluginIcons.GWTP_ICON_16x16; // TODO 24x24
+        // TODO 24x24
+        return PluginIcons.GWTP_ICON_16x16;
     }
 
     @Override
