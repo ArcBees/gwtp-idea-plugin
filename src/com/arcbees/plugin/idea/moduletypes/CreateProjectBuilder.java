@@ -16,7 +16,7 @@
 
 package com.arcbees.plugin.idea.moduletypes;
 
-import com.arcbees.plugin.idea.wizards.CreateProjectWizard;
+import com.arcbees.plugin.idea.wizards.createproject.CreateProjectWizard;
 import com.intellij.ide.util.projectWizard.*;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleType;

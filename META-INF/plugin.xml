@@ -5,13 +5,11 @@
   <vendor email="support@arcbees.com" url="http://www.arcbees.com">ArcBees</vendor>
 
   <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <small>most HTML tags may be used</small>
+      The GWTP IDEA plugin provides tools for GWT-Platform framework in IntelliJ IDEA.<br>
       ]]></description>
 
   <change-notes><![CDATA[
-      Add change notes here.<br>
-      <small>most HTML tags may be used</small>
+      Project Creation by Archetype added.<br>
       ]]>
   </change-notes>
 
@@ -23,13 +21,13 @@
   <!-- uncomment to enable plugin in all products
   <depends>com.intellij.modules.lang</depends>
   -->
+  <!-- TODO maven lib -->
+  <!--<depends>org.jetbrains.idea.maven</depends>-->
 
   <application-components>
-    <!-- Add your application components here -->
   </application-components>
 
   <project-components>
-    <!-- Add your project components here -->
   </project-components>
 
   <actions>
@@ -40,8 +38,6 @@
                   implementationClass="com.arcbees.plugin.idea.moduletypes.CreateProjectModuleType"
                   classpathProvider="true"/>
 
-      <wizardMode implementation="com.arcbees.plugin.idea.wizards.CreateProjectWizard"/>
+      <wizardMode implementation="com.arcbees.plugin.idea.wizards.createproject.CreateProjectWizard"/>
   </extensions>
-
-  <!--<depends>org.jetbrains.idea.maven</depends>-->
 </idea-plugin>

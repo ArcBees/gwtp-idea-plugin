@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.arcbees.plugin.idea.wizards;
+package com.arcbees.plugin.idea.wizards.createproject;
 
 import com.arcbees.plugin.idea.moduletypes.CreateProjectBuilder;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
