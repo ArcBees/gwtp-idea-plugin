@@ -16,10 +16,13 @@
 
 package com.arcbees.plugin.idea.wizards.createproject;
 
+import com.arcbees.plugin.idea.domain.ArchetypeCollection;
 import com.arcbees.plugin.idea.moduletypes.CreateProjectBuilder;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.ide.util.projectWizard.WizardContext;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
+import com.intellij.util.ui.tree.TreeUtil;
 
 import javax.swing.*;
 
@@ -48,5 +51,25 @@ public class CreateProjectWizard extends ModuleWizardStep {
     @Override
     public void updateDataModel() {
         // TODO
+    }
+
+    @Override
+    public void updateStep() {
+        fetchArchetypes();
+    }
+
+    private void fetchArchetypes() {
+        ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
+            public void run() {
+                FetchArchetypes fetch = new FetchArchetypes();
+                ArchetypeCollection collection = fetch.fetchArchetypes();
+
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                       // TODO update table
+                    }
+                });
+            }
+        });
     }
 }

@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.arcbees.plugin.eclipse.domain.Archetype;
-import com.arcbees.plugin.eclipse.domain.ArchetypeCollection;
 import com.arcbees.plugin.idea.domain.Archetype;
 import com.arcbees.plugin.idea.domain.ArchetypeCollection;
 import com.google.gson.Gson;
@@ -106,5 +104,4 @@ public class FetchArchetypes {
         });
         return gsonBuilder;
     }
-    
 }
