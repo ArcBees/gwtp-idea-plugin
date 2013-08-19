@@ -16,15 +16,17 @@
 
 package com.arcbees.plugin.idea.wizards.createproject;
 
+import com.arcbees.plugin.idea.domain.Archetype;
 import com.arcbees.plugin.idea.domain.ArchetypeCollection;
 import com.arcbees.plugin.idea.moduletypes.CreateProjectBuilder;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
-import com.intellij.util.ui.tree.TreeUtil;
+import com.intellij.ui.table.JBTable;
 
 import javax.swing.*;
+import javax.swing.table.TableColumn;
 
 public class CreateProjectWizard extends ModuleWizardStep {
     private final CreateProjectBuilder createProjectBuilder;
@@ -34,7 +36,7 @@ public class CreateProjectWizard extends ModuleWizardStep {
     private JPanel mainPanel;
     private JTextField artifactId;
     private JTextField groupId;
-    private JTable archetypes;
+    private JTable archetypesTable;
 
     public CreateProjectWizard(CreateProjectBuilder createProjectBuilder, WizardContext wizardContext,
                                ModulesProvider modulesProvider) {
@@ -55,7 +57,14 @@ public class CreateProjectWizard extends ModuleWizardStep {
 
     @Override
     public void updateStep() {
+        addColumnsToTable();
         fetchArchetypes();
+    }
+
+    private void addColumnsToTable() {
+        TableColumn columnName = new TableColumn();
+        columnName.setHeaderValue("Name");
+        archetypesTable.addColumn(columnName);
     }
 
     private void fetchArchetypes() {
@@ -71,5 +80,16 @@ public class CreateProjectWizard extends ModuleWizardStep {
                 });
             }
         });
+    }
+
+    private void createUIComponents() {
+        ArchetypesTableModel tableModel = new ArchetypesTableModel();
+        archetypesTable = new JBTable(tableModel);
+        archetypesTable.setShowGrid(true);
+
+        tableModel.setRowCount(15);
+        tableModel.setNumRows(15);
+
+        tableModel.addRow(new Archetype());
     }
 }
