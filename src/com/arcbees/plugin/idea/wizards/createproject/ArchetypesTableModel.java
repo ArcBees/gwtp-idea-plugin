@@ -17,20 +17,49 @@
 package com.arcbees.plugin.idea.wizards.createproject;
 
 import com.arcbees.plugin.idea.domain.Archetype;
+import com.arcbees.plugin.idea.domain.ArchetypeCollection;
 
 import javax.swing.table.DefaultTableModel;
+import java.util.List;
+import java.util.Vector;
 
 public class ArchetypesTableModel extends DefaultTableModel {
     private static final String[] COLUMN_TITLES = {"Name", "Categories", "Tags"};
 
     public ArchetypesTableModel() {
-        setColumnCount(3);
-//        setColumnIdentifiers(COLUMN_TITLES);
-        Object col = "test";
-        addColumn(col);
     }
 
-    public void addRow(Archetype item) {
-        addRow(new Object[] {item});
+    @Override
+    public int getColumnCount() {
+        return COLUMN_TITLES.length;
+    }
+
+    @Override
+    public String getColumnName(int i) {
+        return COLUMN_TITLES[i];
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return String.class;
+    }
+
+    public void addCollection(ArchetypeCollection collection) {
+        List<Archetype> archetypes = collection.getArchetypes();
+        if (archetypes == null) {
+            return;
+        }
+
+        for (Archetype archetype : archetypes) {
+              addRow(archetype);
+        }
+    }
+
+    public void addRow(Archetype archetype) {
+        String[] row = new String[3];
+        row[0] = archetype.getName();
+        row[1] = archetype.getTagsAsString();
+        row[2] = archetype.getCategoriesAsString();
+        addRow(row);
     }
 }

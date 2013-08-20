@@ -76,8 +76,45 @@ public class Archetype {
         this.categories = categories;
     }
 
+    public String getCategoriesAsString() {
+        List<Category> categories = getCategories();
+        if (categories == null) {
+            return "";
+        }
+
+        StringBuffer sb = new StringBuffer();
+        if (categories != null) {
+            for (int i = 0; i < categories.size(); i++) {
+                Category c = categories.get(i);
+                sb.append(c.getName());
+                if (i < categories.size() - 1) {
+                    sb.append(", ");
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     public List<Tag> getTags() {
         return tags;
+    }
+
+    public String getTagsAsString() {
+        List<Tag> tags = getTags();
+        if (tags == null) {
+            return "";
+        }
+        StringBuffer sb = new StringBuffer();
+        if (tags != null) {
+            for (int i = 0; i < tags.size(); i++) {
+                Tag t = tags.get(i);
+                sb.append(t.getName());
+                if (i < tags.size() - 1) {
+                    sb.append(", ");
+                }
+            }
+        }
+        return sb.toString();
     }
 
     public void setTags(List<Tag> tags) {
