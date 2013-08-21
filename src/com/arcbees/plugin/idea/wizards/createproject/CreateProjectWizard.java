@@ -16,7 +16,6 @@
 
 package com.arcbees.plugin.idea.wizards.createproject;
 
-import com.arcbees.plugin.idea.domain.Archetype;
 import com.arcbees.plugin.idea.domain.ArchetypeCollection;
 import com.arcbees.plugin.idea.moduletypes.CreateProjectBuilder;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
@@ -26,8 +25,14 @@ import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
 import com.intellij.ui.table.JBTable;
 
 import javax.swing.*;
-import javax.swing.table.TableColumn;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
+/**
+ * TODO loading icon
+ * TODO validation of project model settings, disable finish until all parameters are retrieved.
+ * TODO update project model settings
+ */
 public class CreateProjectWizard extends ModuleWizardStep {
     private final CreateProjectBuilder createProjectBuilder;
     private final WizardContext wizardContext;
@@ -83,6 +88,16 @@ public class CreateProjectWizard extends ModuleWizardStep {
         archetypesTable.setShowGrid(true);
         archetypesTable.setShowHorizontalLines(true);
         archetypesTable.setShowVerticalLines(true);
-        archetypesTable.setAutoCreateColumnsFromModel(true);
+
+        ListSelectionModel selectionModel = archetypesTable.getSelectionModel();
+        selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        selectionModel.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent listSelectionEvent) {
+                ListSelectionModel model = archetypesTable.getSelectionModel();
+                int selected = model.getLeadSelectionIndex();
+                // TODO
+            }
+        });
     }
 }
