@@ -45,6 +45,8 @@ public class ArchetypesTableModel extends DefaultTableModel {
     }
 
     public void addCollection(ArchetypeCollection collection) {
+        clear();
+
         List<Archetype> archetypes = collection.getArchetypes();
         if (archetypes == null) {
             return;
@@ -62,4 +64,10 @@ public class ArchetypesTableModel extends DefaultTableModel {
         row[2] = archetype.getCategoriesAsString();
         addRow(row);
     }
+
+    private void clear() {
+        setNumRows(0);
+        setRowCount(0);
+    }
+
 }

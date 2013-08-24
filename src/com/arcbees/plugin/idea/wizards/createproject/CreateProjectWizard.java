@@ -17,16 +17,19 @@
 package com.arcbees.plugin.idea.wizards.createproject;
 
 import com.arcbees.plugin.idea.domain.ArchetypeCollection;
+import com.arcbees.plugin.idea.icons.PluginIcons;
 import com.arcbees.plugin.idea.moduletypes.CreateProjectBuilder;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
 import com.intellij.ui.table.JBTable;
+import com.intellij.util.ui.AsyncProcessIcon;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import java.awt.*;
 
 /**
  * TODO loading icon
@@ -34,6 +37,8 @@ import javax.swing.event.ListSelectionListener;
  * TODO update project model settings
  */
 public class CreateProjectWizard extends ModuleWizardStep {
+    private final AsyncProcessIcon loadingIcon = new AsyncProcessIcon.Big(getClass() + ".loading");
+
     private final CreateProjectBuilder createProjectBuilder;
     private final WizardContext wizardContext;
     private final ModulesProvider modulesProvider;
@@ -42,6 +47,7 @@ public class CreateProjectWizard extends ModuleWizardStep {
     private JTextField artifactId;
     private JTextField groupId;
     private JTable archetypesTable;
+    private JPanel loadingPanel;
 
     public CreateProjectWizard(CreateProjectBuilder createProjectBuilder, WizardContext wizardContext,
                                ModulesProvider modulesProvider) {
@@ -65,7 +71,17 @@ public class CreateProjectWizard extends ModuleWizardStep {
         fetchArchetypes();
     }
 
+    @Override
+    public void disposeUIResources() {
+        loadingIcon.dispose();
+        super.disposeUIResources();
+    }
+
     private void fetchArchetypes() {
+        displayLoading(true);
+
+        archetypesTable.clearSelection();
+
         ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
             public void run() {
                 FetchArchetypes fetch = new FetchArchetypes();
@@ -75,11 +91,24 @@ public class CreateProjectWizard extends ModuleWizardStep {
                     public void run() {
                         ArchetypesTableModel model = (ArchetypesTableModel) archetypesTable.getModel();
                         model.addCollection(collection);
+                        displayLoading(false);
                         archetypesTable.repaint();
                     }
                 });
             }
         });
+    }
+
+    private void displayLoading(boolean display) {
+        loadingIcon.setSize(new Dimension(40, 40));
+        loadingPanel.add(loadingIcon);
+        loadingIcon.setVisible(display);
+        loadingPanel.setVisible(display);
+        if (display) {
+            loadingIcon.resume();
+        } else {
+            loadingIcon.suspend();
+        }
     }
 
     private void createUIComponents() {
@@ -89,6 +118,10 @@ public class CreateProjectWizard extends ModuleWizardStep {
         archetypesTable.setShowHorizontalLines(true);
         archetypesTable.setShowVerticalLines(true);
 
+        addTableSelectionModel();
+    }
+
+    private void addTableSelectionModel() {
         ListSelectionModel selectionModel = archetypesTable.getSelectionModel();
         selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         selectionModel.addListSelectionListener(new ListSelectionListener() {
