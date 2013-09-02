@@ -69,5 +69,4 @@ public class ArchetypesTableModel extends DefaultTableModel {
         setNumRows(0);
         setRowCount(0);
     }
-
 }

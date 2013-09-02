@@ -20,19 +20,37 @@ import com.arcbees.plugin.idea.wizards.createproject.CreateProjectWizard;
 import com.intellij.ide.util.projectWizard.*;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleType;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.projectRoots.SdkTypeId;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
+import org.apache.maven.shared.invoker.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.idea.maven.utils.MavenUtil;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.Properties;
 
 public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePathsBuilder, ModuleBuilderListener {
     public CreateProjectBuilder() {
         addListener(this);
     }
 
+    // TODO
     @Override
     public void moduleCreated(@NotNull Module module) {
+        Project project = module.getProject();
+        String basePath = project.getBasePath();
+
+        try {
+            generateArchetype(project, new File(basePath));
+        } catch (MavenInvocationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
         // TODO
+        System.out.println("finished");
     }
 
     @Override
@@ -55,5 +73,36 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
         return new ModuleWizardStep[] {
                 new CreateProjectWizard(this, wizardContext, modulesProvider)
         };
+    }
+
+    // TODO
+    private void generateArchetype(Project project, File basePath) throws MavenInvocationException {
+        File mavenHome = MavenUtil.resolveMavenHomeDirectory(null/** override maven bin path **/);
+
+        InvocationRequest request = new DefaultInvocationRequest();
+        request.setGoals( Collections.singletonList("archetype:generate") );
+        request.setInteractive(false);
+
+        Properties properties = new Properties();
+
+        // select archetype parameters
+        properties.setProperty("archetypeRepository", "https://oss.sonatype.org/content/repositories/snapshots/");
+        properties.setProperty("archetypeGroupId", "com.arcbees.archetypes");
+        properties.setProperty("archetypeArtifactId", "gwtp-basic-archetype");
+        properties.setProperty("archetypeVersion", "1.0-SNAPSHOT");
+
+        // new project parameters
+        properties.setProperty("groupId", "com.projectname.project");
+        properties.setProperty("artifactId", "new-project-name");
+        properties.setProperty("module", "Project");
+
+        // generate parameters
+        properties.setProperty("interactiveMode", "false");
+        request.setProperties(properties);
+
+        Invoker invoker = new DefaultInvoker();
+        invoker.setWorkingDirectory(basePath);
+        invoker.setMavenHome(mavenHome);
+        InvocationResult result = invoker.execute(request);
     }
 }
