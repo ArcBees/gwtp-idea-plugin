@@ -16,6 +16,8 @@
 
 package com.arcbees.plugin.idea.moduletypes;
 
+import com.arcbees.plugin.idea.domain.Archetype;
+import com.arcbees.plugin.idea.domain.ProjectConfigModel;
 import com.arcbees.plugin.idea.wizards.createproject.CreateProjectWizard;
 import com.intellij.ide.util.projectWizard.*;
 import com.intellij.openapi.module.Module;
@@ -24,15 +26,19 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.projectRoots.SdkTypeId;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
+import com.intellij.openapi.util.io.FileUtil;
 import org.apache.maven.shared.invoker.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.utils.MavenUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Properties;
 
 public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePathsBuilder, ModuleBuilderListener {
+    private CreateProjectWizard projectWizard;
+
     public CreateProjectBuilder() {
         addListener(this);
     }
@@ -41,12 +47,21 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
     @Override
     public void moduleCreated(@NotNull Module module) {
         Project project = module.getProject();
-        String basePath = project.getBasePath();
+
+        final File workingDir;
+        try {
+            workingDir = FileUtil.createTempDirectory("archetype", "tmp");
+            workingDir.deleteOnExit();
+        }
+        catch (IOException e) {
+            e.printStackTrace(); // TODO
+            return;
+        }
 
         try {
-            generateArchetype(project, new File(basePath));
+            generateArchetype(project, workingDir);
         } catch (MavenInvocationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();  // TODO
         }
 
         // TODO
@@ -70,13 +85,16 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
 
     @Override
     public ModuleWizardStep[] createWizardSteps(WizardContext wizardContext, ModulesProvider modulesProvider) {
-        return new ModuleWizardStep[] {
-                new CreateProjectWizard(this, wizardContext, modulesProvider)
-        };
+        projectWizard = new CreateProjectWizard(this, wizardContext, modulesProvider);
+
+        return new ModuleWizardStep[] { projectWizard };
     }
 
     // TODO
-    private void generateArchetype(Project project, File basePath) throws MavenInvocationException {
+    private void generateArchetype(Project project, File workingDir) throws MavenInvocationException {
+        ProjectConfigModel projectConfig = getProjectConfig();
+        Archetype archetype = getProjectConfigArchetype();
+
         File mavenHome = MavenUtil.resolveMavenHomeDirectory(null/** override maven bin path **/);
 
         InvocationRequest request = new DefaultInvocationRequest();
@@ -86,23 +104,56 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
         Properties properties = new Properties();
 
         // select archetype parameters
-        properties.setProperty("archetypeRepository", "https://oss.sonatype.org/content/repositories/snapshots/");
-        properties.setProperty("archetypeGroupId", "com.arcbees.archetypes");
-        properties.setProperty("archetypeArtifactId", "gwtp-basic-archetype");
-        properties.setProperty("archetypeVersion", "1.0-SNAPSHOT");
+        properties.setProperty("archetypeRepository", archetype.getRepository());
+        properties.setProperty("archetypeGroupId", archetype.getGroupId());
+        properties.setProperty("archetypeArtifactId", archetype.getArtifactId());
+        properties.setProperty("archetypeVersion", archetype.getVersion());
 
         // new project parameters
-        properties.setProperty("groupId", "com.projectname.project");
-        properties.setProperty("artifactId", "new-project-name");
-        properties.setProperty("module", "Project");
+        properties.setProperty("groupId", projectConfig.getGroupId());
+        properties.setProperty("artifactId", projectConfig.getArtifactId());
+        properties.setProperty("module", projectConfig.getModuleName());
 
         // generate parameters
         properties.setProperty("interactiveMode", "false");
         request.setProperties(properties);
 
         Invoker invoker = new DefaultInvoker();
-        invoker.setWorkingDirectory(basePath);
+        invoker.setWorkingDirectory(workingDir);
         invoker.setMavenHome(mavenHome);
         InvocationResult result = invoker.execute(request);
+
+        //copyGeneratedFiles(project, workingDir);
+    }
+
+    private void copyGeneratedFiles(Project project, File workingDir) {
+//        VirtualFile baseDir = project.getBaseDir();
+//
+//        try {
+//            FileUtil.copyDir(new File(workingDir, project.getArtifactId()), baseDir);
+//        }
+//        catch (IOException e) {
+//            e.printStackTrace(); // TODO
+//            return;
+//        }
+//
+//        FileUtil.delete(workingDir);
+//
+//        //pom.refresh(false, false);
+//        //updateProjectPom(project, pom);
+//
+//        LocalFileSystem.getInstance().refreshWithoutFileWatcher(true);
+    }
+
+    private ProjectConfigModel getProjectConfig() {
+        ProjectConfigModel projectConfig = new ProjectConfigModel();
+        projectWizard.getData(projectConfig);
+        return projectConfig;
+    }
+
+    private Archetype getProjectConfigArchetype() {
+        ProjectConfigModel projectConfig = getProjectConfig();
+
+        return projectConfig.getArchetypeSelected();
     }
 }
