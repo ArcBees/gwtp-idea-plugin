@@ -27,12 +27,15 @@ import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.projectRoots.SdkTypeId;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.maven.shared.invoker.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.utils.MavenUtil;
 
-import java.io.File;
-import java.io.IOException;
+
+import java.io.*;
 import java.util.Collections;
 import java.util.Properties;
 
@@ -90,7 +93,6 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
         return new ModuleWizardStep[] { projectWizard };
     }
 
-    // TODO
     private void generateArchetype(Project project, File workingDir) throws MavenInvocationException {
         ProjectConfigModel projectConfig = getProjectConfig();
         Archetype archetype = getProjectConfigArchetype();
@@ -123,26 +125,56 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
         invoker.setMavenHome(mavenHome);
         InvocationResult result = invoker.execute(request);
 
-        //copyGeneratedFiles(project, workingDir);
+        // post import tasks
+        copyGeneratedFilesToProject(project, workingDir);
+
+        try {
+            importMavenProject(project);
+        } catch (IOException e) {
+            // TODO
+            e.printStackTrace();
+        }
     }
 
-    private void copyGeneratedFiles(Project project, File workingDir) {
-//        VirtualFile baseDir = project.getBaseDir();
-//
-//        try {
-//            FileUtil.copyDir(new File(workingDir, project.getArtifactId()), baseDir);
-//        }
-//        catch (IOException e) {
-//            e.printStackTrace(); // TODO
-//            return;
-//        }
-//
-//        FileUtil.delete(workingDir);
-//
-//        //pom.refresh(false, false);
-//        //updateProjectPom(project, pom);
-//
-//        LocalFileSystem.getInstance().refreshWithoutFileWatcher(true);
+    /**
+     * TODO import the project as a maven project.
+     *
+     * 1. does the idea compiler need to be setup
+     * 2. I wish I could easily use the project manager and then use the MavenProjectImporter
+     */
+    private void importMavenProject(Project project) throws IOException {
+        ProjectConfigModel projectConfig = getProjectConfig();
+        String pomPath = project.getBasePath() + File.separator + "pom.xml";
+        File pom = new File(pomPath);
+
+        VirtualFile pomVirtFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(pom);
+        MavenProject mavenProject = new MavenProject(pomVirtFile);
+
+
+//        String pluginGroupID = "com.arcbees.plugin.idea.mavenimporter";
+//        String pluginArtifactID = "com.arcbees.plugin.idea";
+//        ArchetypeMavenImporter mavenImporter = new ArchetypeMavenImporter(pluginGroupID, pluginArtifactID);
+
+
+        //MavenProjectsManager myProjectsManager = MavenProjectsManager.getInstance(project);
+
+        System.out.println("end");
+    }
+
+    private void copyGeneratedFilesToProject(Project project, File workingDir) {
+        ProjectConfigModel projectConfig = getProjectConfig();
+        String baseDir = project.getBasePath();
+        File baseDirFile = new File(baseDir);
+
+        try {
+            FileUtil.copyDir(new File(workingDir, projectConfig.getArtifactId()), baseDirFile);
+        }
+        catch (IOException e) {
+            e.printStackTrace(); // TODO
+        }
+
+        FileUtil.delete(workingDir);
+        LocalFileSystem.getInstance().refreshWithoutFileWatcher(true);
     }
 
     private ProjectConfigModel getProjectConfig() {
@@ -153,7 +185,6 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
 
     private Archetype getProjectConfigArchetype() {
         ProjectConfigModel projectConfig = getProjectConfig();
-
         return projectConfig.getArchetypeSelected();
     }
 }

@@ -144,7 +144,9 @@ public class CreateProjectWizard extends ModuleWizardStep {
                 int selectedIndex = model.getLeadSelectionIndex();
 
                 ArchetypesTableModel tableModel = (ArchetypesTableModel) archetypesTable.getModel();
-                archetypeSelected = tableModel.getArchetype(selectedIndex);
+                if (selectedIndex != -1) {
+                    archetypeSelected = tableModel.getArchetype(selectedIndex);
+                }
             }
         });
     }
