@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="org.apache.maven.shared:maven-invoker:2.1.1" type="repository">
+    <properties maven-id="org.apache.maven.shared:maven-invoker:2.1.1" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/maven-invoker-2.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/plexus-utils-3.0.8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/plexus-component-annotations-1.5.5.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lib/maven-invoker-2.1.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/maven-invoker-2.1.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
