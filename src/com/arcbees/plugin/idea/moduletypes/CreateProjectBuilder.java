@@ -18,6 +18,7 @@ package com.arcbees.plugin.idea.moduletypes;
 
 import com.arcbees.plugin.idea.domain.Archetype;
 import com.arcbees.plugin.idea.domain.ProjectConfigModel;
+import com.arcbees.plugin.idea.icons.PluginIcons;
 import com.arcbees.plugin.idea.wizards.createproject.CreateProjectWizard;
 import com.intellij.ide.util.projectWizard.*;
 import com.intellij.openapi.module.Module;
@@ -26,18 +27,27 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.projectRoots.SdkTypeId;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
+import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.wm.StatusBar;
+import com.intellij.openapi.wm.WindowManager;
+import com.intellij.ui.awt.RelativePoint;
 import org.apache.maven.shared.invoker.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.utils.MavenUtil;
+import org.jetbrains.idea.maven.wizards.MavenModuleBuilder;
 
-import java.io.File;
-import java.io.IOException;
+import javax.swing.*;
+import java.io.*;
 import java.util.Collections;
 import java.util.Properties;
 
-public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePathsBuilder, ModuleBuilderListener {
+public class CreateProjectBuilder extends MavenModuleBuilder implements SourcePathsBuilder, ModuleBuilderListener {
     private CreateProjectWizard projectWizard;
+    private Project project;
 
     public CreateProjectBuilder() {
         addListener(this);
@@ -46,7 +56,7 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
     // TODO
     @Override
     public void moduleCreated(@NotNull Module module) {
-        Project project = module.getProject();
+        project = module.getProject();
 
         final File workingDir;
         try {
@@ -54,18 +64,34 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
             workingDir.deleteOnExit();
         }
         catch (IOException e) {
-            e.printStackTrace(); // TODO
+            displayBalloon("Error generating project. 100", MessageType.ERROR);
+            e.printStackTrace();
             return;
         }
 
         try {
             generateArchetype(project, workingDir);
         } catch (MavenInvocationException e) {
-            e.printStackTrace();  // TODO
+            displayBalloon("Error generating project. 101", MessageType.ERROR);
+            e.printStackTrace();
         }
 
-        // TODO
-        System.out.println("finished");
+        displayBalloon("Finished generating project.", MessageType.INFO);
+    }
+
+    private void displayBalloon(String htmlText, MessageType messageType) {
+        StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
+
+        JBPopupFactory.getInstance()
+                .createHtmlTextBalloonBuilder(htmlText, messageType, null)
+                .setFadeoutTime(7500)
+                .createBalloon()
+                .show(RelativePoint.getCenterOf(statusBar.getComponent()), Balloon.Position.above);
+    }
+
+    @Override
+    public String getPresentableName() {
+        return "GWTP";
     }
 
     @Override
@@ -84,13 +110,23 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
     }
 
     @Override
+    public Icon getBigIcon() {
+        // TODO 24x24
+        return PluginIcons.GWTP_ICON_16x16;
+    }
+
+    @Override
+    public Icon getNodeIcon() {
+        return PluginIcons.GWTP_ICON_16x16;
+    }
+
+    @Override
     public ModuleWizardStep[] createWizardSteps(WizardContext wizardContext, ModulesProvider modulesProvider) {
         projectWizard = new CreateProjectWizard(this, wizardContext, modulesProvider);
 
         return new ModuleWizardStep[] { projectWizard };
     }
 
-    // TODO
     private void generateArchetype(Project project, File workingDir) throws MavenInvocationException {
         ProjectConfigModel projectConfig = getProjectConfig();
         Archetype archetype = getProjectConfigArchetype();
@@ -123,26 +159,25 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
         invoker.setMavenHome(mavenHome);
         InvocationResult result = invoker.execute(request);
 
-        //copyGeneratedFiles(project, workingDir);
+        // post import tasks
+        copyGeneratedFilesToProject(project, workingDir);
     }
 
-    private void copyGeneratedFiles(Project project, File workingDir) {
-//        VirtualFile baseDir = project.getBaseDir();
-//
-//        try {
-//            FileUtil.copyDir(new File(workingDir, project.getArtifactId()), baseDir);
-//        }
-//        catch (IOException e) {
-//            e.printStackTrace(); // TODO
-//            return;
-//        }
-//
-//        FileUtil.delete(workingDir);
-//
-//        //pom.refresh(false, false);
-//        //updateProjectPom(project, pom);
-//
-//        LocalFileSystem.getInstance().refreshWithoutFileWatcher(true);
+    private void copyGeneratedFilesToProject(Project project, File workingDir) {
+        ProjectConfigModel projectConfig = getProjectConfig();
+        String baseDir = project.getBasePath();
+        File baseDirFile = new File(baseDir);
+
+        try {
+            FileUtil.copyDir(new File(workingDir, projectConfig.getArtifactId()), baseDirFile);
+        }
+        catch (IOException e) {
+            displayBalloon("Error generating project. 103", MessageType.ERROR);
+            e.printStackTrace();
+        }
+
+        FileUtil.delete(workingDir);
+        LocalFileSystem.getInstance().refreshWithoutFileWatcher(true);
     }
 
     private ProjectConfigModel getProjectConfig() {
@@ -153,7 +188,11 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
 
     private Archetype getProjectConfigArchetype() {
         ProjectConfigModel projectConfig = getProjectConfig();
-
         return projectConfig.getArchetypeSelected();
+    }
+
+    @Override
+    public String getDescription() {
+        return "Create a GWTP Maven project from an Maven archetype.";
     }
 }

@@ -75,7 +75,7 @@ public class ArchetypesTableModel extends DefaultTableModel {
     }
 
     public Archetype getArchetype(int index) {
-        if (archetypesArray == null || index > archetypesArray.length) {
+        if (archetypesArray == null || index > archetypesArray.length || index == -1) {
             return null;
         }
         return archetypesArray[index];
