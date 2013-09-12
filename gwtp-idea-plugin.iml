@@ -9,12 +9,11 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="JGoodies Forms" level="project" />
-    <orderEntry type="library" name="rest-assured-1.8.0" level="project" />
-    <orderEntry type="library" name="gson-2.2.3" level="project" />
-    <orderEntry type="library" name="commons-lang3-3.1" level="project" />
-    <orderEntry type="library" name="commons-io-2.4" level="project" />
-    <orderEntry type="library" name="httpclient-4.2.1" level="project" />
-    <orderEntry type="library" name="oro-2.0.8" level="project" />
+    <orderEntry type="library" name="com.jayway.restassured:rest-assured:1.8.1" level="project" />
+    <orderEntry type="library" name="commons-io:commons-io:2.4" level="project" />
+    <orderEntry type="library" name="org.apache.commons:commons-lang3:3.1" level="project" />
+    <orderEntry type="library" name="org.apache.maven.shared:maven-invoker:2.1.1" level="project" />
+    <orderEntry type="library" name="maven lib" level="project" />
   </component>
 </module>
 
