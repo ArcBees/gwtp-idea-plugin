@@ -25,6 +25,7 @@ import java.util.Vector;
 
 public class ArchetypesTableModel extends DefaultTableModel {
     private static final String[] COLUMN_TITLES = {"Name", "Categories", "Tags"};
+    private Archetype[] archetypesArray;
 
     public ArchetypesTableModel() {
     }
@@ -46,14 +47,22 @@ public class ArchetypesTableModel extends DefaultTableModel {
 
     public void addCollection(ArchetypeCollection collection) {
         clear();
+        archetypesArray = null;
 
         List<Archetype> archetypes = collection.getArchetypes();
         if (archetypes == null) {
             return;
         }
 
+        archetypesArray = new Archetype[archetypes.size()];
+        archetypes.toArray(archetypesArray);
+
+        int i = 0;
         for (Archetype archetype : archetypes) {
-              addRow(archetype);
+            addRow(archetype);
+
+            archetypesArray[i] = archetype;
+            i++;
         }
     }
 
@@ -63,6 +72,13 @@ public class ArchetypesTableModel extends DefaultTableModel {
         row[1] = archetype.getTagsAsString();
         row[2] = archetype.getCategoriesAsString();
         addRow(row);
+    }
+
+    public Archetype getArchetype(int index) {
+        if (archetypesArray == null || index > archetypesArray.length || index == -1) {
+            return null;
+        }
+        return archetypesArray[index];
     }
 
     private void clear() {
