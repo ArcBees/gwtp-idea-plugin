@@ -18,6 +18,7 @@ package com.arcbees.plugin.idea.moduletypes;
 
 import com.arcbees.plugin.idea.domain.Archetype;
 import com.arcbees.plugin.idea.domain.ProjectConfigModel;
+import com.arcbees.plugin.idea.icons.PluginIcons;
 import com.arcbees.plugin.idea.wizards.createproject.CreateProjectWizard;
 import com.intellij.ide.util.projectWizard.*;
 import com.intellij.openapi.module.Module;
@@ -28,18 +29,17 @@ import com.intellij.openapi.projectRoots.SdkTypeId;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.maven.shared.invoker.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.utils.MavenUtil;
+import org.jetbrains.idea.maven.wizards.MavenModuleBuilder;
 
-
+import javax.swing.*;
 import java.io.*;
 import java.util.Collections;
 import java.util.Properties;
 
-public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePathsBuilder, ModuleBuilderListener {
+public class CreateProjectBuilder extends MavenModuleBuilder implements SourcePathsBuilder, ModuleBuilderListener {
     private CreateProjectWizard projectWizard;
 
     public CreateProjectBuilder() {
@@ -72,6 +72,11 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
     }
 
     @Override
+    public String getPresentableName() {
+        return "GWTP";
+    }
+
+    @Override
     public ModuleType getModuleType() {
         return CreateProjectModuleType.getInstance();
     }
@@ -84,6 +89,17 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
     @Override
     public boolean isSuitableSdkType(SdkTypeId sdk) {
         return sdk == JavaSdk.getInstance();
+    }
+
+    @Override
+    public Icon getBigIcon() {
+        // TODO 24x24
+        return PluginIcons.GWTP_ICON_16x16;
+    }
+
+    @Override
+    public Icon getNodeIcon() {
+        return PluginIcons.GWTP_ICON_16x16;
     }
 
     @Override
@@ -127,38 +143,6 @@ public class CreateProjectBuilder extends JavaModuleBuilder implements SourcePat
 
         // post import tasks
         copyGeneratedFilesToProject(project, workingDir);
-
-        try {
-            importMavenProject(project);
-        } catch (IOException e) {
-            // TODO
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * TODO import the project as a maven project.
-     *
-     * 1. does the idea compiler need to be setup
-     * 2. I wish I could easily use the project manager and then use the MavenProjectImporter
-     */
-    private void importMavenProject(Project project) throws IOException {
-        ProjectConfigModel projectConfig = getProjectConfig();
-        String pomPath = project.getBasePath() + File.separator + "pom.xml";
-        File pom = new File(pomPath);
-
-        VirtualFile pomVirtFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(pom);
-        MavenProject mavenProject = new MavenProject(pomVirtFile);
-
-
-//        String pluginGroupID = "com.arcbees.plugin.idea.mavenimporter";
-//        String pluginArtifactID = "com.arcbees.plugin.idea";
-//        ArchetypeMavenImporter mavenImporter = new ArchetypeMavenImporter(pluginGroupID, pluginArtifactID);
-
-
-        //MavenProjectsManager myProjectsManager = MavenProjectsManager.getInstance(project);
-
-        System.out.println("end");
     }
 
     private void copyGeneratedFilesToProject(Project project, File workingDir) {
