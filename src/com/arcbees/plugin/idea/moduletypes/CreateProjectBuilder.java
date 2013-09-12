@@ -27,8 +27,14 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.projectRoots.SdkTypeId;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
+import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.wm.StatusBar;
+import com.intellij.openapi.wm.WindowManager;
+import com.intellij.ui.awt.RelativePoint;
 import org.apache.maven.shared.invoker.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.utils.MavenUtil;
@@ -69,6 +75,16 @@ public class CreateProjectBuilder extends MavenModuleBuilder implements SourcePa
 
         // TODO
         System.out.println("finished");
+    }
+
+    private void displayBalloon(Project project, String htmlText, MessageType messageType) {
+        StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
+
+        JBPopupFactory.getInstance()
+                .createHtmlTextBalloonBuilder(htmlText, messageType, null)
+                .setFadeoutTime(7500)
+                .createBalloon()
+                .show(RelativePoint.getCenterOf(statusBar.getComponent()), Balloon.Position.atRight);
     }
 
     @Override

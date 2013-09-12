@@ -26,8 +26,14 @@ import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
+import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.wm.WindowManager;
+import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.AsyncProcessIcon;
+import org.apache.batik.apps.svgbrowser.StatusBar;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -68,8 +74,6 @@ public class CreateProjectWizard extends ModuleWizardStep {
 
     @Override
     public void updateDataModel() {
-        // TODO
-        System.out.println("~~~~~~~~>>>> Update MODEL ");
     }
 
     @Override
@@ -85,9 +89,23 @@ public class CreateProjectWizard extends ModuleWizardStep {
 
     @Override
     public boolean validate() throws ConfigurationException {
-        return super.validate();
+        if (StringUtil.isEmptyOrSpaces(artifactId.getText())) {
+            throw new ConfigurationException("Please, specify artifactId");
+        }
 
-        // TODO module name -> no hyphens
+        if (StringUtil.isEmptyOrSpaces(groupId.getText())) {
+            throw new ConfigurationException("Please, specify groupId");
+        }
+
+        if (StringUtil.isEmptyOrSpaces(moduleName.getText())) {
+            throw new ConfigurationException("Please, specify moduleName");
+        }
+
+        if (archetypeSelected == null) {
+            throw new ConfigurationException("Please, select an archetype");
+        }
+
+        return true;
     }
 
     private void fetchArchetypes() {
@@ -173,6 +191,4 @@ public class CreateProjectWizard extends ModuleWizardStep {
             return true;
         return false;
     }
-
-
 }
