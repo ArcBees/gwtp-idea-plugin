@@ -16,17 +16,23 @@
 
 package com.arcbees.plugin.idea.wizards.createproject;
 
+import com.arcbees.plugin.idea.domain.Archetype;
 import com.arcbees.plugin.idea.domain.ArchetypeCollection;
+import com.arcbees.plugin.idea.domain.ProjectConfigModel;
 import com.arcbees.plugin.idea.moduletypes.CreateProjectBuilder;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.table.JBTable;
+import com.intellij.util.ui.AsyncProcessIcon;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import java.awt.*;
 
 /**
  * TODO loading icon
@@ -34,6 +40,8 @@ import javax.swing.event.ListSelectionListener;
  * TODO update project model settings
  */
 public class CreateProjectWizard extends ModuleWizardStep {
+    private final AsyncProcessIcon loadingIcon = new AsyncProcessIcon.Big(getClass() + ".loading");
+
     private final CreateProjectBuilder createProjectBuilder;
     private final WizardContext wizardContext;
     private final ModulesProvider modulesProvider;
@@ -42,6 +50,9 @@ public class CreateProjectWizard extends ModuleWizardStep {
     private JTextField artifactId;
     private JTextField groupId;
     private JTable archetypesTable;
+    private JPanel loadingPanel;
+    private JTextField moduleName;
+    private Archetype archetypeSelected;
 
     public CreateProjectWizard(CreateProjectBuilder createProjectBuilder, WizardContext wizardContext,
                                ModulesProvider modulesProvider) {
@@ -57,7 +68,6 @@ public class CreateProjectWizard extends ModuleWizardStep {
 
     @Override
     public void updateDataModel() {
-        // TODO
     }
 
     @Override
@@ -65,7 +75,38 @@ public class CreateProjectWizard extends ModuleWizardStep {
         fetchArchetypes();
     }
 
+    @Override
+    public void disposeUIResources() {
+        loadingIcon.dispose();
+        super.disposeUIResources();
+    }
+
+    @Override
+    public boolean validate() throws ConfigurationException {
+        if (StringUtil.isEmptyOrSpaces(artifactId.getText())) {
+            throw new ConfigurationException("Please, specify artifactId");
+        }
+
+        if (StringUtil.isEmptyOrSpaces(groupId.getText())) {
+            throw new ConfigurationException("Please, specify groupId");
+        }
+
+        if (StringUtil.isEmptyOrSpaces(moduleName.getText())) {
+            throw new ConfigurationException("Please, specify moduleName");
+        }
+
+        if (archetypeSelected == null) {
+            throw new ConfigurationException("Please, select an archetype");
+        }
+
+        return true;
+    }
+
     private void fetchArchetypes() {
+        displayLoading(true);
+
+        archetypesTable.clearSelection();
+
         ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
             public void run() {
                 FetchArchetypes fetch = new FetchArchetypes();
@@ -75,11 +116,24 @@ public class CreateProjectWizard extends ModuleWizardStep {
                     public void run() {
                         ArchetypesTableModel model = (ArchetypesTableModel) archetypesTable.getModel();
                         model.addCollection(collection);
+                        displayLoading(false);
                         archetypesTable.repaint();
                     }
                 });
             }
         });
+    }
+
+    private void displayLoading(boolean display) {
+        loadingIcon.setSize(new Dimension(40, 40));
+        loadingPanel.add(loadingIcon);
+        loadingIcon.setVisible(display);
+        loadingPanel.setVisible(display);
+        if (display) {
+            loadingIcon.resume();
+        } else {
+            loadingIcon.suspend();
+        }
     }
 
     private void createUIComponents() {
@@ -89,15 +143,46 @@ public class CreateProjectWizard extends ModuleWizardStep {
         archetypesTable.setShowHorizontalLines(true);
         archetypesTable.setShowVerticalLines(true);
 
+        addTableSelectionModel();
+    }
+
+    private void addTableSelectionModel() {
         ListSelectionModel selectionModel = archetypesTable.getSelectionModel();
         selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         selectionModel.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
                 ListSelectionModel model = archetypesTable.getSelectionModel();
-                int selected = model.getLeadSelectionIndex();
-                // TODO
+                int selectedIndex = model.getLeadSelectionIndex();
+
+                ArchetypesTableModel tableModel = (ArchetypesTableModel) archetypesTable.getModel();
+                if (selectedIndex != -1) {
+                    archetypeSelected = tableModel.getArchetype(selectedIndex);
+                }
             }
         });
+    }
+
+    public void setData(ProjectConfigModel data) {
+        artifactId.setText(data.getArtifactId());
+        groupId.setText(data.getGroupId());
+        moduleName.setText(data.getModuleName());
+    }
+
+    public void getData(ProjectConfigModel data) {
+        data.setArtifactId(artifactId.getText().trim());
+        data.setGroupId(groupId.getText().trim());
+        data.setModuleName(moduleName.getText().trim());
+        data.setArchetypeSelected(archetypeSelected);
+    }
+
+    public boolean isModified(ProjectConfigModel data) {
+        if (artifactId.getText() != null ? !artifactId.getText().equals(data.getArtifactId()) : data.getArtifactId() != null)
+            return true;
+        if (groupId.getText() != null ? !groupId.getText().equals(data.getGroupId()) : data.getGroupId() != null)
+            return true;
+        if (moduleName.getText() != null ? !moduleName.getText().equals(data.getModuleName()) : data.getModuleName() != null)
+            return true;
+        return false;
     }
 }
