@@ -1,43 +1,41 @@
 <idea-plugin version="2">
-  <id>com.arcbees.plugin.idea</id>
-  <name>GWT-Platform (GWTP) IntelliJ IDEA Plugin</name>
-  <version>1.0.0</version>
-  <vendor email="support@arcbees.com" url="http://www.arcbees.com">ArcBees</vendor>
+    <id>com.arcbees.plugin.idea</id>
+    <name>GWT-Platform (GWTP) IntelliJ IDEA Plugin</name>
+    <version>1.0.0</version>
+    <vendor email="support@arcbees.com" url="http://www.arcbees.com">ArcBees</vendor>
 
-  <description><![CDATA[
+    <description><![CDATA[
       The GWTP IDEA plugin provides tools for GWT-Platform framework in IntelliJ IDEA.<br>
       ]]></description>
 
-  <change-notes><![CDATA[
+    <change-notes><![CDATA[
       Project Creation by Archetype added (8/30/2013).<br>
       ]]>
-  </change-notes>
+    </change-notes>
 
-  <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
-  <idea-version since-build="107.105"/>
+    <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
+    <idea-version since-build="107.105"/>
 
-  <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
-       on how to target different products -->
-  <!-- uncomment to enable plugin in all products
-  <depends>com.intellij.modules.lang</depends>
-  -->
-  <!-- TODO maven lib -->
-  <!--<depends>org.jetbrains.idea.maven</depends>-->
+    <depends optional="false" config-file="maven-support.xml">org.jetbrains.idea.maven</depends>
 
-  <application-components>
-  </application-components>
+    <application-components>
+    </application-components>
 
-  <project-components>
-  </project-components>
+    <project-components>
+    </project-components>
 
-  <actions>
-  </actions>
+    <actions>
+    </actions>
 
-  <extensions defaultExtensionNs="com.intellij">
-      <moduleType id="GWTP_CREATE_PROJECT_MODULE"
-                  implementationClass="com.arcbees.plugin.idea.moduletypes.CreateProjectModuleType"
-                  classpathProvider="true"/>
+    <extensions defaultExtensionNs="com.intellij">
 
-      <wizardMode implementation="com.arcbees.plugin.idea.wizards.createproject.CreateProjectWizard"/>
-  </extensions>
+        <moduleType id="GWTP_CREATE_PROJECT_MODULE"
+                    implementationClass="com.arcbees.plugin.idea.moduletypes.CreateProjectModuleType"
+                    classpathProvider="true"/>
+
+        <wizardMode implementation="com.arcbees.plugin.idea.wizards.createproject.CreateProjectWizard"/>
+
+    </extensions>
+
+
 </idea-plugin>

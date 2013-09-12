@@ -17,21 +17,11 @@
 package com.arcbees.plugin.idea.domain;
 
 public class ProjectConfigModel {
-    private String projectName;
     private String packageName;
     private String moduleName;
     private String groupId;
     private String artifactId;
-    private String projectPath;
     private Archetype archetypeSelected;
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
 
     public String getPackageName() {
         return packageName;
@@ -65,14 +55,6 @@ public class ProjectConfigModel {
         this.artifactId = artifactId;
     }
 
-    public String getProjectPath() {
-        return projectPath;
-    }
-
-    public void setProjectPath(String projectPath) {
-        this.projectPath = projectPath;
-    }
-
     public Archetype getArchetypeSelected() {
         return archetypeSelected;
     }
@@ -94,12 +76,10 @@ public class ProjectConfigModel {
     @Override
     public String toString() {
         String s = "{ ProjectConfigModel: ";
-        s += "projectName=" + projectName + " ";
         s += "packageName=" + packageName + " ";
         s += "moduleName=" + moduleName + " ";
         s += "groupId=" + groupId + " ";
         s += "artifactId=" + artifactId + " ";
-        s += "projectPath=" + projectPath + " ";
         s += "archetypeSelected=" + archetypeSelected + " ";
         s += " }";
         return s;
