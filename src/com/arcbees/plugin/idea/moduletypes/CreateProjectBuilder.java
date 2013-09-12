@@ -47,6 +47,7 @@ import java.util.Properties;
 
 public class CreateProjectBuilder extends MavenModuleBuilder implements SourcePathsBuilder, ModuleBuilderListener {
     private CreateProjectWizard projectWizard;
+    private Project project;
 
     public CreateProjectBuilder() {
         addListener(this);
@@ -55,7 +56,7 @@ public class CreateProjectBuilder extends MavenModuleBuilder implements SourcePa
     // TODO
     @Override
     public void moduleCreated(@NotNull Module module) {
-        Project project = module.getProject();
+        project = module.getProject();
 
         final File workingDir;
         try {
@@ -63,28 +64,29 @@ public class CreateProjectBuilder extends MavenModuleBuilder implements SourcePa
             workingDir.deleteOnExit();
         }
         catch (IOException e) {
-            e.printStackTrace(); // TODO
+            displayBalloon("Error generating project. 100", MessageType.ERROR);
+            e.printStackTrace();
             return;
         }
 
         try {
             generateArchetype(project, workingDir);
         } catch (MavenInvocationException e) {
-            e.printStackTrace();  // TODO
+            displayBalloon("Error generating project. 101", MessageType.ERROR);
+            e.printStackTrace();
         }
 
-        // TODO
-        System.out.println("finished");
+        displayBalloon("Finished generating project.", MessageType.INFO);
     }
 
-    private void displayBalloon(Project project, String htmlText, MessageType messageType) {
+    private void displayBalloon(String htmlText, MessageType messageType) {
         StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
 
         JBPopupFactory.getInstance()
                 .createHtmlTextBalloonBuilder(htmlText, messageType, null)
                 .setFadeoutTime(7500)
                 .createBalloon()
-                .show(RelativePoint.getCenterOf(statusBar.getComponent()), Balloon.Position.atRight);
+                .show(RelativePoint.getCenterOf(statusBar.getComponent()), Balloon.Position.above);
     }
 
     @Override
@@ -170,7 +172,8 @@ public class CreateProjectBuilder extends MavenModuleBuilder implements SourcePa
             FileUtil.copyDir(new File(workingDir, projectConfig.getArtifactId()), baseDirFile);
         }
         catch (IOException e) {
-            e.printStackTrace(); // TODO
+            displayBalloon("Error generating project. 103", MessageType.ERROR);
+            e.printStackTrace();
         }
 
         FileUtil.delete(workingDir);
@@ -186,5 +189,10 @@ public class CreateProjectBuilder extends MavenModuleBuilder implements SourcePa
     private Archetype getProjectConfigArchetype() {
         ProjectConfigModel projectConfig = getProjectConfig();
         return projectConfig.getArchetypeSelected();
+    }
+
+    @Override
+    public String getDescription() {
+        return "Create a GWTP Maven project from an Maven archetype.";
     }
 }
