@@ -57,25 +57,20 @@ public class CreateProjectWizard extends ModuleWizardStep {
 
     @Override
     public void updateStep() {
-        addColumnsToTable();
         fetchArchetypes();
-    }
-
-    private void addColumnsToTable() {
-        TableColumn columnName = new TableColumn();
-        columnName.setHeaderValue("Name");
-        archetypesTable.addColumn(columnName);
     }
 
     private void fetchArchetypes() {
         ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
             public void run() {
                 FetchArchetypes fetch = new FetchArchetypes();
-                ArchetypeCollection collection = fetch.fetchArchetypes();
+                final ArchetypeCollection collection = fetch.fetchArchetypes();
 
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                       // TODO update table
+                        ArchetypesTableModel model = (ArchetypesTableModel) archetypesTable.getModel();
+                        model.addCollection(collection);
+                        archetypesTable.repaint();
                     }
                 });
             }
@@ -86,10 +81,8 @@ public class CreateProjectWizard extends ModuleWizardStep {
         ArchetypesTableModel tableModel = new ArchetypesTableModel();
         archetypesTable = new JBTable(tableModel);
         archetypesTable.setShowGrid(true);
-
-        tableModel.setRowCount(15);
-        tableModel.setNumRows(15);
-
-        tableModel.addRow(new Archetype());
+        archetypesTable.setShowHorizontalLines(true);
+        archetypesTable.setShowVerticalLines(true);
+        archetypesTable.setAutoCreateColumnsFromModel(true);
     }
 }
