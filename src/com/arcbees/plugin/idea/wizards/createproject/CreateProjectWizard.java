@@ -16,13 +16,16 @@
 
 package com.arcbees.plugin.idea.wizards.createproject;
 
+import com.arcbees.plugin.idea.domain.Archetype;
 import com.arcbees.plugin.idea.domain.ArchetypeCollection;
-import com.arcbees.plugin.idea.icons.PluginIcons;
+import com.arcbees.plugin.idea.domain.ProjectConfigModel;
 import com.arcbees.plugin.idea.moduletypes.CreateProjectBuilder;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.AsyncProcessIcon;
 
@@ -48,6 +51,8 @@ public class CreateProjectWizard extends ModuleWizardStep {
     private JTextField groupId;
     private JTable archetypesTable;
     private JPanel loadingPanel;
+    private JTextField moduleName;
+    private Archetype archetypeSelected;
 
     public CreateProjectWizard(CreateProjectBuilder createProjectBuilder, WizardContext wizardContext,
                                ModulesProvider modulesProvider) {
@@ -63,7 +68,6 @@ public class CreateProjectWizard extends ModuleWizardStep {
 
     @Override
     public void updateDataModel() {
-        // TODO
     }
 
     @Override
@@ -75,6 +79,27 @@ public class CreateProjectWizard extends ModuleWizardStep {
     public void disposeUIResources() {
         loadingIcon.dispose();
         super.disposeUIResources();
+    }
+
+    @Override
+    public boolean validate() throws ConfigurationException {
+        if (StringUtil.isEmptyOrSpaces(artifactId.getText())) {
+            throw new ConfigurationException("Please, specify artifactId");
+        }
+
+        if (StringUtil.isEmptyOrSpaces(groupId.getText())) {
+            throw new ConfigurationException("Please, specify groupId");
+        }
+
+        if (StringUtil.isEmptyOrSpaces(moduleName.getText())) {
+            throw new ConfigurationException("Please, specify moduleName");
+        }
+
+        if (archetypeSelected == null) {
+            throw new ConfigurationException("Please, select an archetype");
+        }
+
+        return true;
     }
 
     private void fetchArchetypes() {
@@ -128,9 +153,36 @@ public class CreateProjectWizard extends ModuleWizardStep {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
                 ListSelectionModel model = archetypesTable.getSelectionModel();
-                int selected = model.getLeadSelectionIndex();
-                // TODO
+                int selectedIndex = model.getLeadSelectionIndex();
+
+                ArchetypesTableModel tableModel = (ArchetypesTableModel) archetypesTable.getModel();
+                if (selectedIndex != -1) {
+                    archetypeSelected = tableModel.getArchetype(selectedIndex);
+                }
             }
         });
+    }
+
+    public void setData(ProjectConfigModel data) {
+        artifactId.setText(data.getArtifactId());
+        groupId.setText(data.getGroupId());
+        moduleName.setText(data.getModuleName());
+    }
+
+    public void getData(ProjectConfigModel data) {
+        data.setArtifactId(artifactId.getText().trim());
+        data.setGroupId(groupId.getText().trim());
+        data.setModuleName(moduleName.getText().trim());
+        data.setArchetypeSelected(archetypeSelected);
+    }
+
+    public boolean isModified(ProjectConfigModel data) {
+        if (artifactId.getText() != null ? !artifactId.getText().equals(data.getArtifactId()) : data.getArtifactId() != null)
+            return true;
+        if (groupId.getText() != null ? !groupId.getText().equals(data.getGroupId()) : data.getGroupId() != null)
+            return true;
+        if (moduleName.getText() != null ? !moduleName.getText().equals(data.getModuleName()) : data.getModuleName() != null)
+            return true;
+        return false;
     }
 }
