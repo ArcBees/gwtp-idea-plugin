@@ -1,6 +1,5 @@
 <component name="libraryTable">
-  <library name="com.jayway.restassured:rest-assured:1.8.1" type="repository">
-    <properties maven-id="com.jayway.restassured:rest-assured:1.8.1" />
+  <library name="com.jayway.restassured:rest-assured:1.8.1">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/rest-assured-1.8.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/groovy-2.1.2.jar!/" />
