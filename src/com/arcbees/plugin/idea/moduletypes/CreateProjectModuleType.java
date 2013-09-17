@@ -31,9 +31,9 @@ public class CreateProjectModuleType extends ModuleType<CreateProjectBuilder> {
         super(MODULE_TYPE_ID);
     }
 
-    public static CreateProjectModuleType getInstance() {
-        return (CreateProjectModuleType) ModuleTypeManager.getInstance().findByID(MODULE_TYPE_ID);
-    }
+//    public static CreateProjectModuleType getInstance() {
+//        return (CreateProjectModuleType) ModuleTypeManager.getInstance().findByID(MODULE_TYPE_ID);
+//    }
 
     @Override
     public CreateProjectBuilder createModuleBuilder() {
