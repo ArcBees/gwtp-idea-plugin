@@ -17,6 +17,9 @@ This plugin is in the works and almost ready to release the first feature.
 ###Project Creation
 * <a href="http://www.youtube.com/watch?v=lhCZmYOUVLE" target="_blank">Project Creation Video</a>
 
+##Download
+* <a href="http://plugins.jetbrains.com/plugin/7318?pr=idea_ce" target="_blank">GWTP IDEA Plugin</a>
+
 ##Thanks to
 [![Arcbees.com](http://arcbees-ads.appspot.com/ad.png)](http://arcbees.com)
 
