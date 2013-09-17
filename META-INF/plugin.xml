@@ -16,7 +16,7 @@
     <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
     <idea-version since-build="107.105"/>
 
-    <depends optional="false" config-file="maven-support.xml">org.jetbrains.idea.maven</depends>
+    <depends optional="false">org.jetbrains.idea.maven</depends>
 
     <application-components>
     </application-components>

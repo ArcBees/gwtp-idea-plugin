@@ -1,6 +1,5 @@
 <component name="libraryTable">
-  <library name="org.apache.maven.shared:maven-invoker:2.1.1" type="repository">
-    <properties maven-id="org.apache.maven.shared:maven-invoker:2.1.1" />
+  <library name="org.apache.maven.shared:maven-invoker:2.1.1">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/maven-invoker-2.1.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/plexus-utils-3.0.8.jar!/" />
