@@ -15,7 +15,7 @@ The [GWTP](https://github.com/ArcBees/GWTP) Eclipse plugin provides tools for GW
 This plugin is in the works and almost ready to release the first feature. 
 
 ###Project Creation
-* <a href="http://www.youtube.com/watch?v=lhCZmYOUVLE" target="_blank">Project Creation Video</a>
+* <a href="http://youtu.be/s_HOmpuouEo" target="_blank">Project Creation Video</a>
 
 ##Download
 * <a href="http://plugins.jetbrains.com/plugin/7318?pr=idea_ce" target="_blank">GWTP IDEA Plugin</a>
