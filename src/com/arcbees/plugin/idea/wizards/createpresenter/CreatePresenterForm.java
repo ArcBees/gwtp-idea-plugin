@@ -54,9 +54,7 @@ public class CreatePresenterForm extends DialogWrapper {
     presenterConfigModel = new PresenterConfigModel();
 
     initHandlers();
-
     setDefaults();
-
   }
 
   @Nullable
@@ -77,7 +75,6 @@ public class CreatePresenterForm extends DialogWrapper {
     btnIsCrawlable.setEnabled(false);
     nameToken.grabFocus();
   }
-
 
   private void initContentEventHandlers() {
     btnRevealrootcontentevent.addActionListener(new ActionListener() {
