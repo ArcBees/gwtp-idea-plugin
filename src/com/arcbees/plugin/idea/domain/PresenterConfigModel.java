@@ -1,6 +1,10 @@
 package com.arcbees.plugin.idea.domain;
 
+import com.intellij.openapi.project.Project;
+
 public class PresenterConfigModel {
+    private final Project project;
+
     private String name;
     private String path;
     private boolean nestedPresenter;
@@ -31,7 +35,9 @@ public class PresenterConfigModel {
     private boolean usePrepareFromRequest;
     private String gatekeeper;
 
-    public PresenterConfigModel() {
+    public PresenterConfigModel(Project project) {
+        this.project = project;
+
         // default settings
         nestedPresenter = true;
         revealInRoot = true;
@@ -229,12 +235,7 @@ public class PresenterConfigModel {
         this.revealInSlot = revealInSlot;
     }
 
-    @Override
-    public String toString() {
-        String s = "{ PresenterConfigModel: ";
-        s += "name=" + name + " ";
-        s += "path=" + path + " ";
-        s += " }";
-        return s;
+    public Project getProject() {
+        return this.project;
     }
 }
