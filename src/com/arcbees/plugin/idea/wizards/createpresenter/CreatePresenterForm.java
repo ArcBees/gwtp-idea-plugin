@@ -1,11 +1,10 @@
 package com.arcbees.plugin.idea.wizards.createpresenter;
 
+import com.arcbees.plugin.idea.dialogs.ContentSlotDialog;
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
-import com.intellij.ide.util.TreeClassChooser;
-import com.intellij.ide.util.TreeClassChooserFactory;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.psi.PsiClass;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -16,6 +15,7 @@ import java.awt.event.ActionListener;
 
 public class CreatePresenterForm extends DialogWrapper {
     private final PresenterConfigModel presenterConfigModel;
+    private final AnActionEvent sourceEvent;
 
     private JPanel contentPane;
     private JTextField name;
@@ -47,9 +47,11 @@ public class CreatePresenterForm extends DialogWrapper {
     private JCheckBox useAddOnunbind;
     private JLabel lblQuerystring;
 
-    public CreatePresenterForm(Project project) {
+    public CreatePresenterForm(Project project, AnActionEvent sourceEvent) {
         super(project);
         init();
+
+        this.sourceEvent = sourceEvent;
 
         setTitle("Create GWTP Presenter");
 
@@ -257,15 +259,76 @@ public class CreatePresenterForm extends DialogWrapper {
     }
 
     private void showContentSlotDialog() {
-        TreeClassChooserFactory factory = TreeClassChooserFactory.getInstance(presenterConfigModel.getProject());
+        Project project = presenterConfigModel.getProject();
 
-        // TODO create a smaller scope for just the ContentSlots
-        TreeClassChooser dialog = factory.createAllProjectScopeChooser("Choose Content Slot");
-        dialog.showDialog();
+        ContentSlotDialog dialog = new ContentSlotDialog(project, true, sourceEvent);
+        dialog.show();
 
-        PsiClass aClass = dialog.getSelected();
-        if (aClass != null) {
-            // TODO
-        }
+        String contentSlotSelection = dialog.getContentSlot();
+        presenterConfigModel.setContentSlot(contentSlotSelection);
+    }
+
+    public void setData(PresenterConfigModel data) {
+        name.setText(data.getName());
+        packageName.setText(data.getPackageName());
+        contentSlot.setText(data.getContentSlot());
+        usePlace.setSelected(data.isUsePlace());
+        nameToken.setText(data.getNameToken());
+        useCrawlable.setSelected(data.isUseCrawlable());
+        useCodesplit.setSelected(data.isUseCodesplit());
+        useSingleton.setSelected(data.isUseSingleton());
+        useSingleton2.setSelected(data.isUseSingleton());
+        useOverrideDefaultPopup.setSelected(data.isUseOverrideDefaultPopup());
+        useAddUihandlers.setSelected(data.isSeAddUihandlers());
+        useAddOnbind.setSelected(data.isSeAddOnbind());
+        useAddOnhide.setSelected(data.isUseAddOnhide());
+        useAddOnreset.setSelected(data.isUseAddOnreset());
+        useAddOnunbind.setSelected(data.isUseAddOnunbind());
+        useManualReveal.setSelected(data.getUseManualReveal());
+        usePrepareFromRequest.setSelected(data.getUsePrepareFromRequest());
+    }
+
+    public void getData(PresenterConfigModel data) {
+        data.setName(name.getText());
+        data.setPackageName(packageName.getText());
+        data.setContentSlot(contentSlot.getText());
+        data.setUsePlace(usePlace.isSelected());
+        data.setNameToken(nameToken.getText());
+        data.setUseCrawlable(useCrawlable.isSelected());
+        data.setUseCodesplit(useCodesplit.isSelected());
+        data.setUseSingleton(useSingleton.isSelected());
+        data.setUseSingleton(useSingleton2.isSelected());
+        data.setUseOverrideDefaultPopup(useOverrideDefaultPopup.isSelected());
+        data.setSeAddUihandlers(useAddUihandlers.isSelected());
+        data.setSeAddOnbind(useAddOnbind.isSelected());
+        data.setUseAddOnhide(useAddOnhide.isSelected());
+        data.setUseAddOnreset(useAddOnreset.isSelected());
+        data.setUseAddOnunbind(useAddOnunbind.isSelected());
+        data.setUseManualReveal(useManualReveal.isSelected());
+        data.setUsePrepareFromRequest(usePrepareFromRequest.isSelected());
+    }
+
+    public boolean isModified(PresenterConfigModel data) {
+        if (name.getText() != null ? !name.getText().equals(data.getName()) : data.getName() != null) return true;
+        if (packageName.getText() != null ? !packageName.getText().equals(data.getPackageName()) : data.getPackageName() != null)
+            return true;
+        if (contentSlot.getText() != null ? !contentSlot.getText().equals(data.getContentSlot()) : data.getContentSlot() != null)
+            return true;
+        if (usePlace.isSelected() != data.isUsePlace()) return true;
+        if (nameToken.getText() != null ? !nameToken.getText().equals(data.getNameToken()) : data.getNameToken() != null)
+            return true;
+        if (useCrawlable.isSelected() != data.isUseCrawlable()) return true;
+        if (useCodesplit.isSelected() != data.isUseCodesplit()) return true;
+        if (useSingleton.isSelected() != data.isUseSingleton()) return true;
+        if (useSingleton2.isSelected() != data.isUseSingleton()) return true;
+        if (useOverrideDefaultPopup.isSelected() != data.isUseOverrideDefaultPopup()) return true;
+        if (useAddUihandlers.isSelected() != data.isSeAddUihandlers()) return true;
+        if (useAddOnbind.isSelected() != data.isSeAddOnbind()) return true;
+        if (useAddOnhide.isSelected() != data.isUseAddOnhide()) return true;
+        if (useAddOnreset.isSelected() != data.isUseAddOnreset()) return true;
+        if (useAddOnunbind.isSelected() != data.isUseAddOnunbind()) return true;
+        if (useManualReveal.isSelected() != data.getUseManualReveal()) return true;
+        if (usePrepareFromRequest.isSelected() != data.getUsePrepareFromRequest()) return true;
+        return false;
     }
 }

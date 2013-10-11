@@ -34,8 +34,20 @@ public class PresenterConfigModel {
     private boolean useManualReveal;
     private boolean usePrepareFromRequest;
     private String gatekeeper;
+  private String packageName;
+  private String contentSlot;
+  private boolean usePlace;
+  private boolean useCrawlable;
+  private boolean useCodesplit;
+  private boolean useSingleton;
+  private boolean useOverrideDefaultPopup;
+  private boolean seAddUihandlers;
+  private boolean seAddOnbind;
+  private boolean useAddOnhide;
+  private boolean useAddOnreset;
+  private boolean useAddOnunbind;
 
-    public PresenterConfigModel(Project project) {
+  public PresenterConfigModel(Project project) {
         this.project = project;
 
         // default settings
@@ -107,86 +119,6 @@ public class PresenterConfigModel {
         this.nameToken = nameToken;
     }
 
-    public boolean getCrawlable() {
-        return crawlable;
-    }
-
-    public void setCrawlable(boolean crawlable) {
-        this.crawlable = crawlable;
-    }
-
-    public boolean getCodeSplit() {
-        return codeSplit;
-    }
-
-    public void setCodeSplit(boolean codeSplit) {
-        this.codeSplit = codeSplit;
-    }
-
-    public boolean getOverridePopup() {
-        return overridePopup;
-    }
-
-    public void setOverridePopup(boolean overridePopup) {
-        this.overridePopup = overridePopup;
-    }
-
-    public String getPopupPanel() {
-        return popupPanel;
-    }
-
-    public void setPopupPanel(String popupPanel) {
-        this.popupPanel = popupPanel;
-    }
-
-    public boolean getSingleton() {
-        return singleton;
-    }
-
-    public void setSingleton(boolean singleton) {
-        this.singleton = singleton;
-    }
-
-    public boolean getUseUiHandlers() {
-        return useUiHandlers;
-    }
-
-    public void setUseUiHandlers(boolean useUiHandlers) {
-        this.useUiHandlers = useUiHandlers;
-    }
-
-    public boolean getOnBind() {
-        return onBind;
-    }
-
-    public void setOnBind(boolean onBind) {
-        this.onBind = onBind;
-    }
-
-    public boolean getOnHide() {
-        return onHide;
-    }
-
-    public void setOnHide(boolean onHide) {
-        this.onHide = onHide;
-    }
-
-    public boolean getOnReset() {
-        return onReset;
-    }
-
-    public void setOnReset(boolean onReset) {
-        this.onReset = onReset;
-    }
-
-    public boolean getOnUnbind() {
-        return onUnbind;
-    }
-
-    public void setOnUnbind(boolean onUnbind) {
-        this.onUnbind = onUnbind;
-    }
-
     public boolean getUseManualReveal() {
         return useManualReveal;
     }
@@ -238,4 +170,100 @@ public class PresenterConfigModel {
     public Project getProject() {
         return this.project;
     }
+
+  public String getPackageName() {
+    return packageName;
+  }
+
+  public void setPackageName(final String packageName) {
+    this.packageName = packageName;
+  }
+
+  public String getContentSlot() {
+    return contentSlot;
+  }
+
+  public void setContentSlot(final String contentSlot) {
+    this.contentSlot = contentSlot;
+  }
+
+  public boolean isUsePlace() {
+    return usePlace;
+  }
+
+  public void setUsePlace(final boolean usePlace) {
+    this.usePlace = usePlace;
+  }
+
+  public boolean isUseCrawlable() {
+    return useCrawlable;
+  }
+
+  public void setUseCrawlable(final boolean useCrawlable) {
+    this.useCrawlable = useCrawlable;
+  }
+
+  public boolean isUseCodesplit() {
+    return useCodesplit;
+  }
+
+  public void setUseCodesplit(final boolean useCodesplit) {
+    this.useCodesplit = useCodesplit;
+  }
+
+  public boolean isUseSingleton() {
+    return useSingleton;
+  }
+
+  public void setUseSingleton(final boolean useSingleton) {
+    this.useSingleton = useSingleton;
+  }
+
+  public boolean isUseOverrideDefaultPopup() {
+    return useOverrideDefaultPopup;
+  }
+
+  public void setUseOverrideDefaultPopup(final boolean useOverrideDefaultPopup) {
+    this.useOverrideDefaultPopup = useOverrideDefaultPopup;
+  }
+
+  public boolean isSeAddUihandlers() {
+    return seAddUihandlers;
+  }
+
+  public void setSeAddUihandlers(final boolean seAddUihandlers) {
+    this.seAddUihandlers = seAddUihandlers;
+  }
+
+  public boolean isSeAddOnbind() {
+    return seAddOnbind;
+  }
+
+  public void setSeAddOnbind(final boolean seAddOnbind) {
+    this.seAddOnbind = seAddOnbind;
+  }
+
+  public boolean isUseAddOnhide() {
+    return useAddOnhide;
+  }
+
+  public void setUseAddOnhide(final boolean useAddOnhide) {
+    this.useAddOnhide = useAddOnhide;
+  }
+
+  public boolean isUseAddOnreset() {
+    return useAddOnreset;
+  }
+
+  public void setUseAddOnreset(final boolean useAddOnreset) {
+    this.useAddOnreset = useAddOnreset;
+  }
+
+  public boolean isUseAddOnunbind() {
+    return useAddOnunbind;
+  }
+
+  public void setUseAddOnunbind(final boolean useAddOnunbind) {
+    this.useAddOnunbind = useAddOnunbind;
+  }
 }
