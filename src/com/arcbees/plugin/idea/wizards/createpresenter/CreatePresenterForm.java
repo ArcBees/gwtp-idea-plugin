@@ -266,6 +266,7 @@ public class CreatePresenterForm extends DialogWrapper {
 
         String contentSlotSelection = dialog.getContentSlot();
         presenterConfigModel.setContentSlot(contentSlotSelection);
+        contentSlot.setText(contentSlotSelection);
     }
 
     public void setData(PresenterConfigModel data) {
