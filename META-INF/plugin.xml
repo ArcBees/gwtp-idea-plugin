@@ -25,6 +25,16 @@
     </project-components>
 
     <actions>
+        <group id="GWTP.ActionGroup" popup="true" text="GWTP" description="GWTP"
+               icon="/com/arcbees/plugin/idea/icons/addgwtp_16X16.png">
+
+            <action id="GWT.NewPresenter" text="Create a GWTP Presenter with View"
+                    description="Create Presenter"
+                    class="com.arcbees.plugin.idea.wizards.createpresenter.CreatePresenterAction">
+            </action>
+
+            <add-to-group group-id="NewGroup" anchor="last" relative-to-action="NewFile"/>
+        </group>
     </actions>
 
     <extensions defaultExtensionNs="com.intellij">
