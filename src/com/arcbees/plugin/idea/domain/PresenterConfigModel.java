@@ -1,9 +1,12 @@
 package com.arcbees.plugin.idea.domain;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiPackage;
 
 public class PresenterConfigModel {
     private final Project project;
+
+    private PsiPackage selectedPackage;
 
     private String name;
     private String path;
@@ -14,23 +17,14 @@ public class PresenterConfigModel {
     // nested
     private boolean place;
     private String nameToken;
-    private boolean crawlable;
-    private boolean codeSplit;
     private boolean revealInRoot;
     private boolean revealInRootLayout;
     private boolean revealInSlot;
 
     // popup
-    private boolean overridePopup;
-    private String popupPanel;
+    private boolean useOverrideDefaultPopup;
 
     // extra
-    private boolean singleton;
-    private boolean useUiHandlers;
-    private boolean onBind;
-    private boolean onHide;
-    private boolean onReset;
-    private boolean onUnbind;
     private boolean useManualReveal;
     private boolean usePrepareFromRequest;
     private String gatekeeper;
@@ -40,9 +34,9 @@ public class PresenterConfigModel {
     private boolean useCrawlable;
     private boolean useCodesplit;
     private boolean useSingleton;
-    private boolean useOverrideDefaultPopup;
-    private boolean seAddUihandlers;
-    private boolean seAddOnbind;
+
+    private boolean useAddUihandlers;
+    private boolean useAddOnbind;
     private boolean useAddOnhide;
     private boolean useAddOnreset;
     private boolean useAddOnunbind;
@@ -227,20 +221,20 @@ public class PresenterConfigModel {
         this.useOverrideDefaultPopup = useOverrideDefaultPopup;
     }
 
-    public boolean isSeAddUihandlers() {
-        return seAddUihandlers;
+    public boolean isUseAddUihandlers() {
+        return useAddUihandlers;
     }
 
-    public void setSeAddUihandlers(final boolean seAddUihandlers) {
-        this.seAddUihandlers = seAddUihandlers;
+    public void setUseAddUihandlers(final boolean useAddUihandlers) {
+        this.useAddUihandlers = useAddUihandlers;
     }
 
-    public boolean isSeAddOnbind() {
-        return seAddOnbind;
+    public boolean isUseAddOnbind() {
+        return useAddOnbind;
     }
 
-    public void setSeAddOnbind(final boolean seAddOnbind) {
-        this.seAddOnbind = seAddOnbind;
+    public void setUseAddOnbind(final boolean useAddOnbind) {
+        this.useAddOnbind = useAddOnbind;
     }
 
     public boolean isUseAddOnhide() {
@@ -265,5 +259,13 @@ public class PresenterConfigModel {
 
     public void setUseAddOnunbind(final boolean useAddOnunbind) {
         this.useAddOnunbind = useAddOnunbind;
+    }
+
+    public PsiPackage getSelectedPackage() {
+        return selectedPackage;
+    }
+
+    public void setSelectedPackage(PsiPackage selectedPackage) {
+        this.selectedPackage = selectedPackage;
     }
 }

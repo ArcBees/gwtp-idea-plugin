@@ -3,8 +3,17 @@ package com.arcbees.plugin.idea.wizards.createpresenter;
 import com.arcbees.plugin.idea.dialogs.ContentSlotDialog;
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.psi.JavaDirectoryService;
+import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiJavaFile;
+import com.intellij.psi.PsiManager;
+import com.intellij.psi.PsiPackage;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -47,16 +56,14 @@ public class CreatePresenterForm extends DialogWrapper {
     private JCheckBox useAddOnunbind;
     private JLabel lblQuerystring;
 
-    public CreatePresenterForm(Project project, AnActionEvent sourceEvent) {
-        super(project);
+    public CreatePresenterForm(PresenterConfigModel presenterConfigModel, AnActionEvent sourceEvent) {
+        super(presenterConfigModel.getProject());
         init();
 
+        this.presenterConfigModel = presenterConfigModel;
         this.sourceEvent = sourceEvent;
 
         setTitle("Create GWTP Presenter");
-
-        // model object to transfer vars to the ide-templates
-        presenterConfigModel = new PresenterConfigModel(project);
 
         initHandlers();
         setDefaults();
@@ -280,8 +287,8 @@ public class CreatePresenterForm extends DialogWrapper {
         useSingleton.setSelected(data.isUseSingleton());
         useSingleton2.setSelected(data.isUseSingleton());
         useOverrideDefaultPopup.setSelected(data.isUseOverrideDefaultPopup());
-        useAddUihandlers.setSelected(data.isSeAddUihandlers());
-        useAddOnbind.setSelected(data.isSeAddOnbind());
+        useAddUihandlers.setSelected(data.isUseAddUihandlers());
+        useAddOnbind.setSelected(data.isUseAddOnbind());
         useAddOnhide.setSelected(data.isUseAddOnhide());
         useAddOnreset.setSelected(data.isUseAddOnreset());
         useAddOnunbind.setSelected(data.isUseAddOnunbind());
@@ -300,13 +307,14 @@ public class CreatePresenterForm extends DialogWrapper {
         data.setUseSingleton(useSingleton.isSelected());
         data.setUseSingleton(useSingleton2.isSelected());
         data.setUseOverrideDefaultPopup(useOverrideDefaultPopup.isSelected());
-        data.setSeAddUihandlers(useAddUihandlers.isSelected());
-        data.setSeAddOnbind(useAddOnbind.isSelected());
+        data.setUseAddUihandlers(useAddUihandlers.isSelected());
+        data.setUseAddOnbind(useAddOnbind.isSelected());
         data.setUseAddOnhide(useAddOnhide.isSelected());
         data.setUseAddOnreset(useAddOnreset.isSelected());
         data.setUseAddOnunbind(useAddOnunbind.isSelected());
         data.setUseManualReveal(useManualReveal.isSelected());
         data.setUsePrepareFromRequest(usePrepareFromRequest.isSelected());
+        data.setSelectedPackage(getSelectedPackage());
     }
 
     public boolean isModified(PresenterConfigModel data) {
@@ -323,13 +331,28 @@ public class CreatePresenterForm extends DialogWrapper {
         if (useSingleton.isSelected() != data.isUseSingleton()) return true;
         if (useSingleton2.isSelected() != data.isUseSingleton()) return true;
         if (useOverrideDefaultPopup.isSelected() != data.isUseOverrideDefaultPopup()) return true;
-        if (useAddUihandlers.isSelected() != data.isSeAddUihandlers()) return true;
-        if (useAddOnbind.isSelected() != data.isSeAddOnbind()) return true;
+        if (useAddUihandlers.isSelected() != data.isUseAddUihandlers()) return true;
+        if (useAddOnbind.isSelected() != data.isUseAddOnbind()) return true;
         if (useAddOnhide.isSelected() != data.isUseAddOnhide()) return true;
         if (useAddOnreset.isSelected() != data.isUseAddOnreset()) return true;
         if (useAddOnunbind.isSelected() != data.isUseAddOnunbind()) return true;
         if (useManualReveal.isSelected() != data.getUseManualReveal()) return true;
         if (usePrepareFromRequest.isSelected() != data.getUsePrepareFromRequest()) return true;
         return false;
+    }
+
+    public PsiPackage getSelectedPackage() {
+        PsiElement e = sourceEvent.getData(LangDataKeys.PSI_ELEMENT);
+
+        PsiPackage selectedPackage = null;
+        if (e instanceof PsiClass) {
+            PsiClass clazz = (PsiClass) e;
+            PsiJavaFile javaFile = (PsiJavaFile) clazz.getContainingFile();
+            selectedPackage = JavaPsiFacade.getInstance(presenterConfigModel.getProject()).findPackage(javaFile.getPackageName());
+        } else if (e instanceof PsiDirectory) {
+            selectedPackage = JavaDirectoryService.getInstance().getPackage((PsiDirectory) e);
+        }
+
+        return selectedPackage;
     }
 }
