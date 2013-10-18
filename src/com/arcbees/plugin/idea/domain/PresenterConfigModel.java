@@ -1,6 +1,8 @@
 package com.arcbees.plugin.idea.domain;
 
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiPackage;
 
 public class PresenterConfigModel {
@@ -15,7 +17,6 @@ public class PresenterConfigModel {
     private boolean popupPresenter;
 
     // nested
-    private boolean place;
     private String nameToken;
     private boolean revealInRoot;
     private boolean revealInRootLayout;
@@ -40,6 +41,8 @@ public class PresenterConfigModel {
     private boolean useAddOnhide;
     private boolean useAddOnreset;
     private boolean useAddOnunbind;
+    private Module module;
+    private PsiDirectory baseDir;
 
     public PresenterConfigModel(Project project) {
         this.project = project;
@@ -91,14 +94,6 @@ public class PresenterConfigModel {
 
     public void setPopupPresenter(boolean popupPresenter) {
         this.popupPresenter = popupPresenter;
-    }
-
-    public boolean getPlace() {
-        return place;
-    }
-
-    public void setPlace(boolean place) {
-        this.place = place;
     }
 
     public String getNameToken() {
@@ -267,5 +262,13 @@ public class PresenterConfigModel {
 
     public void setSelectedPackage(PsiPackage selectedPackage) {
         this.selectedPackage = selectedPackage;
+    }
+
+    public void setModule(Module module) {
+        this.module = module;
+    }
+
+    public Module getModule() {
+        return module;
     }
 }

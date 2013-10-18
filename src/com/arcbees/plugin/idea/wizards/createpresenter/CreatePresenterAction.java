@@ -4,9 +4,14 @@ import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.arcbees.plugin.idea.icons.PluginIcons;
 import com.arcbees.plugin.idea.utils.PackageHierarchy;
 import com.arcbees.plugin.idea.utils.PackageHierarchyElement;
+import com.intellij.ide.util.PackageUtil;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.JavaDirectoryService;
+import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPackage;
 
 import java.util.logging.Logger;
@@ -89,14 +94,15 @@ public class CreatePresenterAction extends AnAction {
     }
 
     private void createNameTokensPackage() {
-        if (!presenterConfigModel.getPlace()) {
+        if (!presenterConfigModel.isUsePlace()) {
             return;
         }
 
         PsiPackage selectedPackage = presenterConfigModel.getSelectedPackage();
-        String selectedPackageString = selectedPackage.getName();
+        String selectedPackageString = selectedPackage.getQualifiedName();
         PackageHierarchyElement clientPackage = packageHierarchy.findParentClient(selectedPackageString);
-        String clientPackageString = clientPackage.getPackageFragment().getName();
+        String clientPackageString = clientPackage.getPackageFragment().getQualifiedName();
+        PsiDirectory baseDir = PsiManager.getInstance(presenterConfigModel.getProject()).findDirectory(clientPackage.getRoot());
 
         // name tokens package ...client.place.NameTokens
         clientPackageString += ".place";
@@ -106,14 +112,14 @@ public class CreatePresenterAction extends AnAction {
         if (nameTokensPackageExists != null && nameTokensPackageExists.getPackageFragment() != null) {
             createdNameTokensPackage = nameTokensPackageExists.getPackageFragment();
         } else {
-            createdNameTokensPackage = createPackage(clientPackageString);
+            createdNameTokensPackage = createPackage(baseDir, clientPackageString);
         }
     }
 
-    private PsiPackage createPackage(String packageName) {
-        // TODO write package
-
-        return null;
+    private PsiPackage createPackage(PsiDirectory baseDir, String packageName) {
+        Module module = presenterConfigModel.getModule();
+        PsiDirectory psiDir = PackageUtil.findOrCreateDirectoryForPackage(module, packageName, baseDir, false, false);
+        return JavaDirectoryService.getInstance().getPackage(psiDir);
     }
 
 }

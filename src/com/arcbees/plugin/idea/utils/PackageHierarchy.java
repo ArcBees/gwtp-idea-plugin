@@ -26,7 +26,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPackage;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -106,31 +105,28 @@ public class PackageHierarchy {
      * Takes the name like `tld.domain.project.client.child` and returns `tld.domain.project.client`
      */
     public String getClientPackageElementName(String packageElementName) {
-        {
-            if (packageElementName.matches(".*client$")) {
-                return packageElementName;
-            }
-
-            String[] packageUnits = packageElementName.split("\\.");
-            String parentPackageElementName = "";
-            for (int i = 0; i < packageUnits.length - 1; i++) {
-                parentPackageElementName += packageUnits[i];
-                if (i < packageUnits.length - 2) {
-                    parentPackageElementName += ".";
-                }
-
-                if (packageUnits[i].equals("client")) {
-                    break;
-                }
-            }
-
-            if (parentPackageElementName.matches(".*\\.$")) {
-                parentPackageElementName = parentPackageElementName.replaceAll("\\.$", "");
-            }
-
-            return parentPackageElementName;
+        if (packageElementName.matches(".*client$")) {
+            return packageElementName;
         }
 
+        String[] packageUnits = packageElementName.split("\\.");
+        String parentPackageElementName = "";
+        for (int i = 0; i < packageUnits.length - 1; i++) {
+            parentPackageElementName += packageUnits[i];
+            if (i < packageUnits.length - 2) {
+                parentPackageElementName += ".";
+            }
+
+            if (packageUnits[i].equals("client")) {
+                break;
+            }
+        }
+
+        if (parentPackageElementName.matches(".*\\.$")) {
+            parentPackageElementName = parentPackageElementName.replaceAll("\\.$", "");
+        }
+
+        return parentPackageElementName;
     }
 
     public boolean isParentTheClientPackage(String packageElementName) {
@@ -203,15 +199,15 @@ public class PackageHierarchy {
 //    }
 
     private void startIndexing() {
-        List<PsiPackage> packages = getTopLevelPackages();
-        for (PsiPackage mypackage : packages) {
-            indexPackage(mypackage);
+        List<PackageRoot> packages = getTopLevelPackages();
+        for (PackageRoot rootPackage : packages) {
+            indexPackage(rootPackage.getRoot(), rootPackage.getPackage());
         }
     }
 
-    private void indexPackage(PsiPackage packageFragment) {
-        String packageName = packageFragment.getName();
-        PackageHierarchyElement packageIndex = new PackageHierarchyElement(packageName, packageFragment);
+    private void indexPackage(VirtualFile root, PsiPackage packageFragment) {
+        String packageName = packageFragment.getQualifiedName();
+        PackageHierarchyElement packageIndex = new PackageHierarchyElement(root, packageName, packageFragment);
         packagesIndex.put(packageName, packageIndex);
 
         PsiClass[] classes = packageFragment.getClasses();
@@ -220,7 +216,7 @@ public class PackageHierarchy {
         GlobalSearchScope scope = GlobalSearchScope.projectScope(presenterConfigModel.getProject());
         PsiPackage[] children = packageFragment.getSubPackages(scope);
         for (int i = 0; i < children.length; i++) {
-            indexPackage(children[i]);
+            indexPackage(root, children[i]);
         }
     }
 
@@ -231,7 +227,7 @@ public class PackageHierarchy {
         return found;
     }
 
-    private List<PsiPackage> getTopLevelPackages() {
+    private List<PackageRoot> getTopLevelPackages() {
         Project myProject = presenterConfigModel.getProject();
         ProjectViewSettings viewSettings = new ProjectViewSettings();
 
@@ -241,7 +237,7 @@ public class PackageHierarchy {
 
         final PsiManager psiManager = PsiManager.getInstance(myProject);
         final List<AbstractTreeNode> children = new ArrayList<AbstractTreeNode>();
-        final Set<PsiPackage> topLevelPackages = new HashSet<PsiPackage>();
+        final Set<PackageRoot> topLevelPackages = new HashSet<PackageRoot>();
 
         for (final VirtualFile root : sourceRoots) {
             final PsiDirectory directory = psiManager.findDirectory(root);
@@ -255,17 +251,20 @@ public class PackageHierarchy {
                 for (PsiDirectory subdirectory : subdirectories) {
                     final PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(subdirectory);
                     if (aPackage != null && !PackageUtil.isPackageDefault(aPackage)) {
-                        topLevelPackages.add(aPackage);
+
+                        PackageRoot packageRoot = new PackageRoot(root, aPackage);
+                        topLevelPackages.add(packageRoot);
                     }
                 }
                 // add non-dir items
                 children.addAll(ProjectViewDirectoryHelper.getInstance(myProject).getDirectoryChildren(directory, viewSettings, false));
             } else {
                 // this is the case when a source root has package prefix assigned
-                topLevelPackages.add(directoryPackage);
+                PackageRoot packageRoot = new PackageRoot(root, directoryPackage);
+                topLevelPackages.add(packageRoot);
             }
         }
 
-        return new ArrayList<PsiPackage>(topLevelPackages);
+        return new ArrayList<PackageRoot>(topLevelPackages);
     }
 }

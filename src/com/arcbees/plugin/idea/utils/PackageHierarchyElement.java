@@ -16,18 +16,22 @@
 
 package com.arcbees.plugin.idea.utils;
 
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiPackage;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PackageHierarchyElement {
-    private String packageElementName;
-    private PsiPackage packageFragment;
-    private HashMap<String, PsiClass> units;
+    private final VirtualFile root;
+    private final String packageElementName;
+    private final PsiPackage packageFragment;
+    private final HashMap<String, PsiClass> units;
 
-    public PackageHierarchyElement(String packageName, PsiPackage packageFragment) {
+    public PackageHierarchyElement(VirtualFile root, String packageName, PsiPackage packageFragment) {
+        this.root = root;
         this.packageFragment = packageFragment;
         this.packageElementName = packageName;
 
@@ -58,6 +62,10 @@ public class PackageHierarchyElement {
         for (PsiClass unit : units) {
             addUnit(unit);
         }
+    }
+
+    public VirtualFile getRoot() {
+        return root;
     }
 
     @Override

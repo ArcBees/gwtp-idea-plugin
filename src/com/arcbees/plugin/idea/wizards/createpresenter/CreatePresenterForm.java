@@ -4,8 +4,14 @@ import com.arcbees.plugin.idea.dialogs.ContentSlotDialog;
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.roots.impl.ProjectRootManagerImpl;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
@@ -349,9 +355,13 @@ public class CreatePresenterForm extends DialogWrapper {
             PsiClass clazz = (PsiClass) e;
             PsiJavaFile javaFile = (PsiJavaFile) clazz.getContainingFile();
             selectedPackage = JavaPsiFacade.getInstance(presenterConfigModel.getProject()).findPackage(javaFile.getPackageName());
+
         } else if (e instanceof PsiDirectory) {
             selectedPackage = JavaDirectoryService.getInstance().getPackage((PsiDirectory) e);
         }
+
+        Module module = ModuleUtil.findModuleForPsiElement(e);
+        presenterConfigModel.setModule(module);
 
         return selectedPackage;
     }
