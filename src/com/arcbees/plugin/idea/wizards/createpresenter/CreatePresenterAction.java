@@ -4,6 +4,7 @@ import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.arcbees.plugin.idea.icons.PluginIcons;
 import com.arcbees.plugin.idea.utils.PackageHierarchy;
 import com.arcbees.plugin.idea.utils.PackageHierarchyElement;
+import com.arcbees.plugin.idea.utils.PackageUtilExt;
 import com.intellij.ide.util.PackageUtil;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -118,7 +119,7 @@ public class CreatePresenterAction extends AnAction {
 
     private PsiPackage createPackage(PsiDirectory baseDir, String packageName) {
         Module module = presenterConfigModel.getModule();
-        PsiDirectory psiDir = PackageUtil.findOrCreateDirectoryForPackage(module, packageName, baseDir, false, false);
+        PsiDirectory psiDir = PackageUtilExt.findOrCreateDirectoryForPackage(module, packageName, baseDir, false, false);
         return JavaDirectoryService.getInstance().getPackage(psiDir);
     }
 
