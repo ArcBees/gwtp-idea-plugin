@@ -2,6 +2,7 @@ package com.arcbees.plugin.idea.domain;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiPackage;
 
@@ -43,6 +44,7 @@ public class PresenterConfigModel {
     private boolean useAddOnunbind;
     private Module module;
     private PsiDirectory baseDir;
+    private PsiClass nameTokenPsiClass;
 
     public PresenterConfigModel(Project project) {
         this.project = project;
@@ -270,5 +272,13 @@ public class PresenterConfigModel {
 
     public Module getModule() {
         return module;
+    }
+
+    public void setNameTokenPsiClass(PsiClass nameTokenPsiClass) {
+        this.nameTokenPsiClass = nameTokenPsiClass;
+    }
+
+    public PsiClass getNameTokenPsiClass() {
+        return nameTokenPsiClass;
     }
 }
