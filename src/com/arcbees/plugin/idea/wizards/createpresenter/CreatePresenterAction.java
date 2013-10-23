@@ -9,14 +9,21 @@ import com.arcbees.plugin.template.create.place.CreateNameTokens;
 import com.arcbees.plugin.template.domain.place.CreatedNameTokens;
 import com.arcbees.plugin.template.domain.place.NameTokenOptions;
 import com.arcbees.plugin.template.domain.presenter.RenderedTemplate;
+import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.fileTypes.StdFileTypes;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaDirectoryService;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiFileFactory;
+import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPackage;
 
@@ -167,15 +174,14 @@ public class CreatePresenterAction extends AnAction {
         }
 
         RenderedTemplate rendered = createdNameToken.getNameTokensFile();
-        String name = rendered.getNameAndNoExt();
-        // TODO add contents
+        String nameFile = rendered.getNameAndNoExt();
         String contents = rendered.getContents();
 
-        PsiDirectory dir = createdNameTokensPackage.getContainingFile().getContainingDirectory();
+        PsiDirectory[] createdNameTokensPackageDirectories = createdNameTokensPackage.getDirectories();
+        PsiFile element = PsiFileFactory.getInstance(project).createFileFromText(nameFile, JavaFileType.INSTANCE, contents);
+        PsiElement createdNameTokensClass = createdNameTokensPackageDirectories[0].add(element);
 
-        PsiClass psiClass = JavaDirectoryService.getInstance().createClass(dir, name);
-
-        return psiClass;
+        return (PsiClass) createdNameTokensClass;
     }
 
 }
