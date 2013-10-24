@@ -1,5 +1,23 @@
+/**
+ * Copyright 2013 ArcBees Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+
 package com.arcbees.plugin.idea.wizards.createpresenter;
 
+import com.arcbees.plugin.idea.domain.CreatedPsiClass;
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.arcbees.plugin.idea.icons.PluginIcons;
 import com.arcbees.plugin.idea.utils.PackageHierarchy;
@@ -7,26 +25,26 @@ import com.arcbees.plugin.idea.utils.PackageHierarchyElement;
 import com.arcbees.plugin.idea.utils.PackageUtilExt;
 import com.arcbees.plugin.template.create.place.CreateNameTokens;
 import com.arcbees.plugin.template.domain.place.CreatedNameTokens;
+import com.arcbees.plugin.template.domain.place.NameToken;
 import com.arcbees.plugin.template.domain.place.NameTokenOptions;
 import com.arcbees.plugin.template.domain.presenter.RenderedTemplate;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.fileTypes.StdFileTypes;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaDirectoryService;
-import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPackage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -37,6 +55,7 @@ public class CreatePresenterAction extends AnAction {
     private Project project;
     private PackageHierarchy packageHierarchy;
     private PsiPackage createdNameTokensPackage;
+    private CreatedNameTokens createdNameTokenTemplates;
 
     public CreatePresenterAction() {
         super("Create Presenter", "Create GWTP Presenter", PluginIcons.GWTP_ICON_16x16);
@@ -72,13 +91,14 @@ public class CreatePresenterAction extends AnAction {
             return;
         }
 
-//        try {
-//            fetchTemplatesNameTokens();
-//        } catch (Exception e) {
-//            warn("Could not fetch NameTokens templates: Error: " + e.toString());
-//            e.printStackTrace();
-//            return;
-//        }
+        try {
+            fetchTemplatesNameTokens();
+        } catch (Exception e) {
+            // TODO
+            //warn("Could not fetch NameTokens templates: Error: " + e.toString());
+            e.printStackTrace();
+            return;
+        }
 
 //        try {
 //            fetchPresenterTemplates();
@@ -101,6 +121,30 @@ public class CreatePresenterAction extends AnAction {
         // TODO focus on new presenter package and open it up
 
         logger.info("...Creating presenter finished.");
+    }
+
+    private void fetchTemplatesNameTokens() throws Exception {
+        if (!presenterConfigModel.isUsePlace()) {
+            return;
+        }
+
+        NameToken token = new NameToken();
+        token.setCrawlable(presenterConfigModel.isUseCrawlable());
+        token.setToken(presenterConfigModel.getNameToken());
+
+        List<NameToken> nameTokens = new ArrayList<NameToken>();
+        nameTokens.add(token);
+
+        NameTokenOptions nameTokenOptions = new NameTokenOptions();
+        nameTokenOptions.setPackageName(createdNameTokensPackage.getQualifiedName());
+        nameTokenOptions.setNameTokens(nameTokens);
+
+        boolean processFileOnly = false;
+        try {
+            createdNameTokenTemplates = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     private void createPackageHierachyIndex() {
@@ -177,11 +221,21 @@ public class CreatePresenterAction extends AnAction {
         String nameFile = rendered.getNameAndNoExt();
         String contents = rendered.getContents();
 
-        PsiDirectory[] createdNameTokensPackageDirectories = createdNameTokensPackage.getDirectories();
-        PsiFile element = PsiFileFactory.getInstance(project).createFileFromText(nameFile, JavaFileType.INSTANCE, contents);
-        PsiElement createdNameTokensClass = createdNameTokensPackageDirectories[0].add(element);
+        final PsiDirectory[] createdNameTokensPackageDirectories = createdNameTokensPackage.getDirectories();
+        final PsiFile element = PsiFileFactory.getInstance(project).createFileFromText(nameFile, JavaFileType.INSTANCE, contents);
 
-        return (PsiClass) createdNameTokensClass;
+        final CreatedPsiClass createdPsiClass = new CreatedPsiClass();
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            public void run() {
+                PsiElement createdNameTokensClass = createdNameTokensPackageDirectories[0].add(element);
+                PsiJavaFile javaFile = (PsiJavaFile) createdNameTokensClass;
+                PsiClass[] clazzes = javaFile.getClasses();
+
+                createdPsiClass.setPsiClass(clazzes[0]);
+            }
+        });
+
+        return createdPsiClass.getPsiClass();
     }
 
 }
