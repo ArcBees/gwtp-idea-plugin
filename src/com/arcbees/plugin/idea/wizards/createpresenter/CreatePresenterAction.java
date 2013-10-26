@@ -38,18 +38,22 @@ import com.arcbees.plugin.template.domain.presenter.PopupPresenterOptions;
 import com.arcbees.plugin.template.domain.presenter.PresenterOptions;
 import com.arcbees.plugin.template.domain.presenter.PresenterWidgetOptions;
 import com.arcbees.plugin.template.domain.presenter.RenderedTemplate;
+import com.intellij.codeInsight.intention.impl.FieldFromParameterUtils;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.CommonClassNames;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
+import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.PsiJavaFile;
@@ -57,6 +61,10 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiPackage;
 import com.intellij.psi.PsiType;
+import com.intellij.psi.codeStyle.CodeStyleManager;
+import com.intellij.psi.codeStyle.JavaCodeStyleManager;
+import com.intellij.psi.impl.source.codeStyle.CodeEditUtil;
+import com.intellij.util.IncorrectOperationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -158,7 +166,7 @@ public class CreatePresenterAction extends AnAction {
         addMethodsToNameTokens(unitNameTokens);
     }
 
-    private void addMethodsToNameTokens(PsiClass nameTokensPsiClass)  {
+    private void addMethodsToNameTokens(final PsiClass nameTokensPsiClass)  {
         // find existing method
         PsiMethod[] existingMethods = nameTokensPsiClass.getMethods();
         for (PsiMethod psiMethod : existingMethods) {
@@ -176,10 +184,23 @@ public class CreatePresenterAction extends AnAction {
         String fieldSource = fields.get(0);
         String methodSource = methods.get(0);
 
+        // creating field doesn't want a newline
+        fieldSource = fieldSource.replaceAll("\n", "");
+
         // add contents to class
         PsiElementFactory elementFactory = PsiElementFactory.SERVICE.getInstance(project);
-        elementFactory.createFieldFromText(fieldSource, nameTokensPsiClass);
-        elementFactory.createMethodFromText(methodSource, nameTokensPsiClass);
+        final PsiField newField = elementFactory.createFieldFromText(fieldSource, null);
+        final PsiMethod newMethod = elementFactory.createMethodFromText(methodSource, null);
+
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            @Override
+            public void run() {
+                nameTokensPsiClass.add(newField);
+                nameTokensPsiClass.add(newMethod);
+
+                CodeStyleManager.getInstance(project).reformat(nameTokensPsiClass);
+            }
+        });
     }
 
     private void fetchPresenterTemplates() throws Exception {
@@ -322,21 +343,23 @@ public class CreatePresenterAction extends AnAction {
         // look for existing name tokens first.
         List<PsiClass> foundNameTokens = packageHierarchy.findClassName("NameTokens");
 
-        PsiClass unitNameTokens = null;
+        PsiClass nameTokensPsiClass = null;
         if (foundNameTokens != null && foundNameTokens.size() > 0) {
-            unitNameTokens = foundNameTokens.get(0);
+            nameTokensPsiClass = foundNameTokens.get(0);
         } else {
-            unitNameTokens = createNewNameTokensFile();
+            nameTokensPsiClass = createNewNameTokensFile();
         }
 
-        if (unitNameTokens == null) {
+        if (nameTokensPsiClass == null) {
             // TODO
             //warn("Could not create NameTokens.java");
             return;
         }
 
         // used for import string
-        presenterConfigModel.setNameTokenPsiClass(unitNameTokens);
+        presenterConfigModel.setNameTokenPsiClass(nameTokensPsiClass);
+
+        nameTokensPsiClass.navigate(true);
     }
 
     private PsiClass createNewNameTokensFile() throws Exception {
