@@ -298,4 +298,33 @@ public class PresenterConfigModel {
     public PsiClass getNameTokenPsiClass() {
         return nameTokenPsiClass;
     }
+
+    public String getSelectedPackageAndNameAsSubPackage() {
+        return selectedPackage.getQualifiedName() + "." + getName().toLowerCase();
+    }
+
+    public String getNameTokenWithClass() {
+        if (nameTokenPsiClass == null) {
+            return "";
+        }
+        String s = nameTokenPsiClass.getName().replace(".java", "") + "." + nameToken;
+        return s;
+    }
+
+    public String getNameTokenUnitImport() {
+        if (nameTokenPsiClass == null) {
+            return "";
+        }
+        String importString = "import " + nameTokenPsiClass.getQualifiedName() + ";";
+        return importString;
+    }
+
+    public String getContentSlotImport() {
+        if (contentSlot == null) {
+            return "";
+        }
+        // TODO ?
+        String importString = "import " + getContentSlot() + ";";
+        return importString;
+    }
 }

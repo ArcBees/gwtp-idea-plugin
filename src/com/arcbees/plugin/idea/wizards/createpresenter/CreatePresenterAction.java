@@ -24,9 +24,19 @@ import com.arcbees.plugin.idea.utils.PackageHierarchy;
 import com.arcbees.plugin.idea.utils.PackageHierarchyElement;
 import com.arcbees.plugin.idea.utils.PackageUtilExt;
 import com.arcbees.plugin.template.create.place.CreateNameTokens;
+import com.arcbees.plugin.template.create.presenter.CreateNestedPresenter;
+import com.arcbees.plugin.template.create.presenter.CreatePopupPresenter;
+import com.arcbees.plugin.template.create.presenter.CreatePresenterWidget;
 import com.arcbees.plugin.template.domain.place.CreatedNameTokens;
 import com.arcbees.plugin.template.domain.place.NameToken;
 import com.arcbees.plugin.template.domain.place.NameTokenOptions;
+import com.arcbees.plugin.template.domain.presenter.CreatedNestedPresenter;
+import com.arcbees.plugin.template.domain.presenter.CreatedPopupPresenter;
+import com.arcbees.plugin.template.domain.presenter.CreatedPresenterWidget;
+import com.arcbees.plugin.template.domain.presenter.NestedPresenterOptions;
+import com.arcbees.plugin.template.domain.presenter.PopupPresenterOptions;
+import com.arcbees.plugin.template.domain.presenter.PresenterOptions;
+import com.arcbees.plugin.template.domain.presenter.PresenterWidgetOptions;
 import com.arcbees.plugin.template.domain.presenter.RenderedTemplate;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -34,15 +44,19 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.CommonClassNames;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiPackage;
+import com.intellij.psi.PsiType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +69,11 @@ public class CreatePresenterAction extends AnAction {
     private Project project;
     private PackageHierarchy packageHierarchy;
     private PsiPackage createdNameTokensPackage;
+
     private CreatedNameTokens createdNameTokenTemplates;
+    private CreatedNestedPresenter createdNestedPresenterTemplates;
+    private CreatedPopupPresenter createdPopupPresenterTemplates;
+    private CreatedPresenterWidget createdPresenterWidgetTemplates;
 
     public CreatePresenterAction() {
         super("Create Presenter", "Create GWTP Presenter", PluginIcons.GWTP_ICON_16x16);
@@ -100,15 +118,16 @@ public class CreatePresenterAction extends AnAction {
             return;
         }
 
-//        try {
-//            fetchPresenterTemplates();
-//        } catch (Exception e) {
-//            warn("Could not fetch the ntested presenter templates: Error: " + e.toString());
-//            e.printStackTrace();
-//            return;
-//        }
+        try {
+            fetchPresenterTemplates();
+        } catch (Exception e) {
+            // TODO
+            //warn("Could not fetch the ntested presenter templates: Error: " + e.toString());
+            e.printStackTrace();
+            return;
+        }
 
-//        createNameTokensFieldAndMethods();
+        createNameTokensFieldAndMethods();
 //        createPresenterPackage();
 //        createPresenterModule();
 //        createPresenterModuleLinkForGin();
@@ -121,6 +140,120 @@ public class CreatePresenterAction extends AnAction {
         // TODO focus on new presenter package and open it up
 
         logger.info("...Creating presenter finished.");
+    }
+
+    /**
+     * create name tokens class, if it doesn't exist
+     */
+    private void createNameTokensFieldAndMethods() {
+        if (!presenterConfigModel.isUsePlace()) {
+            return;
+        }
+        PsiClass unitNameTokens = presenterConfigModel.getNameTokenPsiClass();
+        if (unitNameTokens == null) {
+            logger.info("createNameTokensFieldAndMethods: skipping creating nametokens methods.");
+            return;
+        }
+
+        addMethodsToNameTokens(unitNameTokens);
+    }
+
+    private void addMethodsToNameTokens(PsiClass nameTokensPsiClass)  {
+        // find existing method
+        PsiMethod[] existingMethods = nameTokensPsiClass.getMethods();
+        for (PsiMethod psiMethod : existingMethods) {
+            // does the method already exist
+            if (psiMethod.getName().equals(presenterConfigModel.getNameTokenMethodName())) {
+                // TODO
+                //warn("FYI: the method in nameTokens already exists." + method.toString());
+                return;
+            }
+        }
+
+        // get items from template
+        List<String> fields = createdNameTokenTemplates.getFields();
+        List<String> methods = createdNameTokenTemplates.getMethods();
+        String fieldSource = fields.get(0);
+        String methodSource = methods.get(0);
+
+        // add contents to class
+        PsiElementFactory elementFactory = PsiElementFactory.SERVICE.getInstance(project);
+        elementFactory.createFieldFromText(fieldSource, nameTokensPsiClass);
+        elementFactory.createMethodFromText(methodSource, nameTokensPsiClass);
+    }
+
+    private void fetchPresenterTemplates() throws Exception {
+        PresenterOptions presenterOptions = new PresenterOptions();
+        presenterOptions.setPackageName(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
+        presenterOptions.setName(presenterConfigModel.getName());
+        presenterOptions.setOnbind(presenterConfigModel.isUseAddOnbind());
+        presenterOptions.setOnhide(presenterConfigModel.isUseAddOnhide());
+        presenterOptions.setOnreset(presenterConfigModel.isUseAddOnreset());
+        presenterOptions.setOnunbind(presenterConfigModel.isUseAddOnunbind());
+        presenterOptions.setManualreveal(presenterConfigModel.getUseManualReveal());
+        presenterOptions.setPrepareFromRequest(presenterConfigModel.getUsePrepareFromRequest());
+        presenterOptions.setUihandlers(presenterConfigModel.isUseAddUihandlers());
+
+        // TODO future
+        //presenterOptions.setGatekeeper(presenterConfigModel.getGatekeeper());
+
+        if (presenterConfigModel.getNestedPresenter()) {
+            fetchNestedTemplate(presenterOptions);
+        } else if (presenterConfigModel.getPresenterWidget()) {
+            fetchPresenterWidgetTemplate(presenterOptions);
+        } else if (presenterConfigModel.getPopupPresenter()) {
+            fetchPopupPresenterTemplate(presenterOptions);
+        }
+    }
+
+    private void fetchPopupPresenterTemplate(PresenterOptions presenterOptions) throws Exception {
+        PopupPresenterOptions presenterWidgetOptions = new PopupPresenterOptions();
+        presenterWidgetOptions.setSingleton(presenterConfigModel.isUseSingleton());
+        presenterWidgetOptions.setCustom(presenterConfigModel.isUseOverrideDefaultPopup());
+
+        try {
+            createdPopupPresenterTemplates = CreatePopupPresenter.run(presenterOptions, presenterWidgetOptions, true);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    private void fetchPresenterWidgetTemplate(PresenterOptions presenterOptions) throws Exception {
+        PresenterWidgetOptions presenterWidgetOptions = new PresenterWidgetOptions();
+        presenterWidgetOptions.setSingleton(presenterConfigModel.isUseSingleton());
+
+        try {
+            createdPresenterWidgetTemplates = CreatePresenterWidget.run(presenterOptions, presenterWidgetOptions, true);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    private void fetchNestedTemplate(PresenterOptions presenterOptions) throws Exception {
+        NestedPresenterOptions nestedPresenterOptions = new NestedPresenterOptions();
+        nestedPresenterOptions.setPlace(presenterConfigModel.isUsePlace());
+        nestedPresenterOptions.setNameToken(presenterConfigModel.getNameToken());
+        nestedPresenterOptions.setCrawlable(presenterConfigModel.isUseCrawlable());
+        nestedPresenterOptions.setCodeSplit(presenterConfigModel.isUseCodesplit());
+        nestedPresenterOptions.setNameToken(presenterConfigModel.getNameTokenWithClass());
+        nestedPresenterOptions.setNameTokenImport(presenterConfigModel.getNameTokenUnitImport());
+        nestedPresenterOptions.setContentSlotImport(presenterConfigModel.getContentSlotImport());
+
+        if (presenterConfigModel.getRevealInRoot()) {
+            nestedPresenterOptions.setRevealType("Root");
+        } else if (presenterConfigModel.getRevealInRootLayout()) {
+            nestedPresenterOptions.setRevealType("RootLayout");
+        } else if (presenterConfigModel.getPopupPresenter()) {
+            nestedPresenterOptions.setRevealType("RootPopup");
+        } else if (presenterConfigModel.getRevealInSlot()) {
+            nestedPresenterOptions.setRevealType(presenterConfigModel.getContentSlot());
+        }
+
+        try {
+            createdNestedPresenterTemplates = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     private void fetchTemplatesNameTokens() throws Exception {
