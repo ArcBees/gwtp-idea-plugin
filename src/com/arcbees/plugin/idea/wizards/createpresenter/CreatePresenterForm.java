@@ -72,13 +72,6 @@ public class CreatePresenterForm extends DialogWrapper {
         setDefaults();
         name.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyTyped(KeyEvent e) {
-                super.keyTyped(e);
-
-
-            }
-
-            @Override
             public void keyReleased(KeyEvent e) {
                 super.keyReleased(e);
 
