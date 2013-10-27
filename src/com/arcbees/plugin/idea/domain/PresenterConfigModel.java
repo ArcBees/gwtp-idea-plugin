@@ -26,7 +26,7 @@ import com.intellij.psi.PsiPackage;
 public class PresenterConfigModel {
     private final Project project;
 
-    private PsiPackage selectedPackage;
+    private PsiPackage selectedPackageRoot;
 
     private String name;
     private String path;
@@ -275,12 +275,12 @@ public class PresenterConfigModel {
         this.useAddOnunbind = useAddOnunbind;
     }
 
-    public PsiPackage getSelectedPackage() {
-        return selectedPackage;
+    public PsiPackage getSelectedPackageRoot() {
+        return selectedPackageRoot;
     }
 
-    public void setSelectedPackage(PsiPackage selectedPackage) {
-        this.selectedPackage = selectedPackage;
+    public void setSelectedPackageRoot(PsiPackage selectedPackageRoot) {
+        this.selectedPackageRoot = selectedPackageRoot;
     }
 
     public void setModule(Module module) {
@@ -300,7 +300,10 @@ public class PresenterConfigModel {
     }
 
     public String getSelectedPackageAndNameAsSubPackage() {
-        return selectedPackage.getQualifiedName() + "." + getName().toLowerCase();
+        if (getName() == null) {
+            setName("");
+        }
+        return selectedPackageRoot.getQualifiedName() + "." + getName().toLowerCase();
     }
 
     public String getNameTokenWithClass() {

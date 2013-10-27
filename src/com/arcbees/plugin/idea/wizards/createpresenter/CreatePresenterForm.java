@@ -22,6 +22,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class CreatePresenterForm extends DialogWrapper {
     private final PresenterConfigModel presenterConfigModel;
@@ -68,6 +70,22 @@ public class CreatePresenterForm extends DialogWrapper {
 
         initHandlers();
         setDefaults();
+        name.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                super.keyTyped(e);
+
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+
+                CreatePresenterForm.this.presenterConfigModel.setName(name.getText());
+                packageName.setText(CreatePresenterForm.this.presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
+            }
+        });
     }
 
     @Nullable
@@ -88,6 +106,10 @@ public class CreatePresenterForm extends DialogWrapper {
         nameToken.setEnabled(false);
         useCrawlable.setEnabled(false);
         nameToken.grabFocus();
+
+        PsiPackage selectedPackageRoot = getSelectedPackageRoot();
+        presenterConfigModel.setSelectedPackageRoot(selectedPackageRoot);
+        packageName.setText(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
     }
 
     private void initButtonHandlers() {
@@ -315,7 +337,7 @@ public class CreatePresenterForm extends DialogWrapper {
         data.setUseAddOnunbind(useAddOnunbind.isSelected());
         data.setUseManualReveal(useManualReveal.isSelected());
         data.setUsePrepareFromRequest(usePrepareFromRequest.isSelected());
-        data.setSelectedPackage(getSelectedPackage());
+        data.setSelectedPackageRoot(getSelectedPackageRoot());
     }
 
     public boolean isModified(PresenterConfigModel data) {
@@ -342,7 +364,7 @@ public class CreatePresenterForm extends DialogWrapper {
         return false;
     }
 
-    public PsiPackage getSelectedPackage() {
+    public PsiPackage getSelectedPackageRoot() {
         PsiElement e = sourceEvent.getData(LangDataKeys.PSI_ELEMENT);
 
         PsiPackage selectedPackage = null;
