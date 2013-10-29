@@ -34,13 +34,15 @@ import javax.swing.event.ListSelectionListener;
 import java.util.ArrayList;
 
 public class ContentSlotDialog extends DialogWrapper {
-
+    // project
     private final Project project;
     private final AnActionEvent sourceEvent;
 
+    // panels
     private JPanel contentPanel;
     private JList contentSlotsList;
 
+    // vars
     private String selection;
     private ArrayList<String> slots;
 
@@ -72,7 +74,8 @@ public class ContentSlotDialog extends DialogWrapper {
 
     private void findSlots() {
         GlobalSearchScope scope = GlobalSearchScope.allScope(project);
-        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass("com.gwtplatform.mvp.client.annotations.ContentSlot", scope);
+        PsiClass psiClass = JavaPsiFacade.getInstance(project)
+                .findClass("com.gwtplatform.mvp.client.annotations.ContentSlot", scope);
 
         slots = new ArrayList<String>();
         Query<PsiMember> query = AnnotatedMembersSearch.search(psiClass, GlobalSearchScope.allScope(project));
@@ -81,6 +84,7 @@ public class ContentSlotDialog extends DialogWrapper {
                 PsiClass container = psiMember.getContainingClass();
                 String classname = container.getName();
                 slots.add(classname + "." + psiMember.getName());
+
                 return true;
             }
         });
