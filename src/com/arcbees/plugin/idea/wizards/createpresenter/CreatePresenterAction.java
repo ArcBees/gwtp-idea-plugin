@@ -152,6 +152,9 @@ public class CreatePresenterAction extends AnAction {
         logger.info("...Creating presenter finished.");
     }
 
+    /**
+     * TODO extraction possibly down the road.
+     */
     private void createPresenterModuleLinkForGin() {
         // 1. first search parent
         PsiClass unit = packageHierarchy.findInterfaceTypeInParentPackage(
