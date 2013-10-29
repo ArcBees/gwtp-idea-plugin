@@ -59,6 +59,7 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiPackage;
 import com.intellij.psi.PsiStatement;
 import com.intellij.psi.codeStyle.CodeStyleManager;
+import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -238,14 +239,15 @@ public class CreatePresenterAction extends AnAction {
         // write to configure method
         ApplicationManager.getApplication().runWriteAction(new Runnable() {
             public void run() {
-                PsiJavaFile file = (PsiJavaFile) parentModulePsiClass.getContainingFile();
-                // TODO stack import style
-                file.getImportList().add(importStatement);
+                PsiJavaFile parentmoduleFile = (PsiJavaFile) parentModulePsiClass.getContainingFile();
+                PsiImportStatement[] importStatements = parentmoduleFile.getImportList().getImportStatements();
+                parentmoduleFile.getImportList().addAfter(importStatement, importStatements[importStatements.length - 1]);
 
                 // TODO add to top of install order
                 method.getBody().add(installModuleStatementElement);
 
                 CodeStyleManager.getInstance(project).reformat(parentModulePsiClass);
+                JavaCodeStyleManager.getInstance(project).optimizeImports(parentmoduleFile);
             }
         });
 
@@ -383,6 +385,7 @@ public class CreatePresenterAction extends AnAction {
                 PsiClass[] createdClasses = createdJavaFile.getClasses();
                 createdPsiClass.setPsiClass(createdClasses[0]);
                 CodeStyleManager.getInstance(project).reformat(createdClasses[0]);
+                JavaCodeStyleManager.getInstance(project).optimizeImports(createdClasses[0].getContainingFile());
             }
         });
 

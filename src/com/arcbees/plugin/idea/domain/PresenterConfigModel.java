@@ -310,24 +310,23 @@ public class PresenterConfigModel {
         if (nameTokenPsiClass == null) {
             return "";
         }
-        String s = nameTokenPsiClass.getName().replace(".java", "") + "." + nameToken;
-        return s;
+
+        return nameTokenPsiClass.getName().replace(".java", "") + "." + nameToken;
     }
 
     public String getNameTokenUnitImport() {
         if (nameTokenPsiClass == null) {
             return "";
         }
-        String importString = "import " + nameTokenPsiClass.getQualifiedName() + ";";
-        return importString;
+
+        return "import " + nameTokenPsiClass.getQualifiedName() + ";";
     }
 
     public String getContentSlotImport() {
-        if (contentSlot == null) {
+        if (contentSlot == null || contentSlot.isEmpty()) {
             return "";
         }
-        // TODO ?
-        String importString = "import " + getContentSlot() + ";";
-        return importString;
+
+        return "import " + contentSlot + ";";
     }
 }
