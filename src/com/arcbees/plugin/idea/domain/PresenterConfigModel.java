@@ -62,6 +62,7 @@ public class PresenterConfigModel {
     private Module module;
     private PsiDirectory baseDir;
     private PsiClass nameTokenPsiClass;
+    private PsiClass contentSlotClass;
 
     public PresenterConfigModel(Project project) {
         this.project = project;
@@ -323,10 +324,14 @@ public class PresenterConfigModel {
     }
 
     public String getContentSlotImport() {
-        if (contentSlot == null || contentSlot.isEmpty()) {
+        if (contentSlotClass == null) {
             return "";
         }
 
-        return "import " + contentSlot + ";";
+        return "import " + contentSlotClass.getQualifiedName() + ";";
+    }
+
+    public void setContentSlotClass(PsiClass contentSlotClass) {
+        this.contentSlotClass = contentSlotClass;
     }
 }

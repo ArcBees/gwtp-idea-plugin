@@ -257,19 +257,6 @@ public class CreatePresenterAction extends AnAction {
                 + installModuleStatement);
     }
 
-    private String getFileNameForModule() {
-        String name = null;
-        if (presenterConfigModel.getNestedPresenter()) {
-            name = createdNestedPresenterTemplates.getModule().getNameAndNoExts();
-        } else if (presenterConfigModel.getPresenterWidget()) {
-            name = createdPresenterWidgetTemplates.getModule().getNameAndNoExts();
-        } else if (presenterConfigModel.getPopupPresenter()) {
-            name = createdPopupPresenterTemplates.getModule().getNameAndNoExts();
-        }
-
-        return name;
-    }
-
     private PsiMethod findMethod(PsiClass unit, String methodName) {
         PsiMethod[] methods = unit.getMethods();
         if (methods == null) {
