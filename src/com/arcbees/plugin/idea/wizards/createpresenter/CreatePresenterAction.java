@@ -42,6 +42,7 @@ import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaDirectoryService;
@@ -85,6 +86,8 @@ public class CreatePresenterAction extends AnAction {
     private CreatedPopupPresenter createdPopupPresenterTemplates;
     private CreatedPresenterWidget createdPresenterWidgetTemplates;
 
+    private boolean failedStep;
+
     public CreatePresenterAction() {
         super("Create Presenter", "Create GWTP Presenter", PluginIcons.GWTP_ICON_16x16);
     }
@@ -114,30 +117,18 @@ public class CreatePresenterAction extends AnAction {
         createPackageHierachyIndex();
         createNameTokensPackage();
 
-        try {
-            createNametokensClass();
-        } catch (Exception e) {
-            // TODO
-            //warn("Could not create or find the name tokens file 'NameTokens.java': Error: " + e.toString());
-            e.printStackTrace();
+        createNametokensClassTask();
+        if (failedStep) {
             return;
         }
 
-        try {
-            fetchTemplatesNameTokens();
-        } catch (Exception e) {
-            // TODO
-            //warn("Could not fetch NameTokens templates: Error: " + e.toString());
-            e.printStackTrace();
+        fetchTemplatesNameTokensTask();
+        if (failedStep) {
             return;
         }
 
-        try {
-            fetchPresenterTemplates();
-        } catch (Exception e) {
-            // TODO
-            //warn("Could not fetch the nested presenter templates: Error: " + e.toString());
-            e.printStackTrace();
+        fetchPresenterTemplatesTask();
+        if (failedStep) {
             return;
         }
 
@@ -151,6 +142,66 @@ public class CreatePresenterAction extends AnAction {
         createPresenterModuleLinkForGin();
 
         logger.info("...Creating presenter finished.");
+    }
+
+    private void fetchPresenterTemplatesTask() {
+        ApplicationManager.getApplication().invokeLater(new Runnable() {
+            public void run() {
+                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            fetchPresenterTemplates();
+                        } catch (Exception e) {
+                            // TODO
+                            //warn("Could not fetch the nested presenter templates: Error: " + e.toString());
+                            failedStep = true;
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void fetchTemplatesNameTokensTask() {
+        ApplicationManager.getApplication().invokeLater(new Runnable() {
+            public void run() {
+                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            fetchTemplatesNameTokens();
+                        } catch (Exception e) {
+                            // TODO
+                            //warn("Could not fetch NameTokens templates: Error: " + e.toString());
+                            failedStep = true;
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void createNametokensClassTask() {
+        ApplicationManager.getApplication().invokeLater(new Runnable() {
+            public void run() {
+                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            createNametokensClass();
+                        } catch (Exception e) {
+                            // TODO
+                            //warn("Could not create or find the name tokens file 'NameTokens.java': Error: " + e.toString());
+                            failedStep = true;
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
     }
 
     /**
@@ -466,7 +517,7 @@ public class CreatePresenterAction extends AnAction {
 
     private void fetchPopupPresenterTemplate(PresenterOptions presenterOptions) throws Exception {
         PopupPresenterOptions presenterWidgetOptions = new PopupPresenterOptions();
-        presenterWidgetOptions.setSingleton(presenterConfigModel.isUseSingleton());
+        presenterWidgetOptions.setSingleton(presenterConfigModel.isUseSingleton2());
         presenterWidgetOptions.setCustom(presenterConfigModel.isUseOverrideDefaultPopup());
 
         createdPopupPresenterTemplates = CreatePopupPresenter.run(presenterOptions, presenterWidgetOptions, true);

@@ -323,7 +323,7 @@ public class CreatePresenterForm extends DialogWrapper {
         data.setUseCrawlable(useCrawlable.isSelected());
         data.setUseCodesplit(useCodesplit.isSelected());
         data.setUseSingleton(useSingleton.isSelected());
-        data.setUseSingleton(useSingleton2.isSelected());
+        data.setUseSingleton2(useSingleton2.isSelected());
         data.setUseOverrideDefaultPopup(useOverrideDefaultPopup.isSelected());
         data.setUseAddUihandlers(useAddUihandlers.isSelected());
         data.setUseAddOnbind(useAddOnbind.isSelected());
