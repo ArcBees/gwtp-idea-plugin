@@ -20,6 +20,7 @@ import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.intellij.ide.projectView.impl.nodes.PackageUtil;
 import com.intellij.ide.projectView.impl.nodes.ProjectViewDirectoryHelper;
 import com.intellij.ide.util.treeView.AbstractTreeNode;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -58,7 +59,12 @@ public class PackageHierarchy {
 
         logger.info("Creating package index.");
 
-        startIndexing();
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
+            public void run() {
+                startIndexing();
+            }
+        });
 
         logger.info("Finished package index.");
     }
@@ -192,7 +198,7 @@ public class PackageHierarchy {
             PsiType[] superTypes = types.getSuperTypes();
 
             if (superTypes != null) {
-                for (PsiType superType : superTypes ) {
+                for (PsiType superType : superTypes) {
                     if (superType.getCanonicalText().contains(findTypeName)) {
                         return true;
                     }

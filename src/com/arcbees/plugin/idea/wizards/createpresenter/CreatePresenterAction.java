@@ -18,6 +18,9 @@ package com.arcbees.plugin.idea.wizards.createpresenter;
 
 import com.arcbees.plugin.idea.domain.CreatedPsiClass;
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
+import com.arcbees.plugin.idea.domain.PsiDirectoriesModel;
+import com.arcbees.plugin.idea.domain.PsiElementModel;
+import com.arcbees.plugin.idea.domain.PsiPackageModel;
 import com.arcbees.plugin.idea.icons.PluginIcons;
 import com.arcbees.plugin.idea.utils.PackageHierarchy;
 import com.arcbees.plugin.idea.utils.PackageHierarchyElement;
@@ -42,7 +45,6 @@ import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaDirectoryService;
@@ -88,6 +90,9 @@ public class CreatePresenterAction extends AnAction {
 
     private boolean failedStep;
 
+    /**
+     * TODO >>>>>>> Messages.showErrorDialog(myContentPanel, AndroidBundle.message("ddms.corrupted.error"));
+     */
     public CreatePresenterAction() {
         super("Create Presenter", "Create GWTP Presenter", PluginIcons.GWTP_ICON_16x16);
     }
@@ -104,31 +109,38 @@ public class CreatePresenterAction extends AnAction {
         // update the model with the input data from the form
         dialog.getData(presenterConfigModel);
 
-        run();
+        runTask();
     }
 
-    /**
-     * TODO run async command
-     * TODO progress monitor spinning
-     */
+    private void runTask() {
+        ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
+            public void run() {
+                CreatePresenterAction.this.run();
+            }
+        });
+    }
+
     private void run() {
         logger.info("Creating presenter started...");
 
         createPackageHierachyIndex();
         createNameTokensPackage();
 
-        createNametokensClassTask();
-        if (failedStep) {
-            return;
+        try {
+            createNametokensClass();
+        } catch (Exception e) {
+            // TODO
+            //warn("Could not create or find the name tokens file 'NameTokens.java': Error: " + e.toString());
+            failedStep = true;
+            e.printStackTrace();
         }
 
-        fetchTemplatesNameTokensTask();
-        if (failedStep) {
-            return;
-        }
-
-        fetchPresenterTemplatesTask();
-        if (failedStep) {
+        try {
+            fetchPresenterTemplates();
+        } catch (Exception e) {
+            // TODO
+            //warn("Could not fetch the nested presenter templates: Error: " + e.toString());
+            e.printStackTrace();
             return;
         }
 
@@ -142,66 +154,6 @@ public class CreatePresenterAction extends AnAction {
         createPresenterModuleLinkForGin();
 
         logger.info("...Creating presenter finished.");
-    }
-
-    private void fetchPresenterTemplatesTask() {
-        ApplicationManager.getApplication().invokeLater(new Runnable() {
-            public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            fetchPresenterTemplates();
-                        } catch (Exception e) {
-                            // TODO
-                            //warn("Could not fetch the nested presenter templates: Error: " + e.toString());
-                            failedStep = true;
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    private void fetchTemplatesNameTokensTask() {
-        ApplicationManager.getApplication().invokeLater(new Runnable() {
-            public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            fetchTemplatesNameTokens();
-                        } catch (Exception e) {
-                            // TODO
-                            //warn("Could not fetch NameTokens templates: Error: " + e.toString());
-                            failedStep = true;
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    private void createNametokensClassTask() {
-        ApplicationManager.getApplication().invokeLater(new Runnable() {
-            public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            createNametokensClass();
-                        } catch (Exception e) {
-                            // TODO
-                            //warn("Could not create or find the name tokens file 'NameTokens.java': Error: " + e.toString());
-                            failedStep = true;
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        });
     }
 
     /**
@@ -404,30 +356,69 @@ public class CreatePresenterAction extends AnAction {
         }
 
         createdModulePsiClass = createPsiClass(createdPresenterPackage, renderedTemplate);
-        createdModulePsiClass.navigate(true);
+
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
+            public void run() {
+                createdModulePsiClass.navigate(true);
+            }
+        });
     }
 
-    private PsiClass createPsiClass(PsiPackage createInPsiPackage, RenderedTemplate renderedTemplate) {
-        String className = renderedTemplate.getNameAndNoExt();
-        String contents = renderedTemplate.getContents();
+    private PsiClass createPsiClass(final PsiPackage createInPsiPackage, RenderedTemplate renderedTemplate) {
+        final String className = renderedTemplate.getNameAndNoExt();
+        final String contents = renderedTemplate.getContents();
 
-        final PsiDirectory[] directoriesInPackage = createInPsiPackage.getDirectories();
-        final PsiFile element = PsiFileFactory.getInstance(project).createFileFromText(
-                className, JavaFileType.INSTANCE, contents);
-
-        final CreatedPsiClass createdPsiClass = new CreatedPsiClass();
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+        final PsiPackageModel psiPackageModel = new PsiPackageModel();
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
             public void run() {
-                PsiElement createdElement = directoriesInPackage[0].add(element);
-                PsiJavaFile createdJavaFile = (PsiJavaFile) createdElement;
-                PsiClass[] createdClasses = createdJavaFile.getClasses();
-                createdPsiClass.setPsiClass(createdClasses[0]);
-                CodeStyleManager.getInstance(project).reformat(createdClasses[0]);
-                JavaCodeStyleManager.getInstance(project).optimizeImports(createdClasses[0].getContainingFile());
+                PsiDirectory[] directoriesInPackage = createInPsiPackage.getDirectories();
+                PsiDirectory dir = directoriesInPackage[0];
+                psiPackageModel.setPsiDirirectory(dir);
             }
         });
 
-        return createdPsiClass.getPsiClass();
+        final PsiElementModel elementModel = new PsiElementModel();
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
+            public void run() {
+                PsiFile element = PsiFileFactory.getInstance(project).createFileFromText(
+                        className, JavaFileType.INSTANCE, contents);
+                elementModel.setElement(element);
+            }
+        });
+
+        final PsiElementModel createdJavaFileModel = new PsiElementModel();
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            @Override
+            public void run() {
+
+                PsiElement element = elementModel.getElement();
+                PsiDirectory dir = psiPackageModel.getPsiDirectory();
+                PsiElement createdElement = dir.add(element);
+                // TODO fail
+                createdJavaFileModel.setElement(createdElement);
+            }
+        });
+
+        final CreatedPsiClass createdPsiClassModel = new CreatedPsiClass();
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            public void run() {
+                PsiClass[] createdClasses = createdJavaFileModel.getJavaFile().getClasses();
+                createdPsiClassModel.setPsiClass(createdClasses[0]);
+                CodeStyleManager.getInstance(project).reformat(createdClasses[0]);
+            }
+        });
+
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
+            public void run() {
+                JavaCodeStyleManager.getInstance(project).optimizeImports(createdPsiClassModel.getPsiClass().getContainingFile());
+            }
+        });
+
+        return createdPsiClassModel.getPsiClass();
     }
 
     private void createPresenterPackage() {
@@ -586,11 +577,8 @@ public class CreatePresenterAction extends AnAction {
         PsiPackage selectedPackage = presenterConfigModel.getSelectedPackageRoot();
         String selectedPackageString = selectedPackage.getQualifiedName();
         PackageHierarchyElement clientPackage = packageHierarchy.findParentClient(selectedPackageString);
-        String clientPackageString = clientPackage.getPackageFragment().getQualifiedName();
-        PsiDirectory baseDir = getBaseDir();
-
-        // name tokens package ...client.place.NameTokens
-        clientPackageString += ".place";
+        final String clientPackageString = clientPackage.getPackageFragment().getQualifiedName() + ".place";
+        final PsiDirectory baseDir = getBaseDir();
 
         PackageHierarchyElement nameTokensPackageExists = packageHierarchy.find(clientPackageString);
 
@@ -652,10 +640,18 @@ public class CreatePresenterAction extends AnAction {
     private PsiDirectory getBaseDir() {
         PsiPackage selectedPackage = presenterConfigModel.getSelectedPackageRoot();
         String selectedPackageString = selectedPackage.getQualifiedName();
-        PackageHierarchyElement clientPackage = packageHierarchy.findParentClient(selectedPackageString);
-        PsiDirectory baseDir = PsiManager.getInstance(presenterConfigModel.getProject())
-                .findDirectory(clientPackage.getRoot());
+        final PackageHierarchyElement clientPackage = packageHierarchy.findParentClient(selectedPackageString);
 
-        return baseDir;
+        final PsiPackageModel psiPackageModel = new PsiPackageModel();
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
+            public void run() {
+                PsiDirectory baseDir = PsiManager.getInstance(presenterConfigModel.getProject())
+                        .findDirectory(clientPackage.getRoot());
+                psiPackageModel.setPsiDirirectory(baseDir);
+            }
+        });
+
+        return psiPackageModel.getPsiDirectory();
     }
 }
