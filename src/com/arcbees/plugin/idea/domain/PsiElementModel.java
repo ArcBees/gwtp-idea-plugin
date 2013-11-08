@@ -16,20 +16,17 @@
 
 package com.arcbees.plugin.idea.domain;
 
-import com.intellij.psi.JavaDirectoryService;
-import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.PsiPackage;
 
 public class PsiElementModel {
     private PsiElement element;
 
-    public void setElement(PsiElement element) {
+    public void set(PsiElement element) {
         this.element = element;
     }
 
-    public PsiElement getElement() {
+    public PsiElement get() {
         return element;
     }
 
