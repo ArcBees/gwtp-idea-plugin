@@ -4,6 +4,18 @@
     <entry_points version="2.0" />
   </component>
   <component name="IdProvider" IDEtalkID="AAD9B16058635B2A13C4243F8E5CF0FF" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/../IDE-Templates/pom.xml" />
+      </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/../IDE-Templates/pom.xml" />
+      </set>
+    </option>
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="IDEA IU-129.713" project-jdk-type="IDEA JDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
