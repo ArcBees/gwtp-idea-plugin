@@ -18,14 +18,14 @@ package com.arcbees.plugin.idea.domain;
 
 import com.intellij.psi.PsiClass;
 
-public class CreatedPsiClass {
+public class PsiClassModel {
     private PsiClass psiClass;
 
-    public PsiClass getPsiClass() {
+    public PsiClass get() {
         return psiClass;
     }
 
-    public void setPsiClass(PsiClass psiClass) {
+    public void set(PsiClass psiClass) {
         this.psiClass = psiClass;
     }
 }
