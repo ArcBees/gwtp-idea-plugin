@@ -6,8 +6,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
@@ -79,6 +82,24 @@ public class CreatePresenterForm extends DialogWrapper {
                 packageName.setText(CreatePresenterForm.this.presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
             }
         });
+
+        // TODO focus on name input
+    }
+
+    @Nullable
+    @Override
+    protected ValidationInfo doValidate() {
+        if (!packageName.getText().contains(".client")) {
+            return new ValidationInfo("Select a package that has .client in it.", packageName);
+        }
+
+        if (StringUtil.isEmptyOrSpaces(name.getText())) {
+            return new ValidationInfo("Presenter name can't be empty", name);
+        }
+
+        // TODO add more complex validations
+
+        return null;
     }
 
     @Nullable
@@ -288,8 +309,10 @@ public class CreatePresenterForm extends DialogWrapper {
         dialog.show();
 
         String contentSlotSelection = dialog.getContentSlot();
-        presenterConfigModel.setContentSlot(contentSlotSelection);
         contentSlot.setText(contentSlotSelection);
+
+        presenterConfigModel.setContentSlot(contentSlotSelection);
+        presenterConfigModel.setContentSlotClass(dialog.getContentSlotPsiClass());
     }
 
     public void setData(PresenterConfigModel data) {
@@ -321,7 +344,7 @@ public class CreatePresenterForm extends DialogWrapper {
         data.setUseCrawlable(useCrawlable.isSelected());
         data.setUseCodesplit(useCodesplit.isSelected());
         data.setUseSingleton(useSingleton.isSelected());
-        data.setUseSingleton(useSingleton2.isSelected());
+        data.setUseSingleton2(useSingleton2.isSelected());
         data.setUseOverrideDefaultPopup(useOverrideDefaultPopup.isSelected());
         data.setUseAddUihandlers(useAddUihandlers.isSelected());
         data.setUseAddOnbind(useAddOnbind.isSelected());

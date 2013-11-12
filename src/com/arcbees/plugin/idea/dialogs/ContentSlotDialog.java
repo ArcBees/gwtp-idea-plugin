@@ -32,17 +32,22 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class ContentSlotDialog extends DialogWrapper {
-
+    // project
     private final Project project;
     private final AnActionEvent sourceEvent;
 
+    // panels
     private JPanel contentPanel;
     private JList contentSlotsList;
 
+    // vars
     private String selection;
-    private ArrayList<String> slots;
+    private Map<String, PsiMember> slots;
 
     public ContentSlotDialog(@Nullable Project project, boolean canBeParent, AnActionEvent sourceEvent) {
         super(project, canBeParent);
@@ -58,10 +63,24 @@ public class ContentSlotDialog extends DialogWrapper {
         contentSlotsList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                int selected = e.getFirstIndex();
-                selection = slots.get(selected);
+                int selected = contentSlotsList.getSelectedIndex();
+                ListModel list = contentSlotsList.getModel();
+                selection = (String) list.getElementAt(selected);
             }
         });
+    }
+
+    public String getContentSlot() {
+        return selection;
+    }
+
+    public PsiClass getContentSlotPsiClass() {
+        PsiClass psiClass = null;
+        if (selection != null) {
+            PsiMember psiMember = slots.get(selection);
+            psiClass = psiMember.getContainingClass();
+        }
+        return psiClass;
     }
 
     @Nullable
@@ -72,25 +91,34 @@ public class ContentSlotDialog extends DialogWrapper {
 
     private void findSlots() {
         GlobalSearchScope scope = GlobalSearchScope.allScope(project);
-        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass("com.gwtplatform.mvp.client.annotations.ContentSlot", scope);
+        PsiClass psiClass = JavaPsiFacade.getInstance(project)
+                .findClass("com.gwtplatform.mvp.client.annotations.ContentSlot", scope);
 
-        slots = new ArrayList<String>();
+        slots = new HashMap<String, PsiMember>();
         Query<PsiMember> query = AnnotatedMembersSearch.search(psiClass, GlobalSearchScope.allScope(project));
         query.forEach(new Processor<PsiMember>() {
             public boolean process(PsiMember psiMember) {
-                PsiClass container = psiMember.getContainingClass();
-                String classname = container.getName();
-                slots.add(classname + "." + psiMember.getName());
+                slots.put(getSlot(psiMember), psiMember);
+
                 return true;
             }
         });
 
         String[] listData = new String[slots.size()];
-        slots.toArray(listData);
+        Set<String> set = slots.keySet();
+        int i=0;
+        for (String item : set) {
+            listData[i] = item;
+            i++;
+        }
+
         contentSlotsList.setListData(listData);
     }
 
-    public String getContentSlot() {
-        return selection;
+    private String getSlot(PsiMember psiMember) {
+        PsiClass container = psiMember.getContainingClass();
+        String classname = container.getName();
+        String slot = classname + "." + psiMember.getName();
+        return slot;
     }
 }
