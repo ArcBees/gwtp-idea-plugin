@@ -62,6 +62,8 @@ public class PresenterConfigModel {
     private Module module;
     private PsiDirectory baseDir;
     private PsiClass nameTokenPsiClass;
+    private PsiClass contentSlotClass;
+    private boolean useSingleton2;
 
     public PresenterConfigModel(Project project) {
         this.project = project;
@@ -227,6 +229,14 @@ public class PresenterConfigModel {
         this.useSingleton = useSingleton;
     }
 
+    public void setUseSingleton2(boolean useSingleton2) {
+        this.useSingleton2 = useSingleton2;
+    }
+
+    public boolean isUseSingleton2() {
+        return useSingleton2;
+    }
+
     public boolean isUseOverrideDefaultPopup() {
         return useOverrideDefaultPopup;
     }
@@ -323,10 +333,14 @@ public class PresenterConfigModel {
     }
 
     public String getContentSlotImport() {
-        if (contentSlot == null || contentSlot.isEmpty()) {
+        if (contentSlotClass == null) {
             return "";
         }
 
-        return "import " + contentSlot + ";";
+        return "import " + contentSlotClass.getQualifiedName() + ";";
+    }
+
+    public void setContentSlotClass(PsiClass contentSlotClass) {
+        this.contentSlotClass = contentSlotClass;
     }
 }

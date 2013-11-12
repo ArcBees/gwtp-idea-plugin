@@ -17,9 +17,12 @@
 package com.arcbees.plugin.idea.utils;
 
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
+import com.arcbees.plugin.idea.domain.PsiClassModel;
 import com.intellij.ide.projectView.impl.nodes.PackageUtil;
 import com.intellij.ide.projectView.impl.nodes.ProjectViewDirectoryHelper;
 import com.intellij.ide.util.treeView.AbstractTreeNode;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -58,7 +61,12 @@ public class PackageHierarchy {
 
         logger.info("Creating package index.");
 
-        startIndexing();
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
+            public void run() {
+                startIndexing();
+            }
+        });
 
         logger.info("Finished package index.");
     }
@@ -174,17 +182,28 @@ public class PackageHierarchy {
         return foundUnit;
     }
 
-    public PsiClass findInterfaceTypeInParentPackage(PsiPackage packageSelected, String findTypeName) {
-        PsiClass[] units = packageSelected.getClasses();
+    public PsiClass findInterfaceTypeInParentPackage(final PsiPackage packageSelected, final String findTypeName) {
+        final PsiClassModel psiClassModel = new PsiClassModel();
+        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+                ApplicationManager.getApplication().runReadAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        PsiClass[] units = packageSelected.getClasses();
 
-        for (PsiClass unit : units) {
-            boolean found = findInterfaceUseInUnit(unit, findTypeName);
-            if (found == true) {
-                return unit;
+                        for (PsiClass unit : units) {
+                            boolean found = findInterfaceUseInUnit(unit, findTypeName);
+                            if (found == true) {
+                                psiClassModel.set(unit);
+                            }
+                        }
+                    }
+                });
             }
-        }
+        }, ModalityState.NON_MODAL);
 
-        return null;
+        return psiClassModel.get();
     }
 
     private boolean findInterfaceUseInUnit(PsiClass unit, String findTypeName) {
@@ -192,7 +211,7 @@ public class PackageHierarchy {
             PsiType[] superTypes = types.getSuperTypes();
 
             if (superTypes != null) {
-                for (PsiType superType : superTypes ) {
+                for (PsiType superType : superTypes) {
                     if (superType.getCanonicalText().contains(findTypeName)) {
                         return true;
                     }
