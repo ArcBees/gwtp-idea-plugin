@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="ide-templates">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/ide-templates.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/ide-templates.jar!/" />
+    </SOURCES>
+  </library>
+</component>
