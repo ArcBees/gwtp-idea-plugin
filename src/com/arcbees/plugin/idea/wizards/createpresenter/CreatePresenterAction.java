@@ -50,6 +50,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
@@ -93,9 +94,6 @@ public class CreatePresenterAction extends AnAction {
 
     private boolean failedStep;
 
-    /**
-     * TODO >>>>>>> Messages.showErrorDialog(myContentPanel, AndroidBundle.message("ddms.corrupted.error"));
-     */
     public CreatePresenterAction() {
         super("Create Presenter", "Create GWTP Presenter", PluginIcons.GWTP_ICON_16x16);
     }
@@ -132,8 +130,7 @@ public class CreatePresenterAction extends AnAction {
         try {
             createNametokensClass();
         } catch (Exception e) {
-            // TODO
-            //warn("Could not create or find the name tokens file 'NameTokens.java': Error: " + e.toString());
+            error("Could not create or find the name tokens file 'NameTokens.java': Error: " + e.toString());
             failedStep = true;
             e.printStackTrace();
         }
@@ -141,8 +138,7 @@ public class CreatePresenterAction extends AnAction {
         try {
             fetchPresenterTemplates();
         } catch (Exception e) {
-            // TODO
-            //warn("Could not fetch the nested presenter templates: Error: " + e.toString());
+            error("Could not fetch the nested presenter templates: Error: " + e.toString());
             e.printStackTrace();
             return;
         }
@@ -211,8 +207,7 @@ public class CreatePresenterAction extends AnAction {
             createPresenterGinlink(unit);
         } else {
             logger.warning("Error: Wasn't able to install Module");
-            // TODO
-            //warn("Could not create install module.");
+            warn("Could not create install module.");
         }
     }
 
@@ -224,8 +219,7 @@ public class CreatePresenterAction extends AnAction {
         final PsiMethod method = findMethod(parentModulePsiClass, "configure");
 
         if (method == null) {
-            // TODO
-            //warn("Wasn't able to findMethod Configure in unit: " + unit.getElementName());
+            warn("Wasn't able to findMethod Configure in unit: " + parentModulePsiClass.getName());
             logger.severe("createPresenterGinLink() unit did not have configure implementation.");
             return;
         }
@@ -540,8 +534,7 @@ public class CreatePresenterAction extends AnAction {
         for (PsiMethod psiMethod : existingMethods) {
             // does the method already exist
             if (psiMethod.getName().equals(presenterConfigModel.getNameTokenMethodName())) {
-                // TODO
-                //warn("FYI: the method in nameTokens already exists." + method.toString());
+                warn("FYI: the method in nameTokens already exists." + psiMethod.toString());
                 return;
             }
         }
@@ -706,8 +699,7 @@ public class CreatePresenterAction extends AnAction {
         }
 
         if (nameTokensPsiClass == null) {
-            // TODO
-            //warn("Could not create NameTokens.java");
+            warn("Could not create NameTokens.java");
             return;
         }
 
@@ -747,5 +739,13 @@ public class CreatePresenterAction extends AnAction {
         });
 
         return psiPackageModel.get();
+    }
+
+    private void warn(String message) {
+        Messages.showWarningDialog(message, "Warning");
+    }
+
+    private void error(String message) {
+        Messages.showErrorDialog(message, "Error");
     }
 }

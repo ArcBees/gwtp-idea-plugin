@@ -6,8 +6,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
@@ -79,6 +82,24 @@ public class CreatePresenterForm extends DialogWrapper {
                 packageName.setText(CreatePresenterForm.this.presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
             }
         });
+
+        // TODO focus on name input
+    }
+
+    @Nullable
+    @Override
+    protected ValidationInfo doValidate() {
+        if (!packageName.getText().contains(".client")) {
+            return new ValidationInfo("Select a package that has .client in it.", packageName);
+        }
+
+        if (StringUtil.isEmptyOrSpaces(name.getText())) {
+            return new ValidationInfo("Presenter name can't be empty", name);
+        }
+
+        // TODO add more complex validations
+
+        return null;
     }
 
     @Nullable
