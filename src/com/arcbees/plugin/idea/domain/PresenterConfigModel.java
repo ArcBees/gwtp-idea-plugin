@@ -62,6 +62,8 @@ public class PresenterConfigModel {
     private Module module;
     private PsiDirectory baseDir;
     private PsiClass nameTokenPsiClass;
+    private PsiClass contentSlotClass;
+    private boolean useSingleton2;
 
     public PresenterConfigModel(Project project) {
         this.project = project;
@@ -227,6 +229,14 @@ public class PresenterConfigModel {
         this.useSingleton = useSingleton;
     }
 
+    public void setUseSingleton2(boolean useSingleton2) {
+        this.useSingleton2 = useSingleton2;
+    }
+
+    public boolean isUseSingleton2() {
+        return useSingleton2;
+    }
+
     public boolean isUseOverrideDefaultPopup() {
         return useOverrideDefaultPopup;
     }
@@ -310,24 +320,27 @@ public class PresenterConfigModel {
         if (nameTokenPsiClass == null) {
             return "";
         }
-        String s = nameTokenPsiClass.getName().replace(".java", "") + "." + nameToken;
-        return s;
+
+        return nameTokenPsiClass.getName().replace(".java", "") + "." + nameToken;
     }
 
     public String getNameTokenUnitImport() {
         if (nameTokenPsiClass == null) {
             return "";
         }
-        String importString = "import " + nameTokenPsiClass.getQualifiedName() + ";";
-        return importString;
+
+        return "import " + nameTokenPsiClass.getQualifiedName() + ";";
     }
 
     public String getContentSlotImport() {
-        if (contentSlot == null) {
+        if (contentSlotClass == null) {
             return "";
         }
-        // TODO ?
-        String importString = "import " + getContentSlot() + ";";
-        return importString;
+
+        return "import " + contentSlotClass.getQualifiedName() + ";";
+    }
+
+    public void setContentSlotClass(PsiClass contentSlotClass) {
+        this.contentSlotClass = contentSlotClass;
     }
 }
