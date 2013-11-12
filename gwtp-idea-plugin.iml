@@ -13,7 +13,10 @@
     <orderEntry type="library" name="commons-io:commons-io:2.4" level="project" />
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.1" level="project" />
     <orderEntry type="library" name="org.apache.maven.shared:maven-invoker:2.1.1" level="project" />
-    <orderEntry type="library" name="maven lib" level="project" />
+    <orderEntry type="library" name="oro-2.0.8" level="project" />
+    <orderEntry type="library" name="gson-2.2.3" level="project" />
+    <orderEntry type="library" name="commons-configuration:commons-configuration:1.9" level="project" />
+    <orderEntry type="library" name="ide-templates" level="project" />
   </component>
 </module>
 
