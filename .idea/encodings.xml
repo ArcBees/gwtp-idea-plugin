@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false">
+    <file url="file://$PROJECT_DIR$/../IDE-Templates" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/lib/antlr-2.7.7.jar" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/lib/asm-4.0.jar" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/lib/asm-analysis-4.0.jar" charset="UTF-8" />
@@ -8,7 +9,6 @@
     <file url="file://$PROJECT_DIR$/lib/asm-tree-4.0.jar" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/lib/asm-util-4.0.jar" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/lib/commons-codec-1.6.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/commons-collections-3.2.1.jar" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/lib/commons-configuration-1.9.jar" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/lib/commons-io-2.4.jar" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/lib/commons-lang-2.6.jar" charset="UTF-8" />

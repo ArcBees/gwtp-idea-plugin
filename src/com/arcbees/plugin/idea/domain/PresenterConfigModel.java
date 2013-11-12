@@ -1,12 +1,32 @@
+/**
+ * Copyright 2013 ArcBees Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+
 package com.arcbees.plugin.idea.domain;
 
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiPackage;
 
 public class PresenterConfigModel {
     private final Project project;
 
-    private PsiPackage selectedPackage;
+    private PsiPackage selectedPackageRoot;
 
     private String name;
     private String path;
@@ -15,7 +35,6 @@ public class PresenterConfigModel {
     private boolean popupPresenter;
 
     // nested
-    private boolean place;
     private String nameToken;
     private boolean revealInRoot;
     private boolean revealInRootLayout;
@@ -40,6 +59,11 @@ public class PresenterConfigModel {
     private boolean useAddOnhide;
     private boolean useAddOnreset;
     private boolean useAddOnunbind;
+    private Module module;
+    private PsiDirectory baseDir;
+    private PsiClass nameTokenPsiClass;
+    private PsiClass contentSlotClass;
+    private boolean useSingleton2;
 
     public PresenterConfigModel(Project project) {
         this.project = project;
@@ -91,14 +115,6 @@ public class PresenterConfigModel {
 
     public void setPopupPresenter(boolean popupPresenter) {
         this.popupPresenter = popupPresenter;
-    }
-
-    public boolean getPlace() {
-        return place;
-    }
-
-    public void setPlace(boolean place) {
-        this.place = place;
     }
 
     public String getNameToken() {
@@ -213,6 +229,14 @@ public class PresenterConfigModel {
         this.useSingleton = useSingleton;
     }
 
+    public void setUseSingleton2(boolean useSingleton2) {
+        this.useSingleton2 = useSingleton2;
+    }
+
+    public boolean isUseSingleton2() {
+        return useSingleton2;
+    }
+
     public boolean isUseOverrideDefaultPopup() {
         return useOverrideDefaultPopup;
     }
@@ -261,11 +285,62 @@ public class PresenterConfigModel {
         this.useAddOnunbind = useAddOnunbind;
     }
 
-    public PsiPackage getSelectedPackage() {
-        return selectedPackage;
+    public PsiPackage getSelectedPackageRoot() {
+        return selectedPackageRoot;
     }
 
-    public void setSelectedPackage(PsiPackage selectedPackage) {
-        this.selectedPackage = selectedPackage;
+    public void setSelectedPackageRoot(PsiPackage selectedPackageRoot) {
+        this.selectedPackageRoot = selectedPackageRoot;
+    }
+
+    public void setModule(Module module) {
+        this.module = module;
+    }
+
+    public Module getModule() {
+        return module;
+    }
+
+    public void setNameTokenPsiClass(PsiClass nameTokenPsiClass) {
+        this.nameTokenPsiClass = nameTokenPsiClass;
+    }
+
+    public PsiClass getNameTokenPsiClass() {
+        return nameTokenPsiClass;
+    }
+
+    public String getSelectedPackageAndNameAsSubPackage() {
+        if (getName() == null) {
+            setName("");
+        }
+        return selectedPackageRoot.getQualifiedName() + "." + getName().toLowerCase();
+    }
+
+    public String getNameTokenWithClass() {
+        if (nameTokenPsiClass == null) {
+            return "";
+        }
+
+        return nameTokenPsiClass.getName().replace(".java", "") + "." + nameToken;
+    }
+
+    public String getNameTokenUnitImport() {
+        if (nameTokenPsiClass == null) {
+            return "";
+        }
+
+        return "import " + nameTokenPsiClass.getQualifiedName() + ";";
+    }
+
+    public String getContentSlotImport() {
+        if (contentSlotClass == null) {
+            return "";
+        }
+
+        return "import " + contentSlotClass.getQualifiedName() + ";";
+    }
+
+    public void setContentSlotClass(PsiClass contentSlotClass) {
+        this.contentSlotClass = contentSlotClass;
     }
 }

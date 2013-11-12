@@ -17,18 +17,22 @@
 package com.arcbees.plugin.idea.utils;
 
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
+import com.arcbees.plugin.idea.domain.PsiClassModel;
 import com.intellij.ide.projectView.impl.nodes.PackageUtil;
 import com.intellij.ide.projectView.impl.nodes.ProjectViewDirectoryHelper;
 import com.intellij.ide.util.treeView.AbstractTreeNode;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPackage;
+import com.intellij.psi.PsiType;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.util.containers.ContainerUtil;
@@ -40,8 +44,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class PackageHierarchy {
+    private static final Logger logger = Logger.getLogger(PackageHierarchy.class.getName());
+
     private PresenterConfigModel presenterConfigModel;
     private Map<String, PackageHierarchyElement> packagesIndex;
 
@@ -52,13 +59,16 @@ public class PackageHierarchy {
     public void run() {
         packagesIndex = new HashMap<String, PackageHierarchyElement>();
 
-        // TODO logger
-        System.out.println("Creating package index.");
+        logger.info("Creating package index.");
 
-        startIndexing();
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
+            public void run() {
+                startIndexing();
+            }
+        });
 
-        // TODO logger
-        System.out.println("Finished package index.");
+        logger.info("Finished package index.");
     }
 
     public PackageHierarchyElement find(String packageElementName) {
@@ -106,31 +116,29 @@ public class PackageHierarchy {
      * Takes the name like `tld.domain.project.client.child` and returns `tld.domain.project.client`
      */
     public String getClientPackageElementName(String packageElementName) {
-        {
-            if (packageElementName.matches(".*client$")) {
-                return packageElementName;
-            }
-
-            String[] packageUnits = packageElementName.split("\\.");
-            String parentPackageElementName = "";
-            for (int i = 0; i < packageUnits.length - 1; i++) {
-                parentPackageElementName += packageUnits[i];
-                if (i < packageUnits.length - 2) {
-                    parentPackageElementName += ".";
-                }
-
-                if (packageUnits[i].equals("client")) {
-                    break;
-                }
-            }
-
-            if (parentPackageElementName.matches(".*\\.$")) {
-                parentPackageElementName = parentPackageElementName.replaceAll("\\.$", "");
-            }
-
-            return parentPackageElementName;
+        if (packageElementName.matches(".*client$")) {
+            return packageElementName;
         }
 
+        String[] packageUnits = packageElementName.split("\\.");
+        String parentPackageElementName = "";
+
+        for (int i = 0; i < packageUnits.length - 1; i++) {
+            parentPackageElementName += packageUnits[i];
+            if (i < packageUnits.length - 2) {
+                parentPackageElementName += ".";
+            }
+
+            if (packageUnits[i].equals("client")) {
+                break;
+            }
+        }
+
+        if (parentPackageElementName.matches(".*\\.$")) {
+            parentPackageElementName = parentPackageElementName.replaceAll("\\.$", "");
+        }
+
+        return parentPackageElementName;
     }
 
     public boolean isParentTheClientPackage(String packageElementName) {
@@ -145,73 +153,86 @@ public class PackageHierarchy {
         }
     }
 
-//    public PsiClass findFirstInterfaceType(String findType) {
-//        PsiClass unit = null;
-//        for (String packageElementName : packagesIndex.keySet()) {
-//            unit = findFirstInterfaceTypeInPackage(packageElementName, findType);
-//            if (unit != null) {
-//                break;
-//            }
-//        }
-//        return unit;
-//    }
-//
-//    public PsiClass findFirstInterfaceTypeInPackage(String packageElementName, String findTypeName) {
-//        PackageHierarchyElement hierarchyElement = packagesIndex.get(packageElementName);
-//        Map<String, PsiClass> units = hierarchyElement.getUnits();
-//
-//        PsiClass foundUnit = null;
-//        for (String key : units.keySet()) {
-//            PsiClass unit = units.get(key);
-//            boolean hasType = findInterfaceUseInUnit(unit, findTypeName);
-//            if (hasType) {
-//                foundUnit = unit;
-//                break;
-//            }
-//        }
-//        return foundUnit;
-//    }
+    public PsiClass findFirstInterfaceType(String findType) {
+        PsiClass unit = null;
+        for (String packageElementName : packagesIndex.keySet()) {
+            unit = findFirstInterfaceTypeInPackage(packageElementName, findType);
+            if (unit != null) {
+                break;
+            }
+        }
 
-    //    public PsiClass findInterfaceTypeInParentPackage(PsiPackage packageSelected, String findTypeName) {
-//        PsiShortNamesCache.getInstance(presenterConfigModel.getProject()).getClassesByName()
-//
-//        PsiClass[] units = packageSelected.getCompilationUnits();
-//
-//        for (PsiClass unit : units) {
-//            boolean found = findInterfaceUseInUnit(unit, findTypeName);
-//            if (found == true) {
-//                return unit;
-//            }
-//        }
-//
-//        return null;
-//    }
-//
-//    private boolean findInterfaceUseInUnit(PsiClass unit, String findTypeName) {
-//        for (IType type : unit.getTypes()) {
-//            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(progressMonitor);
-//            IType[] interfaces = hierarchy.getAllInterfaces();
-//            for (IType checkInterface : interfaces) {
-//                System.out.println("search unit checkInterface=" + checkInterface.getElementName()
-//                        + " findTypeName=" + findTypeName);
-//                if (checkInterface.getFullyQualifiedName('.').contains(findTypeName)) {
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
+        return unit;
+    }
+
+    public PsiClass findFirstInterfaceTypeInPackage(String packageElementName, String findTypeName) {
+        PackageHierarchyElement hierarchyElement = packagesIndex.get(packageElementName);
+        Map<String, PsiClass> units = hierarchyElement.getUnits();
+
+        PsiClass foundUnit = null;
+        for (String key : units.keySet()) {
+            PsiClass unit = units.get(key);
+            boolean hasType = findInterfaceUseInUnit(unit, findTypeName);
+            if (hasType) {
+                foundUnit = unit;
+                break;
+            }
+        }
+
+        return foundUnit;
+    }
+
+    public PsiClass findInterfaceTypeInParentPackage(final PsiPackage packageSelected, final String findTypeName) {
+        final PsiClassModel psiClassModel = new PsiClassModel();
+        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+                ApplicationManager.getApplication().runReadAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        PsiClass[] units = packageSelected.getClasses();
+
+                        for (PsiClass unit : units) {
+                            boolean found = findInterfaceUseInUnit(unit, findTypeName);
+                            if (found == true) {
+                                psiClassModel.set(unit);
+                            }
+                        }
+                    }
+                });
+            }
+        }, ModalityState.NON_MODAL);
+
+        return psiClassModel.get();
+    }
+
+    private boolean findInterfaceUseInUnit(PsiClass unit, String findTypeName) {
+        for (PsiClassType types : unit.getSuperTypes()) {
+            PsiType[] superTypes = types.getSuperTypes();
+
+            if (superTypes != null) {
+                for (PsiType superType : superTypes) {
+                    if (superType.getCanonicalText().contains(findTypeName)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 
     private void startIndexing() {
-        List<PsiPackage> packages = getTopLevelPackages();
-        for (PsiPackage mypackage : packages) {
-            indexPackage(mypackage);
+        List<PackageRoot> packages = getTopLevelPackages();
+
+        for (PackageRoot rootPackage : packages) {
+            indexPackage(rootPackage.getRoot(), rootPackage.getPackage());
         }
     }
 
-    private void indexPackage(PsiPackage packageFragment) {
-        String packageName = packageFragment.getName();
-        PackageHierarchyElement packageIndex = new PackageHierarchyElement(packageName, packageFragment);
+    private void indexPackage(VirtualFile root, PsiPackage packageFragment) {
+        String packageName = packageFragment.getQualifiedName();
+        PackageHierarchyElement packageIndex = new PackageHierarchyElement(root, packageName, packageFragment);
         packagesIndex.put(packageName, packageIndex);
 
         PsiClass[] classes = packageFragment.getClasses();
@@ -219,8 +240,9 @@ public class PackageHierarchy {
 
         GlobalSearchScope scope = GlobalSearchScope.projectScope(presenterConfigModel.getProject());
         PsiPackage[] children = packageFragment.getSubPackages(scope);
+
         for (int i = 0; i < children.length; i++) {
-            indexPackage(children[i]);
+            indexPackage(root, children[i]);
         }
     }
 
@@ -228,10 +250,11 @@ public class PackageHierarchy {
         GlobalSearchScope scope = GlobalSearchScope.allScope(presenterConfigModel.getProject());
         PsiClass[] foundArray = PsiShortNamesCache.getInstance(presenterConfigModel.getProject()).getClassesByName(name, scope);
         List<PsiClass> found = new ArrayList<PsiClass>(Arrays.asList(foundArray));
+
         return found;
     }
 
-    private List<PsiPackage> getTopLevelPackages() {
+    private List<PackageRoot> getTopLevelPackages() {
         Project myProject = presenterConfigModel.getProject();
         ProjectViewSettings viewSettings = new ProjectViewSettings();
 
@@ -241,7 +264,7 @@ public class PackageHierarchy {
 
         final PsiManager psiManager = PsiManager.getInstance(myProject);
         final List<AbstractTreeNode> children = new ArrayList<AbstractTreeNode>();
-        final Set<PsiPackage> topLevelPackages = new HashSet<PsiPackage>();
+        final Set<PackageRoot> topLevelPackages = new HashSet<PackageRoot>();
 
         for (final VirtualFile root : sourceRoots) {
             final PsiDirectory directory = psiManager.findDirectory(root);
@@ -255,17 +278,20 @@ public class PackageHierarchy {
                 for (PsiDirectory subdirectory : subdirectories) {
                     final PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(subdirectory);
                     if (aPackage != null && !PackageUtil.isPackageDefault(aPackage)) {
-                        topLevelPackages.add(aPackage);
+
+                        PackageRoot packageRoot = new PackageRoot(root, aPackage);
+                        topLevelPackages.add(packageRoot);
                     }
                 }
                 // add non-dir items
                 children.addAll(ProjectViewDirectoryHelper.getInstance(myProject).getDirectoryChildren(directory, viewSettings, false));
             } else {
                 // this is the case when a source root has package prefix assigned
-                topLevelPackages.add(directoryPackage);
+                PackageRoot packageRoot = new PackageRoot(root, directoryPackage);
+                topLevelPackages.add(packageRoot);
             }
         }
 
-        return new ArrayList<PsiPackage>(topLevelPackages);
+        return new ArrayList<PackageRoot>(topLevelPackages);
     }
 }
