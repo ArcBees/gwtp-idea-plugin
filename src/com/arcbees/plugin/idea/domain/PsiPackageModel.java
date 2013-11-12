@@ -16,16 +16,22 @@
 
 package com.arcbees.plugin.idea.domain;
 
-import com.intellij.psi.PsiClass;
+import com.intellij.psi.JavaDirectoryService;
+import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiPackage;
 
-public class CreatedPsiClass {
-    private PsiClass psiClass;
+public class PsiPackageModel {
+    private PsiDirectory psiDir;
 
-    public PsiClass getPsiClass() {
-        return psiClass;
+    public void set(PsiDirectory psiDir) {
+        this.psiDir = psiDir;
     }
 
-    public void setPsiClass(PsiClass psiClass) {
-        this.psiClass = psiClass;
+    public PsiDirectory get() {
+        return psiDir;
+    }
+
+    public PsiPackage getPackage() {
+        return JavaDirectoryService.getInstance().getPackage(psiDir);
     }
 }

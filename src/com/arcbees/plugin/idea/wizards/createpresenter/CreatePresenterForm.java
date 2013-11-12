@@ -6,8 +6,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
@@ -22,6 +25,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class CreatePresenterForm extends DialogWrapper {
     private final PresenterConfigModel presenterConfigModel;
@@ -68,6 +73,33 @@ public class CreatePresenterForm extends DialogWrapper {
 
         initHandlers();
         setDefaults();
+        name.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+
+                CreatePresenterForm.this.presenterConfigModel.setName(name.getText());
+                packageName.setText(CreatePresenterForm.this.presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
+            }
+        });
+
+        // TODO focus on name input
+    }
+
+    @Nullable
+    @Override
+    protected ValidationInfo doValidate() {
+        if (!packageName.getText().contains(".client")) {
+            return new ValidationInfo("Select a package that has .client in it.", packageName);
+        }
+
+        if (StringUtil.isEmptyOrSpaces(name.getText())) {
+            return new ValidationInfo("Presenter name can't be empty", name);
+        }
+
+        // TODO add more complex validations
+
+        return null;
     }
 
     @Nullable
@@ -88,6 +120,10 @@ public class CreatePresenterForm extends DialogWrapper {
         nameToken.setEnabled(false);
         useCrawlable.setEnabled(false);
         nameToken.grabFocus();
+
+        PsiPackage selectedPackageRoot = getSelectedPackageRoot();
+        presenterConfigModel.setSelectedPackageRoot(selectedPackageRoot);
+        packageName.setText(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
     }
 
     private void initButtonHandlers() {
@@ -273,8 +309,10 @@ public class CreatePresenterForm extends DialogWrapper {
         dialog.show();
 
         String contentSlotSelection = dialog.getContentSlot();
-        presenterConfigModel.setContentSlot(contentSlotSelection);
         contentSlot.setText(contentSlotSelection);
+
+        presenterConfigModel.setContentSlot(contentSlotSelection);
+        presenterConfigModel.setContentSlotClass(dialog.getContentSlotPsiClass());
     }
 
     public void setData(PresenterConfigModel data) {
@@ -306,7 +344,7 @@ public class CreatePresenterForm extends DialogWrapper {
         data.setUseCrawlable(useCrawlable.isSelected());
         data.setUseCodesplit(useCodesplit.isSelected());
         data.setUseSingleton(useSingleton.isSelected());
-        data.setUseSingleton(useSingleton2.isSelected());
+        data.setUseSingleton2(useSingleton2.isSelected());
         data.setUseOverrideDefaultPopup(useOverrideDefaultPopup.isSelected());
         data.setUseAddUihandlers(useAddUihandlers.isSelected());
         data.setUseAddOnbind(useAddOnbind.isSelected());
@@ -315,7 +353,7 @@ public class CreatePresenterForm extends DialogWrapper {
         data.setUseAddOnunbind(useAddOnunbind.isSelected());
         data.setUseManualReveal(useManualReveal.isSelected());
         data.setUsePrepareFromRequest(usePrepareFromRequest.isSelected());
-        data.setSelectedPackage(getSelectedPackage());
+        data.setSelectedPackageRoot(getSelectedPackageRoot());
     }
 
     public boolean isModified(PresenterConfigModel data) {
@@ -342,7 +380,7 @@ public class CreatePresenterForm extends DialogWrapper {
         return false;
     }
 
-    public PsiPackage getSelectedPackage() {
+    public PsiPackage getSelectedPackageRoot() {
         PsiElement e = sourceEvent.getData(LangDataKeys.PSI_ELEMENT);
 
         PsiPackage selectedPackage = null;
