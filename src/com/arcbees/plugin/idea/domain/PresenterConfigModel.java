@@ -63,6 +63,7 @@ public class PresenterConfigModel {
     private PsiDirectory baseDir;
     private PsiClass nameTokenPsiClass;
     private PsiClass contentSlotClass;
+    private boolean useSingleton2;
 
     public PresenterConfigModel(Project project) {
         this.project = project;
@@ -226,6 +227,14 @@ public class PresenterConfigModel {
 
     public void setUseSingleton(final boolean useSingleton) {
         this.useSingleton = useSingleton;
+    }
+
+    public void setUseSingleton2(boolean useSingleton2) {
+        this.useSingleton2 = useSingleton2;
+    }
+
+    public boolean isUseSingleton2() {
+        return useSingleton2;
     }
 
     public boolean isUseOverrideDefaultPopup() {
