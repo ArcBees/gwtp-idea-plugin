@@ -1,0 +1,24 @@
+<component name="libraryTable">
+  <library name="commons-configuration:commons-configuration:1.9" type="repository">
+    <properties maven-id="commons-configuration:commons-configuration:1.9" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/commons-configuration-1.9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-lang-2.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-logging-1.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/servlet-api-2.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/xml-apis-1.0.b2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lib/commons-configuration-1.9-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-lang-2.6-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-logging-1.1.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/commons-configuration-1.9-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-lang-2.6-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-logging-1.1.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/servlet-api-2.4-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/xml-apis-1.0.b2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
