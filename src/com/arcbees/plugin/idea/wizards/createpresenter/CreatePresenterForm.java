@@ -3,8 +3,21 @@ package com.arcbees.plugin.idea.wizards.createpresenter;
 import com.arcbees.plugin.idea.dialogs.ContentSlotDialog;
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.LangDataKeys;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.JavaDirectoryService;
+import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiJavaFile;
+import com.intellij.psi.PsiPackage;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -12,6 +25,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class CreatePresenterForm extends DialogWrapper {
     private final PresenterConfigModel presenterConfigModel;
@@ -47,19 +62,44 @@ public class CreatePresenterForm extends DialogWrapper {
     private JCheckBox useAddOnunbind;
     private JLabel lblQuerystring;
 
-    public CreatePresenterForm(Project project, AnActionEvent sourceEvent) {
-        super(project);
+    public CreatePresenterForm(PresenterConfigModel presenterConfigModel, AnActionEvent sourceEvent) {
+        super(presenterConfigModel.getProject());
         init();
 
+        this.presenterConfigModel = presenterConfigModel;
         this.sourceEvent = sourceEvent;
 
         setTitle("Create GWTP Presenter");
 
-        // model object to transfer vars to the ide-templates
-        presenterConfigModel = new PresenterConfigModel(project);
-
         initHandlers();
         setDefaults();
+        name.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+
+                CreatePresenterForm.this.presenterConfigModel.setName(name.getText());
+                packageName.setText(CreatePresenterForm.this.presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
+            }
+        });
+
+        // TODO focus on name input
+    }
+
+    @Nullable
+    @Override
+    protected ValidationInfo doValidate() {
+        if (!packageName.getText().contains(".client")) {
+            return new ValidationInfo("Select a package that has .client in it.", packageName);
+        }
+
+        if (StringUtil.isEmptyOrSpaces(name.getText())) {
+            return new ValidationInfo("Presenter name can't be empty", name);
+        }
+
+        // TODO add more complex validations
+
+        return null;
     }
 
     @Nullable
@@ -80,6 +120,10 @@ public class CreatePresenterForm extends DialogWrapper {
         nameToken.setEnabled(false);
         useCrawlable.setEnabled(false);
         nameToken.grabFocus();
+
+        PsiPackage selectedPackageRoot = getSelectedPackageRoot();
+        presenterConfigModel.setSelectedPackageRoot(selectedPackageRoot);
+        packageName.setText(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
     }
 
     private void initButtonHandlers() {
@@ -265,8 +309,10 @@ public class CreatePresenterForm extends DialogWrapper {
         dialog.show();
 
         String contentSlotSelection = dialog.getContentSlot();
-        presenterConfigModel.setContentSlot(contentSlotSelection);
         contentSlot.setText(contentSlotSelection);
+
+        presenterConfigModel.setContentSlot(contentSlotSelection);
+        presenterConfigModel.setContentSlotClass(dialog.getContentSlotPsiClass());
     }
 
     public void setData(PresenterConfigModel data) {
@@ -280,8 +326,8 @@ public class CreatePresenterForm extends DialogWrapper {
         useSingleton.setSelected(data.isUseSingleton());
         useSingleton2.setSelected(data.isUseSingleton());
         useOverrideDefaultPopup.setSelected(data.isUseOverrideDefaultPopup());
-        useAddUihandlers.setSelected(data.isSeAddUihandlers());
-        useAddOnbind.setSelected(data.isSeAddOnbind());
+        useAddUihandlers.setSelected(data.isUseAddUihandlers());
+        useAddOnbind.setSelected(data.isUseAddOnbind());
         useAddOnhide.setSelected(data.isUseAddOnhide());
         useAddOnreset.setSelected(data.isUseAddOnreset());
         useAddOnunbind.setSelected(data.isUseAddOnunbind());
@@ -298,15 +344,16 @@ public class CreatePresenterForm extends DialogWrapper {
         data.setUseCrawlable(useCrawlable.isSelected());
         data.setUseCodesplit(useCodesplit.isSelected());
         data.setUseSingleton(useSingleton.isSelected());
-        data.setUseSingleton(useSingleton2.isSelected());
+        data.setUseSingleton2(useSingleton2.isSelected());
         data.setUseOverrideDefaultPopup(useOverrideDefaultPopup.isSelected());
-        data.setSeAddUihandlers(useAddUihandlers.isSelected());
-        data.setSeAddOnbind(useAddOnbind.isSelected());
+        data.setUseAddUihandlers(useAddUihandlers.isSelected());
+        data.setUseAddOnbind(useAddOnbind.isSelected());
         data.setUseAddOnhide(useAddOnhide.isSelected());
         data.setUseAddOnreset(useAddOnreset.isSelected());
         data.setUseAddOnunbind(useAddOnunbind.isSelected());
         data.setUseManualReveal(useManualReveal.isSelected());
         data.setUsePrepareFromRequest(usePrepareFromRequest.isSelected());
+        data.setSelectedPackageRoot(getSelectedPackageRoot());
     }
 
     public boolean isModified(PresenterConfigModel data) {
@@ -323,13 +370,32 @@ public class CreatePresenterForm extends DialogWrapper {
         if (useSingleton.isSelected() != data.isUseSingleton()) return true;
         if (useSingleton2.isSelected() != data.isUseSingleton()) return true;
         if (useOverrideDefaultPopup.isSelected() != data.isUseOverrideDefaultPopup()) return true;
-        if (useAddUihandlers.isSelected() != data.isSeAddUihandlers()) return true;
-        if (useAddOnbind.isSelected() != data.isSeAddOnbind()) return true;
+        if (useAddUihandlers.isSelected() != data.isUseAddUihandlers()) return true;
+        if (useAddOnbind.isSelected() != data.isUseAddOnbind()) return true;
         if (useAddOnhide.isSelected() != data.isUseAddOnhide()) return true;
         if (useAddOnreset.isSelected() != data.isUseAddOnreset()) return true;
         if (useAddOnunbind.isSelected() != data.isUseAddOnunbind()) return true;
         if (useManualReveal.isSelected() != data.getUseManualReveal()) return true;
         if (usePrepareFromRequest.isSelected() != data.getUsePrepareFromRequest()) return true;
         return false;
+    }
+
+    public PsiPackage getSelectedPackageRoot() {
+        PsiElement e = sourceEvent.getData(LangDataKeys.PSI_ELEMENT);
+
+        PsiPackage selectedPackage = null;
+        if (e instanceof PsiClass) {
+            PsiClass clazz = (PsiClass) e;
+            PsiJavaFile javaFile = (PsiJavaFile) clazz.getContainingFile();
+            selectedPackage = JavaPsiFacade.getInstance(presenterConfigModel.getProject()).findPackage(javaFile.getPackageName());
+
+        } else if (e instanceof PsiDirectory) {
+            selectedPackage = JavaDirectoryService.getInstance().getPackage((PsiDirectory) e);
+        }
+
+        Module module = ModuleUtil.findModuleForPsiElement(e);
+        presenterConfigModel.setModule(module);
+
+        return selectedPackage;
     }
 }
