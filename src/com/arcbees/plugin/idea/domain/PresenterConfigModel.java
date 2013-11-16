@@ -17,6 +17,7 @@
 
 package com.arcbees.plugin.idea.domain;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
@@ -313,7 +314,17 @@ public class PresenterConfigModel {
         if (getName() == null) {
             setName("");
         }
-        return selectedPackageRoot.getQualifiedName() + "." + getName().toLowerCase();
+
+        final StringModel stringModel = new StringModel();
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
+            public void run() {
+                String qualifiedClassName = selectedPackageRoot.getQualifiedName();
+                stringModel.set(qualifiedClassName);
+            }
+        });
+
+        return  stringModel.get() + "." + getName().toLowerCase();
     }
 
     public String getNameTokenWithClass() {
@@ -329,7 +340,16 @@ public class PresenterConfigModel {
             return "";
         }
 
-        return "import " + nameTokenPsiClass.getQualifiedName() + ";";
+        final StringModel stringModel = new StringModel();
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
+            public void run() {
+                String qualifiedClassName = nameTokenPsiClass.getQualifiedName();
+                stringModel.set(qualifiedClassName);
+            }
+        });
+
+        return "import " + stringModel.get() + ";";
     }
 
     public String getContentSlotImport() {
@@ -337,7 +357,16 @@ public class PresenterConfigModel {
             return "";
         }
 
-        return "import " + contentSlotClass.getQualifiedName() + ";";
+        final StringModel stringModel = new StringModel();
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
+            public void run() {
+                String qualifiedClassName = contentSlotClass.getQualifiedName();
+                stringModel.set(qualifiedClassName);
+            }
+        });
+
+        return "import " + stringModel.get() + ";";
     }
 
     public void setContentSlotClass(PsiClass contentSlotClass) {

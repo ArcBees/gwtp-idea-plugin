@@ -14,7 +14,6 @@
  * the License.
  */
 
-
 package com.arcbees.plugin.idea.utils;
 
 import com.intellij.ide.projectView.ViewSettings;
