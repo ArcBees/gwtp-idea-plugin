@@ -17,6 +17,11 @@ This plugin is in the works and almost ready to release the first feature.
 ###Project Creation
 * <a href="http://youtu.be/s_HOmpuouEo" target="_blank">Project Creation Video</a>
 
+###Presenter Creation
+Create the presenter and view classes quickly with this.
+
+* <a href="http://www.youtube.com/watch?v=_u03xsCYpS0&feature=youtu.be" target="_blank">Project Creation Video</a>
+
 ##Download
 * <a href="http://plugins.jetbrains.com/plugin/7318?pr=idea_ce" target="_blank">GWTP IDEA Plugin</a>
 
