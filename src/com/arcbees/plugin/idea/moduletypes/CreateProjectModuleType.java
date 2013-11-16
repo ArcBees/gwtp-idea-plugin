@@ -23,17 +23,11 @@ import com.intellij.openapi.module.ModuleTypeManager;
 import javax.swing.*;
 
 public class CreateProjectModuleType extends ModuleType<CreateProjectBuilder> {
-    // TODO register its own group
-    public static final String GWT_GROUP = "Java";
     public static final String MODULE_TYPE_ID = "GWTP_CREATE_PROJECT_MODULE";
 
     public CreateProjectModuleType() {
         super(MODULE_TYPE_ID);
     }
-
-//    public static CreateProjectModuleType getInstance() {
-//        return (CreateProjectModuleType) ModuleTypeManager.getInstance().findByID(MODULE_TYPE_ID);
-//    }
 
     @Override
     public CreateProjectBuilder createModuleBuilder() {

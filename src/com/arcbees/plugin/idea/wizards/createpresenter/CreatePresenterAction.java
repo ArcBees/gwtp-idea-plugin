@@ -16,11 +16,13 @@
 
 package com.arcbees.plugin.idea.wizards.createpresenter;
 
-import com.arcbees.plugin.idea.domain.PsiClassModel;
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
+import com.arcbees.plugin.idea.domain.PsiClassModel;
 import com.arcbees.plugin.idea.domain.PsiDirectoriesModel;
 import com.arcbees.plugin.idea.domain.PsiElementModel;
+import com.arcbees.plugin.idea.domain.PsiFieldModel;
 import com.arcbees.plugin.idea.domain.PsiImportStatementModel;
+import com.arcbees.plugin.idea.domain.PsiMethodModel;
 import com.arcbees.plugin.idea.domain.PsiPackageModel;
 import com.arcbees.plugin.idea.domain.PsiStatementModel;
 import com.arcbees.plugin.idea.icons.PluginIcons;
@@ -49,6 +51,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.JavaDirectoryService;
@@ -92,8 +96,6 @@ public class CreatePresenterAction extends AnAction {
     private CreatedPopupPresenter createdPopupPresenterTemplates;
     private CreatedPresenterWidget createdPresenterWidgetTemplates;
 
-    private boolean failedStep;
-
     public CreatePresenterAction() {
         super("Create Presenter", "Create GWTP Presenter", PluginIcons.GWTP_ICON_16x16);
     }
@@ -110,32 +112,49 @@ public class CreatePresenterAction extends AnAction {
         // update the model with the input data from the form
         dialog.getData(presenterConfigModel);
 
-        runTask();
-    }
-
-    private void runTask() {
-        ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
-            public void run() {
-                CreatePresenterAction.this.run();
+        new Task.Backgroundable(project, "Create Presenter", true) {
+            public void run(ProgressIndicator indicator) {
+                indicator.setFraction(0.0);
+                CreatePresenterAction.this.run(indicator);
+                indicator.setFraction(1.0);
             }
-        });
+        }.setCancelText("Cancel Presenter Creation").queue();
     }
 
-    private void run() {
-        logger.info("Creating presenter started...");
+    private void run(ProgressIndicator indicator) {
+        indicator.setText("Creating presenter started");
 
+        indicator.setFraction(.5);
+        indicator.setText("Indexing packages and classes");
         createPackageHierachyIndex();
+
+        indicator.setFraction(.1);
+        indicator.setText("Creating name tokens package");
         createNameTokensPackage();
 
         try {
+            indicator.setFraction(.25);
+            indicator.setText("Creating name tokens class");
             createNametokensClass();
         } catch (Exception e) {
             error("Could not create or find the name tokens file 'NameTokens.java': Error: " + e.toString());
-            failedStep = true;
             e.printStackTrace();
+            return;
         }
 
         try {
+            indicator.setFraction(.4);
+            indicator.setText("Fetching NameTokens templates");
+            fetchTemplatesNameTokens();
+        } catch (Exception e) {
+            warn("Could not fetch NameTokens templates: Error: " + e.toString());
+            e.printStackTrace();
+            return;
+        }
+
+        try {
+            indicator.setFraction(.6);
+            indicator.setText("Fetching presenter templates");
             fetchPresenterTemplates();
         } catch (Exception e) {
             error("Could not fetch the nested presenter templates: Error: " + e.toString());
@@ -143,16 +162,19 @@ public class CreatePresenterAction extends AnAction {
             return;
         }
 
+        indicator.setFraction(.8);
+        indicator.setText("Generating classes");
         createNameTokensFieldAndMethods();
         createPresenterPackage();
         createPresenterModule();
         createPresenter();
+        indicator.setFraction(.9);
         createPresenterUiHandlers();
         createPresenterView();
         createPresenterViewUi();
         createPresenterModuleLinkForGin();
 
-        logger.info("...Creating presenter finished.");
+        indicator.setText("Creating presenter finished.");
     }
 
     /**
@@ -426,7 +448,7 @@ public class CreatePresenterAction extends AnAction {
                 ApplicationManager.getApplication().runWriteAction(new Runnable() {
                     @Override
                     public void run() {
-                       psiClass.navigate(true);
+                        psiClass.navigate(true);
                     }
                 });
             }
@@ -542,16 +564,30 @@ public class CreatePresenterAction extends AnAction {
         // get items from template
         List<String> fields = createdNameTokenTemplates.getFields();
         List<String> methods = createdNameTokenTemplates.getMethods();
-        String fieldSource = fields.get(0);
-        String methodSource = methods.get(0);
+        final String fieldSource = fields.get(0).replaceAll("\n", "");
+        ;
+        final String methodSource = methods.get(0);
 
-        // creating field doesn't want a newline
-        fieldSource = fieldSource.replaceAll("\n", "");
+        final PsiFieldModel psiFieldModel = new PsiFieldModel();
+        final PsiMethodModel psiMethodModel = new PsiMethodModel();
+        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+                ApplicationManager.getApplication().runReadAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        // add contents to class
+                        PsiElementFactory elementFactory = PsiElementFactory.SERVICE.getInstance(project);
 
-        // add contents to class
-        PsiElementFactory elementFactory = PsiElementFactory.SERVICE.getInstance(project);
-        final PsiField newField = elementFactory.createFieldFromText(fieldSource, null);
-        final PsiMethod newMethod = elementFactory.createMethodFromText(methodSource, null);
+                        PsiField newField = elementFactory.createFieldFromText(fieldSource, null);
+                        PsiMethod newMethod = elementFactory.createMethodFromText(methodSource, null);
+
+                        psiFieldModel.set(newField);
+                        psiMethodModel.set(newMethod);
+                    }
+                });
+            }
+        }, ModalityState.NON_MODAL);
 
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
@@ -559,8 +595,8 @@ public class CreatePresenterAction extends AnAction {
                 ApplicationManager.getApplication().runWriteAction(new Runnable() {
                     @Override
                     public void run() {
-                        nameTokensPsiClass.add(newField);
-                        nameTokensPsiClass.add(newMethod);
+                        nameTokensPsiClass.add(psiFieldModel.get());
+                        nameTokensPsiClass.add(psiMethodModel.get());
 
                         CodeStyleManager.getInstance(project).reformat(nameTokensPsiClass);
                     }

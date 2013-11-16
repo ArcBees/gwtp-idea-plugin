@@ -14,7 +14,6 @@
  * the License.
  */
 
-
 package com.arcbees.plugin.idea.utils;
 
 import com.intellij.openapi.vfs.VirtualFile;

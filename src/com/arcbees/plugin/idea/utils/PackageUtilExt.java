@@ -99,8 +99,9 @@ public class PackageUtilExt {
     public static PsiDirectory findOrCreateDirectoryForPackage(Project project,
                                                                String packageName,
                                                                PsiDirectory baseDir,
-                                                               boolean askUserToCreate, boolean filterSourceDirsForTestBaseDir) throws IncorrectOperationException {
-
+                                                               boolean askUserToCreate,
+                                                               boolean filterSourceDirsForTestBaseDir)
+            throws IncorrectOperationException {
         PsiDirectory psiDirectory = null;
 
         if (!"".equals(packageName)) {

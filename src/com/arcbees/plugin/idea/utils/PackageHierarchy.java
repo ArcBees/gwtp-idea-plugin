@@ -18,6 +18,7 @@ package com.arcbees.plugin.idea.utils;
 
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.arcbees.plugin.idea.domain.PsiClassModel;
+import com.arcbees.plugin.idea.domain.PsiClassesModel;
 import com.intellij.ide.projectView.impl.nodes.PackageUtil;
 import com.intellij.ide.projectView.impl.nodes.ProjectViewDirectoryHelper;
 import com.intellij.ide.util.treeView.AbstractTreeNode;
@@ -61,12 +62,17 @@ public class PackageHierarchy {
 
         logger.info("Creating package index.");
 
-        ApplicationManager.getApplication().runReadAction(new Runnable() {
+        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                startIndexing();
+                ApplicationManager.getApplication().runReadAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        startIndexing();
+                    }
+                });
             }
-        });
+        }, ModalityState.NON_MODAL);
 
         logger.info("Finished package index.");
     }
@@ -246,10 +252,24 @@ public class PackageHierarchy {
         }
     }
 
-    public List<PsiClass> findClassName(String name) {
-        GlobalSearchScope scope = GlobalSearchScope.allScope(presenterConfigModel.getProject());
-        PsiClass[] foundArray = PsiShortNamesCache.getInstance(presenterConfigModel.getProject()).getClassesByName(name, scope);
-        List<PsiClass> found = new ArrayList<PsiClass>(Arrays.asList(foundArray));
+    public List<PsiClass> findClassName(final String name) {
+        final PsiClassesModel psiClassesModel = new PsiClassesModel();
+        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+                ApplicationManager.getApplication().runReadAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        GlobalSearchScope scope = GlobalSearchScope.allScope(presenterConfigModel.getProject());
+                        PsiShortNamesCache shortNamesCache = PsiShortNamesCache.getInstance(presenterConfigModel.getProject());
+                        PsiClass[] foundArray = shortNamesCache.getClassesByName(name, scope);
+                        psiClassesModel.set(foundArray);
+                    }
+                });
+            }
+        }, ModalityState.NON_MODAL);
+
+        List<PsiClass> found = new ArrayList<PsiClass>(Arrays.asList(psiClassesModel.get()));
 
         return found;
     }
