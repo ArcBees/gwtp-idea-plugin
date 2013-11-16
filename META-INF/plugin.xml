@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>com.arcbees.plugin.idea</id>
     <name>GWT-Platform (GWTP) IntelliJ IDEA Plugin</name>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <vendor email="support@arcbees.com" url="http://www.arcbees.com">ArcBees</vendor>
 
     <description><![CDATA[
@@ -9,7 +9,8 @@
       ]]></description>
 
     <change-notes><![CDATA[
-      Project Creation by Archetype added (8/30/2013).<br>
+      Project creation from archetype.<br/>
+      Project Creation by Archetype added (11/15/2013).<br/>
       ]]>
     </change-notes>
 
