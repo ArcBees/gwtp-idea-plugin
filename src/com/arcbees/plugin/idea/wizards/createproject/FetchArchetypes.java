@@ -48,8 +48,7 @@ public class FetchArchetypes {
     public ArchetypeCollection fetchArchetypes() {
         initRestAssured();
 
-        ArchetypeCollection archetypeCollection = RestAssured.get(DIRECTORY_URL).as(ArchetypeCollection.class);
-        return archetypeCollection;
+        return RestAssured.get(DIRECTORY_URL).as(ArchetypeCollection.class);
     }
 
     private void initRestAssured() {

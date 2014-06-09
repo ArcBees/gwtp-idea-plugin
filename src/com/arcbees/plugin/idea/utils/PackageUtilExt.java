@@ -240,8 +240,7 @@ public class PackageUtilExt {
             try {
                 foundExistingDirectory = ActionRunner.runInsideWriteAction(new ActionRunner.InterruptibleRunnableWithResult<PsiDirectory>() {
                     public PsiDirectory run() throws Exception {
-                        PsiDirectory foundExistingDirectory = passDir.findSubdirectory(name);
-                        return foundExistingDirectory;
+                        return passDir.findSubdirectory(name);
                     }
                 });
             } catch (Exception e) {

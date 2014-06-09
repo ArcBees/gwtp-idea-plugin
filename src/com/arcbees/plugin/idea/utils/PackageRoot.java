@@ -20,8 +20,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiPackage;
 
 public class PackageRoot {
-    private VirtualFile root;
-    private PsiPackage psiPackage;
+    private final VirtualFile root;
+    private final PsiPackage psiPackage;
 
     public PackageRoot(VirtualFile root, PsiPackage psiPackage) {
         this.root = root;
