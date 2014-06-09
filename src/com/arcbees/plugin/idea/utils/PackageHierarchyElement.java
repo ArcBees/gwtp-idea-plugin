@@ -18,7 +18,6 @@ package com.arcbees.plugin.idea.utils;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiPackage;
 
 import java.util.HashMap;

@@ -18,7 +18,6 @@ package com.arcbees.plugin.idea.moduletypes;
 
 import com.arcbees.plugin.idea.icons.PluginIcons;
 import com.intellij.openapi.module.ModuleType;
-import com.intellij.openapi.module.ModuleTypeManager;
 
 import javax.swing.*;
 

@@ -307,12 +307,9 @@ public class CreatePresenterAction extends AnAction {
 
     private PsiMethod findMethod(PsiClass unit, String methodName) {
         PsiMethod[] methods = unit.getMethods();
-        if (methods == null) {
-            return null;
-        }
 
         for (PsiMethod method : methods) {
-            if (method.getName().toString().contains(methodName)) {
+            if (method.getName().contains(methodName)) {
                 return method;
             }
         }
@@ -565,7 +562,6 @@ public class CreatePresenterAction extends AnAction {
         List<String> fields = createdNameTokenTemplates.getFields();
         List<String> methods = createdNameTokenTemplates.getMethods();
         final String fieldSource = fields.get(0).replaceAll("\n", "");
-        ;
         final String methodSource = methods.get(0);
 
         final PsiFieldModel psiFieldModel = new PsiFieldModel();
@@ -682,9 +678,8 @@ public class CreatePresenterAction extends AnAction {
         NameTokenOptions nameTokenOptions = new NameTokenOptions();
         nameTokenOptions.setPackageName(createdNameTokensPackage.getQualifiedName());
         nameTokenOptions.setNameTokens(nameTokens);
-        boolean processFileOnly = false;
 
-        createdNameTokenTemplates = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+        createdNameTokenTemplates = CreateNameTokens.run(nameTokenOptions, true, false);
     }
 
     private void createPackageHierachyIndex() {
@@ -746,17 +741,15 @@ public class CreatePresenterAction extends AnAction {
     }
 
     private PsiClass createNewNameTokensClass() throws Exception {
-        boolean processFileOnly = true;
         NameTokenOptions nameTokenOptions = new NameTokenOptions();
         nameTokenOptions.setPackageName(createdNameTokensPackage.getQualifiedName());
         CreatedNameTokens createdNameToken;
 
-        createdNameToken = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+        createdNameToken = CreateNameTokens.run(nameTokenOptions, true, true);
 
         RenderedTemplate renderedTemplate = createdNameToken.getNameTokensFile();
-        PsiClass createdPsiClass = createPsiClass(createdNameTokensPackage, renderedTemplate);
 
-        return createdPsiClass;
+        return createPsiClass(createdNameTokensPackage, renderedTemplate);
     }
 
     private PsiDirectory getBaseDir() {

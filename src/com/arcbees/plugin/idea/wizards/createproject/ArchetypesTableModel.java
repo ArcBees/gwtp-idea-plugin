@@ -21,7 +21,6 @@ import com.arcbees.plugin.idea.domain.ArchetypeCollection;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
-import java.util.Vector;
 
 public class ArchetypesTableModel extends DefaultTableModel {
     private static final String[] COLUMN_TITLES = {"Name", "Categories", "Tags"};

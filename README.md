@@ -25,6 +25,14 @@ Create the presenter and view classes quickly with this.
 ##Download
 * <a href="http://plugins.jetbrains.com/plugin/7318?pr=idea_ce" target="_blank">GWTP IDEA Plugin</a>
 
+##Develop the plugin (inspired by http://bjorn.tipling.com/how-to-make-an-intellij-idea-plugin-in-30-minutes)
+* Download and install the Community Edition of IntelliJ IDEA (it will be the SDK)
+* Download the source code of IntelliJ (to be able to debug)
+* Clone this repository and set the SDK of the project with the version you downloaded of IntelliJ
+* Add the source code of IntelliJ to your sourcepath
+* Add the maven.jar located in plugins/maven directory of the SDK to your classpath
+* Install the UI Designer (as prompted by your editor)
+
 ##Thanks to
 [![Arcbees.com](http://arcbees-ads.appspot.com/ad.png)](http://arcbees.com)
 

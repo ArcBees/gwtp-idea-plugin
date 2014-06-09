@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 public class PackageHierarchy {
     private static final Logger logger = Logger.getLogger(PackageHierarchy.class.getName());
 
-    private PresenterConfigModel presenterConfigModel;
+    private final PresenterConfigModel presenterConfigModel;
     private Map<String, PackageHierarchyElement> packagesIndex;
 
     public PackageHierarchy(PresenterConfigModel presenterConfigModel) {
@@ -200,7 +200,7 @@ public class PackageHierarchy {
 
                         for (PsiClass unit : units) {
                             boolean found = findInterfaceUseInUnit(unit, findTypeName);
-                            if (found == true) {
+                            if (found) {
                                 psiClassModel.set(unit);
                             }
                         }
@@ -216,11 +216,9 @@ public class PackageHierarchy {
         for (PsiClassType types : unit.getSuperTypes()) {
             PsiType[] superTypes = types.getSuperTypes();
 
-            if (superTypes != null) {
-                for (PsiType superType : superTypes) {
-                    if (superType.getCanonicalText().contains(findTypeName)) {
-                        return true;
-                    }
+            for (PsiType superType : superTypes) {
+                if (superType.getCanonicalText().contains(findTypeName)) {
+                    return true;
                 }
             }
         }
@@ -247,8 +245,8 @@ public class PackageHierarchy {
         GlobalSearchScope scope = GlobalSearchScope.projectScope(presenterConfigModel.getProject());
         PsiPackage[] children = packageFragment.getSubPackages(scope);
 
-        for (int i = 0; i < children.length; i++) {
-            indexPackage(root, children[i]);
+        for (PsiPackage aChildren : children) {
+            indexPackage(root, aChildren);
         }
     }
 
@@ -269,9 +267,7 @@ public class PackageHierarchy {
             }
         }, ModalityState.NON_MODAL);
 
-        List<PsiClass> found = new ArrayList<PsiClass>(Arrays.asList(psiClassesModel.get()));
-
-        return found;
+        return new ArrayList<PsiClass>(Arrays.asList(psiClassesModel.get()));
     }
 
     private List<PackageRoot> getTopLevelPackages() {

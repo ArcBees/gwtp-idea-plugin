@@ -31,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -118,7 +117,7 @@ public class ContentSlotDialog extends DialogWrapper {
     private String getSlot(PsiMember psiMember) {
         PsiClass container = psiMember.getContainingClass();
         String classname = container.getName();
-        String slot = classname + "." + psiMember.getName();
-        return slot;
+
+        return classname + "." + psiMember.getName();
     }
 }
