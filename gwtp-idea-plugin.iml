@@ -17,6 +17,6 @@
     <orderEntry type="library" name="gson-2.2.3" level="project" />
     <orderEntry type="library" name="commons-configuration:commons-configuration:1.9" level="project" />
     <orderEntry type="library" name="ide-templates" level="project" />
+    <orderEntry type="library" name="maven" level="project" />
   </component>
 </module>
-

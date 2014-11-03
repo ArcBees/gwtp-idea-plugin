@@ -48,6 +48,7 @@ import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.module.Module;
@@ -56,6 +57,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.JavaDirectoryService;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
@@ -71,6 +73,7 @@ import com.intellij.psi.PsiPackage;
 import com.intellij.psi.PsiStatement;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -175,6 +178,27 @@ public class CreatePresenterAction extends AnAction {
         createPresenterModuleLinkForGin();
 
         indicator.setText("Creating presenter finished.");
+    }
+
+    @Override
+    public void update(@NotNull AnActionEvent event) {
+        updateEnabledState(event);
+    }
+
+    private void updateEnabledState(AnActionEvent event) {
+        PsiElement element = event.getData(LangDataKeys.PSI_ELEMENT);
+
+        PsiPackage selectedPackage = null;
+        if (element instanceof PsiClass) {
+            PsiClass clazz = (PsiClass) element;
+            PsiJavaFile javaFile = (PsiJavaFile) clazz.getContainingFile();
+            selectedPackage = JavaPsiFacade.getInstance(presenterConfigModel.getProject()).findPackage(javaFile.getPackageName());
+
+        } else if (element instanceof PsiDirectory) {
+            selectedPackage = JavaDirectoryService.getInstance().getPackage((PsiDirectory) element);
+        }
+
+        event.getPresentation().setEnabledAndVisible(selectedPackage != null);
     }
 
     /**
