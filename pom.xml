@@ -15,21 +15,23 @@
         <vendor.name>ArcBees</vendor.name>
 
         <ideaIC.filename>ideaIC-${intellij.version}</ideaIC.filename>
+        <intellij.path>${project.build.directory}/dependency/IntelliJ-IDEA-CE/idea-IC-${intellij.build}</intellij.path>
+        <intellij.libs>${intellij.path}/lib/</intellij.libs>
+        <intellij.maven>${intellij.path}/plugins/maven/lib/</intellij.maven>
 
-        <intellij.version>14.0.2</intellij.version>
-        <download-maven-plugin.version>1.2.1</download-maven-plugin.version>
-        <maven-dependency-plugin.version>2.9</maven-dependency-plugin.version>
-        <maven-compiler-plugin.version>3.2</maven-compiler-plugin.version>
         <intellij.build>139.659.2</intellij.build>
         <rest-assured.version>2.4.0</rest-assured.version>
         <maven-invoker.version>2.1.1</maven-invoker.version>
         <ide-templates.version>1.0.0-SNAPSHOT</ide-templates.version>
-        <jdk.version>1.7</jdk.version>
-        <intellij.path>${project.build.directory}/dependency/IntelliJ-IDEA-CE/idea-IC-${intellij.build}</intellij.path>
-        <intellij.libs>${intellij.path}/lib/</intellij.libs>
-        <intellij.maven>${intellij.path}/plugins/maven/lib/</intellij.maven>
-        <ij.plugin>true</ij.plugin>
+        <intellij.version>14.0.2</intellij.version>
+
+        <download-maven-plugin.version>1.2.1</download-maven-plugin.version>
+        <maven-dependency-plugin.version>2.9</maven-dependency-plugin.version>
+        <maven-compiler-plugin.version>3.2</maven-compiler-plugin.version>
         <maven-assembly-plugin.version>2.5.3</maven-assembly-plugin.version>
+
+        <jdk.version>1.7</jdk.version>
+        <ij.plugin>true</ij.plugin>
     </properties>
 
     <repositories>
