@@ -1,3 +1,6 @@
 .DS_Store
 .idea/
 out/
+*.iml
+ideaIC*
+META-INF/
