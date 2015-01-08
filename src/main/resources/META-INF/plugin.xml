@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>com.arcbees.plugin.idea</id>
     <name>GWT-Platform (GWTP) IntelliJ IDEA Plugin</name>
-    <version>1.2.0</version>
+    <version>${project.version}</version>
     <vendor email="${vendor.email}" url="${vendor.url}">${vendor.name}</vendor>
 
     <description><![CDATA[
