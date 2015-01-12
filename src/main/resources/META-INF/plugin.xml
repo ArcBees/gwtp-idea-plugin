@@ -1,0 +1,52 @@
+<idea-plugin version="2">
+    <id>com.arcbees.plugin.idea</id>
+    <name>GWT-Platform (GWTP) IntelliJ IDEA Plugin</name>
+    <version>${project.version}</version>
+    <vendor email="${vendor.email}" url="${vendor.url}">${vendor.name}</vendor>
+
+    <description><![CDATA[
+      The GWTP IDEA plugin provides tools for GWT-Platform framework in IntelliJ IDEA.<br>
+      ]]></description>
+
+    <change-notes><![CDATA[
+      Project creation from archetype.<br/>
+      Project Creation by Archetype added (11/15/2013).<br/>
+      ]]>
+    </change-notes>
+
+    <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
+    <idea-version since-build="139"/>
+
+    <depends optional="false">org.jetbrains.idea.maven</depends>
+
+    <application-components>
+    </application-components>
+
+    <project-components>
+    </project-components>
+
+    <actions>
+        <group id="GWTP.ActionGroup" popup="true" text="GWTP" description="GWTP"
+               icon="/com/arcbees/plugin/idea/icons/addgwtp_16X16.png">
+
+            <action id="GWT.NewPresenter" text="Create a GWTP Presenter with View"
+                    description="Create Presenter"
+                    class="com.arcbees.plugin.idea.wizards.createpresenter.CreatePresenterAction">
+            </action>
+
+            <add-to-group group-id="NewGroup" anchor="last" relative-to-action="NewFile"/>
+        </group>
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+
+        <moduleType id="GWTP_CREATE_PROJECT_MODULE"
+                    implementationClass="com.arcbees.plugin.idea.moduletypes.CreateProjectModuleType"
+                    classpathProvider="true"/>
+
+        <wizardMode implementation="com.arcbees.plugin.idea.wizards.createproject.CreateProjectWizard"/>
+
+    </extensions>
+
+
+</idea-plugin>
