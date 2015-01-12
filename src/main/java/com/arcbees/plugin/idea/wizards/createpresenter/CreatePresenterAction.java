@@ -192,8 +192,10 @@ public class CreatePresenterAction extends AnAction {
         if (element instanceof PsiClass) {
             PsiClass clazz = (PsiClass) element;
             PsiJavaFile javaFile = (PsiJavaFile) clazz.getContainingFile();
-            selectedPackage = JavaPsiFacade.getInstance(presenterConfigModel.getProject()).findPackage(javaFile.getPackageName());
-
+            if (presenterConfigModel != null) {
+                JavaPsiFacade instance = JavaPsiFacade.getInstance(presenterConfigModel.getProject());
+                selectedPackage = instance.findPackage(javaFile.getPackageName());
+            }
         } else if (element instanceof PsiDirectory) {
             selectedPackage = JavaDirectoryService.getInstance().getPackage((PsiDirectory) element);
         }

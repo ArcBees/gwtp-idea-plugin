@@ -1,33 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false">
+    <file url="file://$PROJECT_DIR$/../IDE-Templates" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/.gitconfig" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/.gitignore" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/antlr-2.7.7.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/asm-4.0.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/asm-analysis-4.0.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/asm-commons-4.0.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/asm-tree-4.0.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/asm-util-4.0.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/commons-codec-1.6.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/commons-configuration-1.9.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/commons-io-2.4.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/commons-lang-2.6.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/commons-lang3-3.1.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/commons-logging-1.1.1.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/groovy-2.1.2.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/groovy-json-2.1.2.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/groovy-xml-2.1.2.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/gson-2.2.3.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/hamcrest-core-1.2.1.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/hamcrest-library-1.2.1.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/httpclient-4.2.1.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/httpcore-4.2.1.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/httpmime-4.2.1.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/ide-templates.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/oro-2.0.8.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/rest-assured-1.8.0.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/tagsoup-1.2.1.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/lib/velocity-1.5.jar" charset="UTF-8" />
   </component>
 </project>
