@@ -51,6 +51,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.application.Result;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
@@ -73,8 +75,10 @@ import com.intellij.psi.PsiPackage;
 import com.intellij.psi.PsiStatement;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
+import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -279,13 +283,13 @@ public class CreatePresenterAction extends AnAction {
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                new WriteCommandAction<Void>(project) {
                     @Override
-                    public void run() {
+                    protected void run(@NotNull Result<Void> result) throws Throwable {
                         PsiImportStatement importStatement = factory.createImportStatement(createdModulePsiClass);
                         importStatementModel.set(importStatement);
                     }
-                });
+                }.execute();
             }
         }, ModalityState.NON_MODAL);
 
@@ -311,9 +315,9 @@ public class CreatePresenterAction extends AnAction {
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                new WriteCommandAction<Void>(project) {
                     @Override
-                    public void run() {
+                    protected void run(@NotNull Result<Void> result) throws Throwable {
                         PsiJavaFile parentmoduleFile = (PsiJavaFile) parentModulePsiClass.getContainingFile();
                         PsiImportStatement[] importStatements = parentmoduleFile.getImportList().getImportStatements();
                         parentmoduleFile.getImportList().addAfter(importStatementModel.get(), importStatements[importStatements.length - 1]);
@@ -324,7 +328,7 @@ public class CreatePresenterAction extends AnAction {
                         CodeStyleManager.getInstance(project).reformat(parentModulePsiClass);
                         JavaCodeStyleManager.getInstance(project).optimizeImports(parentmoduleFile);
                     }
-                });
+                }.execute();
             }
         }, ModalityState.NON_MODAL);
 
@@ -360,13 +364,13 @@ public class CreatePresenterAction extends AnAction {
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                new WriteCommandAction<Void>(project) {
                     @Override
-                    public void run() {
+                    protected void run(@NotNull Result<Void> result) throws Throwable {
                         PsiDirectory[] directoriesInPackage = createdPresenterPackage.getDirectories();
                         psiDirectoriesModel.set(directoriesInPackage);
                     }
-                });
+                }.execute();
             }
         }, ModalityState.NON_MODAL);
 
@@ -389,13 +393,13 @@ public class CreatePresenterAction extends AnAction {
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                new WriteCommandAction<Void>(project) {
                     @Override
-                    public void run() {
+                    protected void run(@NotNull Result<Void> result) throws Throwable {
                         PsiDirectory[] psiDirectories = psiDirectoriesModel.get();
                         psiDirectories[0].add(psiElementModel.get());
                     }
-                });
+                }.execute();
             }
         }, ModalityState.NON_MODAL);
     }
@@ -465,17 +469,17 @@ public class CreatePresenterAction extends AnAction {
     }
 
     private void navigateToClass(final PsiClass psiClass) {
-        ApplicationManager.getApplication().invokeLater(new Runnable() {
+        UIUtil.invokeAndWaitIfNeeded(new Runnable() {
             @Override
             public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                new WriteCommandAction<Void>(project) {
                     @Override
-                    public void run() {
+                    protected void run(@NotNull Result<Void> result) throws Throwable {
                         psiClass.navigate(true);
                     }
-                });
+                }.execute();
             }
-        }, ModalityState.NON_MODAL);
+        });
     }
 
     private PsiClass createPsiClass(final PsiPackage createInPsiPackage, RenderedTemplate renderedTemplate) {
@@ -503,48 +507,48 @@ public class CreatePresenterAction extends AnAction {
         });
 
         final PsiElementModel createdJavaFileModel = new PsiElementModel();
-        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+        UIUtil.invokeAndWaitIfNeeded(new Runnable() {
             @Override
             public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                new WriteCommandAction<Void>(project) {
                     @Override
-                    public void run() {
+                    protected void run(@NotNull Result<Void> result) throws Throwable {
                         PsiElement element = elementModel.get();
                         PsiDirectory dir = psiPackageModel.get();
                         PsiElement createdElement = dir.add(element);
                         // TODO fail
                         createdJavaFileModel.set(createdElement);
                     }
-                });
+                }.execute();
             }
-        }, ModalityState.NON_MODAL);
+        });
 
         final PsiClassModel psiClassModelModel = new PsiClassModel();
-        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+        UIUtil.invokeAndWaitIfNeeded(new Runnable() {
             @Override
             public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                new WriteCommandAction<Void>(project) {
                     @Override
-                    public void run() {
+                    protected void run(@NotNull Result<Void> result) throws Throwable {
                         PsiClass[] createdClasses = createdJavaFileModel.getJavaFile().getClasses();
                         psiClassModelModel.set(createdClasses[0]);
                         CodeStyleManager.getInstance(project).reformat(createdClasses[0]);
                     }
-                });
+                }.execute();
             }
-        }, ModalityState.NON_MODAL);
+        });
 
-        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+        UIUtil.invokeAndWaitIfNeeded(new Runnable() {
             @Override
             public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                new WriteCommandAction<Void>(project) {
                     @Override
-                    public void run() {
+                    protected void run(@NotNull Result<Void> result) throws Throwable {
                         JavaCodeStyleManager.getInstance(project).optimizeImports(psiClassModelModel.get().getContainingFile());
                     }
-                });
+                }.execute();
             }
-        }, ModalityState.NON_MODAL);
+        });
 
         return psiClassModelModel.get();
     }
@@ -592,7 +596,7 @@ public class CreatePresenterAction extends AnAction {
 
         final PsiFieldModel psiFieldModel = new PsiFieldModel();
         final PsiMethodModel psiMethodModel = new PsiMethodModel();
-        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+        UIUtil.invokeAndWaitIfNeeded(new Runnable() {
             @Override
             public void run() {
                 ApplicationManager.getApplication().runReadAction(new Runnable() {
@@ -609,22 +613,22 @@ public class CreatePresenterAction extends AnAction {
                     }
                 });
             }
-        }, ModalityState.NON_MODAL);
+        });
 
-        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+        UIUtil.invokeAndWaitIfNeeded(new Runnable() {
             @Override
             public void run() {
-                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                new WriteCommandAction<Void>(project) {
                     @Override
-                    public void run() {
+                    protected void run(@NotNull Result<Void> result) throws Throwable {
                         nameTokensPsiClass.add(psiFieldModel.get());
                         nameTokensPsiClass.add(psiMethodModel.get());
 
                         CodeStyleManager.getInstance(project).reformat(nameTokensPsiClass);
                     }
-                });
+                }.execute();
             }
-        }, ModalityState.NON_MODAL);
+        });
     }
 
     private void fetchPresenterTemplates() throws Exception {
@@ -796,11 +800,21 @@ public class CreatePresenterAction extends AnAction {
         return psiPackageModel.get();
     }
 
-    private void warn(String message) {
-        Messages.showWarningDialog(message, "Warning");
+    private void warn(final String message) {
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Messages.showWarningDialog(message, "Warning");
+            }
+        });
     }
 
-    private void error(String message) {
-        Messages.showErrorDialog(message, "Error");
+    private void error(final String message) {
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Messages.showErrorDialog(message, "Error");
+            }
+        });
     }
 }
