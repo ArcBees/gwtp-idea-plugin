@@ -37,6 +37,3 @@ Create the presenter and view classes quickly with this.
 [![Arcbees.com](http://arcbees-ads.appspot.com/ad.png)](http://arcbees.com)
 
 [![IntelliJ](https://lh6.googleusercontent.com/--QIIJfKrjSk/UJJ6X-UohII/AAAAAAAAAVM/cOW7EjnH778/s800/banner_IDEA.png)](http://www.jetbrains.com/idea/index.html)
-
-[![githalytics.com alpha](https://cruel-carlota.gopagoda.com/6e16f23445a00c21cb69f21b63d9da44 "githalytics.com")](http://githalytics.com/ArcBees/gwtp-idea-plugin)
-
