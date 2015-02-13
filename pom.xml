@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.arcbees.plugin</groupId>
     <artifactId>gwtp-idea</artifactId>
-    <version>1.2.0-beta1</version>
+    <version>1.2.0-beta3</version>
     <name>GWTP IntelliJ Plugin</name>
     <description>The GWTP IDEA plugin provides tools for GWT-Platform framework in IntelliJ IDEA</description>
 
@@ -19,18 +19,18 @@
         <intellij.libs>${intellij.path}/lib/</intellij.libs>
         <intellij.maven>${intellij.path}/plugins/maven/lib/</intellij.maven>
 
-        <intellij.build>139.659.2</intellij.build>
+        <intellij.build>139.1117.1</intellij.build>
         <rest-assured.version>2.4.0</rest-assured.version>
         <maven-invoker.version>2.1.1</maven-invoker.version>
         <ide-templates.version>1.0.0-SNAPSHOT</ide-templates.version>
-        <intellij.version>14.0.2</intellij.version>
+        <intellij.version>14.0.3</intellij.version>
 
         <download-maven-plugin.version>1.2.1</download-maven-plugin.version>
         <maven-dependency-plugin.version>2.9</maven-dependency-plugin.version>
         <maven-compiler-plugin.version>3.2</maven-compiler-plugin.version>
         <maven-assembly-plugin.version>2.5.3</maven-assembly-plugin.version>
 
-        <jdk.version>1.7</jdk.version>
+        <jdk.version>1.6</jdk.version>
         <ij.plugin>true</ij.plugin>
     </properties>
 
@@ -231,12 +231,28 @@
                         <executions>
                             <execution>
                                 <id>unzip-distribution</id>
-                                <phase>skip</phase>
+                                <phase>validate</phase>
                             </execution>
                         </executions>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>local</id>
+
+            <dependencies>
+                <dependency>
+                    <groupId>maven</groupId>
+                    <artifactId>maven</artifactId>
+                    <version>${intellij.version}</version>
+                    <scope>provided</scope>
+                    <systemPath>${project.basedir}/lib/maven-${intellij.version}.jar</systemPath>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 </project>
