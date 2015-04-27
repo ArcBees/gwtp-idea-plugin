@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.arcbees.plugin</groupId>
     <artifactId>gwtp-idea</artifactId>
-    <version>1.2.0-beta3</version>
+    <version>1.2.0-beta4</version>
     <name>GWTP IntelliJ Plugin</name>
     <description>The GWTP IDEA plugin provides tools for GWT-Platform framework in IntelliJ IDEA</description>
 
@@ -19,15 +19,15 @@
         <intellij.libs>${intellij.path}/lib/</intellij.libs>
         <intellij.maven>${intellij.path}/plugins/maven/lib/</intellij.maven>
 
-        <intellij.build>141.178.9</intellij.build>
-        <rest-assured.version>2.4.0</rest-assured.version>
-        <maven-invoker.version>2.1.1</maven-invoker.version>
+        <intellij.build>141.713.2</intellij.build>
+        <rest-assured.version>2.4.1</rest-assured.version>
+        <maven-invoker.version>2.2</maven-invoker.version>
         <ide-templates.version>1.0.0-SNAPSHOT</ide-templates.version>
-        <intellij.version>14.1.1</intellij.version>
+        <intellij.version>14.1.2</intellij.version>
 
         <download-maven-plugin.version>1.2.1</download-maven-plugin.version>
-        <maven-dependency-plugin.version>2.9</maven-dependency-plugin.version>
-        <maven-compiler-plugin.version>3.2</maven-compiler-plugin.version>
+        <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
+        <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
         <maven-assembly-plugin.version>2.5.3</maven-assembly-plugin.version>
 
         <jdk.version>1.6</jdk.version>

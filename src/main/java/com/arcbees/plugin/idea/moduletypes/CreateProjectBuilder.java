@@ -64,8 +64,6 @@ public class CreateProjectBuilder extends MavenModuleBuilder implements SourcePa
 
   @Override
   public void setupRootModel(ModifiableRootModel rootModel) throws ConfigurationException {
-    final Project project = rootModel.getProject();
-
     final VirtualFile root = createAndGetContentEntry();
     rootModel.addContentEntry(root);
 
