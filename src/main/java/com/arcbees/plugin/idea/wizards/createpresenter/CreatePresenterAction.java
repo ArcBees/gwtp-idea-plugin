@@ -639,8 +639,8 @@ public class CreatePresenterAction extends AnAction {
         PresenterOptions presenterOptions = new PresenterOptions();
         presenterOptions.setPackageName(presenterConfigModel.getPackageName());
         presenterOptions.setName(presenterConfigModel.getName());
-        presenterOptions.setManualreveal(presenterConfigModel.getUseManualReveal());
-        presenterOptions.setUihandlers(presenterConfigModel.isUseAddUihandlers());
+        presenterOptions.setManualReveal(presenterConfigModel.getUseManualReveal());
+        presenterOptions.setUiHandlers(presenterConfigModel.isUseAddUihandlers());
 
         if (presenterConfigModel.getSelectedPresenter() == PresenterType.NESTED_PRESENTER) {
             fetchNestedTemplate(presenterOptions);
