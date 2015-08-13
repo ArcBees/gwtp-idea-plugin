@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.arcbees.plugin.idea.dialogs.ContentSlotDialog;
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
+import com.arcbees.plugin.idea.domain.PresenterType;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.module.Module;
@@ -209,7 +210,7 @@ public class CreatePresenterForm extends DialogWrapper {
                 if (radioNestedPresenter.isSelected()) {
                     setSelectedIndex(0);
 
-                    presenterConfigModel.setNestedPresenter(true);
+                    presenterConfigModel.setSelectedPresenter(PresenterType.NESTED_PRESENTER);
                 }
             }
         });
@@ -220,7 +221,7 @@ public class CreatePresenterForm extends DialogWrapper {
                 if (radioPresenterWidget.isSelected()) {
                     setSelectedIndex(1);
 
-                    presenterConfigModel.setPresenterWidget(true);
+                    presenterConfigModel.setSelectedPresenter(PresenterType.PRESENTER_WIDGET);
                 }
             }
         });
@@ -231,22 +232,14 @@ public class CreatePresenterForm extends DialogWrapper {
                 if (radioPopupPresenter.isSelected()) {
                     setSelectedIndex(2);
 
-                    presenterConfigModel.setPopupPresenter(true);
+                    presenterConfigModel.setSelectedPresenter(PresenterType.POPUP_PRESENTER);
                 }
             }
         });
     }
 
     private void setSelectedIndex(Integer selectedIndex) {
-        clearSelectedPresenter();
-
         tabbedPanel.setSelectedIndex(selectedIndex);
-    }
-
-    private void clearSelectedPresenter() {
-        presenterConfigModel.setNestedPresenter(false);
-        presenterConfigModel.setPresenterWidget(false);
-        presenterConfigModel.setPopupPresenter(false);
     }
 
     private void showContentSlotDialog() {

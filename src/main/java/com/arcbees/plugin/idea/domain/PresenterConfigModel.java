@@ -30,9 +30,7 @@ public class PresenterConfigModel {
 
     private String name;
     private String path;
-    private boolean nestedPresenter;
-    private boolean presenterWidget;
-    private boolean popupPresenter;
+    private PresenterType selectedPresenter;
 
     // nested
     private String nameToken;
@@ -64,7 +62,7 @@ public class PresenterConfigModel {
         this.project = project;
 
         // default settings
-        nestedPresenter = true;
+        selectedPresenter = PresenterType.NESTED_PRESENTER;
         revealInRoot = true;
     }
 
@@ -86,30 +84,6 @@ public class PresenterConfigModel {
 
     public void setPath(String path) {
         this.path = path;
-    }
-
-    public boolean getNestedPresenter() {
-        return nestedPresenter;
-    }
-
-    public void setNestedPresenter(boolean nestedPresenter) {
-        this.nestedPresenter = nestedPresenter;
-    }
-
-    public boolean getPresenterWidget() {
-        return presenterWidget;
-    }
-
-    public void setPresenterWidget(boolean presenterWidget) {
-        this.presenterWidget = presenterWidget;
-    }
-
-    public boolean getPopupPresenter() {
-        return popupPresenter;
-    }
-
-    public void setPopupPresenter(boolean popupPresenter) {
-        this.popupPresenter = popupPresenter;
     }
 
     public String getNameToken() {
@@ -321,5 +295,13 @@ public class PresenterConfigModel {
 
     public void setContentSlotClass(PsiClass contentSlotClass) {
         this.contentSlotClass = contentSlotClass;
+    }
+
+    public PresenterType getSelectedPresenter() {
+        return selectedPresenter;
+    }
+
+    public void setSelectedPresenter(PresenterType selectedPresenter) {
+        this.selectedPresenter = selectedPresenter;
     }
 }
