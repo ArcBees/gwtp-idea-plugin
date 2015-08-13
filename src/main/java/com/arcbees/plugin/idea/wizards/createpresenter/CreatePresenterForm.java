@@ -5,8 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.plaf.metal.MetalTabbedPaneUI;
 
 import org.jetbrains.annotations.Nullable;
@@ -298,22 +296,7 @@ public class CreatePresenterForm extends DialogWrapper {
         if (useAddUihandlers.isSelected() != data.isUseAddUihandlers()) {
             return true;
         }
-        if (useAddOnbind.isSelected() != data.isUseAddOnbind()) {
-            return true;
-        }
-        if (useAddOnhide.isSelected() != data.isUseAddOnhide()) {
-            return true;
-        }
-        if (useAddOnreset.isSelected() != data.isUseAddOnreset()) {
-            return true;
-        }
-        if (useAddOnunbind.isSelected() != data.isUseAddOnunbind()) {
-            return true;
-        }
         if (useManualReveal.isSelected() != data.getUseManualReveal()) {
-            return true;
-        }
-        if (usePrepareFromRequest.isSelected() != data.getUsePrepareFromRequest()) {
             return true;
         }
         return false;

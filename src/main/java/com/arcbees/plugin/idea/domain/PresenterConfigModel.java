@@ -185,38 +185,6 @@ public class PresenterConfigModel {
         this.useAddUihandlers = useAddUihandlers;
     }
 
-    public boolean isUseAddOnbind() {
-        return useAddOnbind;
-    }
-
-    public void setUseAddOnbind(final boolean useAddOnbind) {
-        this.useAddOnbind = useAddOnbind;
-    }
-
-    public boolean isUseAddOnhide() {
-        return useAddOnhide;
-    }
-
-    public void setUseAddOnhide(final boolean useAddOnhide) {
-        this.useAddOnhide = useAddOnhide;
-    }
-
-    public boolean isUseAddOnreset() {
-        return useAddOnreset;
-    }
-
-    public void setUseAddOnreset(final boolean useAddOnreset) {
-        this.useAddOnreset = useAddOnreset;
-    }
-
-    public boolean isUseAddOnunbind() {
-        return useAddOnunbind;
-    }
-
-    public void setUseAddOnunbind(final boolean useAddOnunbind) {
-        this.useAddOnunbind = useAddOnunbind;
-    }
-
     public void setModule(Module module) {
         this.module = module;
     }

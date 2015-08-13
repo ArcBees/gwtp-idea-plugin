@@ -23,13 +23,6 @@ import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.EventQueue;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-
-import org.jetbrains.annotations.NotNull;
-
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.arcbees.plugin.idea.domain.PresenterType;
 import com.arcbees.plugin.idea.domain.PsiClassModel;
@@ -702,8 +695,8 @@ public class CreatePresenterAction extends AnAction {
         PresenterOptions presenterOptions = new PresenterOptions();
         presenterOptions.setPackageName(presenterConfigModel.getPackageName());
         presenterOptions.setName(presenterConfigModel.getName());
-        presenterOptions.setManualreveal(presenterConfigModel.getUseManualReveal());
-        presenterOptions.setUihandlers(presenterConfigModel.isUseAddUihandlers());
+        presenterOptions.setManualReveal(presenterConfigModel.getUseManualReveal());
+        presenterOptions.setUiHandlers(presenterConfigModel.isUseAddUihandlers());
 
         if (presenterConfigModel.getSelectedPresenter() == PresenterType.NESTED_PRESENTER) {
             fetchNestedTemplate(presenterOptions);
