@@ -24,8 +24,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 
 public class CreatePresenterForm extends DialogWrapper {
     private final PresenterConfigModel presenterConfigModel;
@@ -72,17 +70,8 @@ public class CreatePresenterForm extends DialogWrapper {
 
         initHandlers();
         setDefaults();
-        name.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                super.keyReleased(e);
 
-                CreatePresenterForm.this.presenterConfigModel.setName(name.getText());
-                packageName.setText(CreatePresenterForm.this.presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
-            }
-        });
-
-        // TODO focus on name input
+        name.requestFocusInWindow();
     }
 
     @Nullable
@@ -122,7 +111,7 @@ public class CreatePresenterForm extends DialogWrapper {
 
         PsiPackage selectedPackageRoot = getSelectedPackageRoot();
         presenterConfigModel.setSelectedPackageRoot(selectedPackageRoot);
-        packageName.setText(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
+        packageName.setText(presenterConfigModel.getSelectedPackage());
     }
 
     private void initButtonHandlers() {

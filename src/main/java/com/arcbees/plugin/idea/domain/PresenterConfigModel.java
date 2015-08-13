@@ -14,7 +14,6 @@
  * the License.
  */
 
-
 package com.arcbees.plugin.idea.domain;
 
 import com.intellij.openapi.application.ApplicationManager;
@@ -310,11 +309,7 @@ public class PresenterConfigModel {
         return nameTokenPsiClass;
     }
 
-    public String getSelectedPackageAndNameAsSubPackage() {
-        if (getName() == null) {
-            setName("");
-        }
-
+    public String getSelectedPackage() {
         final StringModel stringModel = new StringModel();
         ApplicationManager.getApplication().runReadAction(new Runnable() {
             @Override
@@ -324,7 +319,7 @@ public class PresenterConfigModel {
             }
         });
 
-        return  stringModel.get() + "." + getName().toLowerCase();
+        return stringModel.get();
     }
 
     public String getNameTokenWithClass() {
