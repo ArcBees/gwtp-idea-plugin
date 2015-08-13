@@ -189,6 +189,7 @@ public class CreateProjectBuilder extends MavenModuleBuilder implements SourcePa
     properties.setProperty("groupId", projectConfig.getGroupId());
     properties.setProperty("artifactId", projectConfig.getArtifactId());
     properties.setProperty("module", projectConfig.getModuleName());
+    properties.setProperty("moduleName", projectConfig.getModuleName());
 
     // generate parameters
     properties.setProperty("interactiveMode", "false");
