@@ -22,6 +22,11 @@ Create the presenter and view classes quickly with this.
 
 * <a href="http://www.youtube.com/watch?v=_u03xsCYpS0&feature=youtu.be" target="_blank">Project Creation Video</a>
 
+##Event Creation
+With IntelliJ, there is a built in way to do create them when you have a GWT Facet : 
+* Right-click on the package
+* New / Google Web Toolkit / GWT Event and Handler classes
+
 ##Download
 * <a href="http://plugins.jetbrains.com/plugin/7318?pr=idea_ce" target="_blank">GWTP IDEA Plugin</a>
 
