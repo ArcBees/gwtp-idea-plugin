@@ -1,5 +1,23 @@
 package com.arcbees.plugin.idea.wizards.createpresenter;
 
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.plaf.metal.MetalTabbedPaneUI;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.arcbees.plugin.idea.dialogs.ContentSlotDialog;
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -17,13 +35,6 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiPackage;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class CreatePresenterForm extends DialogWrapper {
     private final PresenterConfigModel presenterConfigModel;
@@ -67,6 +78,7 @@ public class CreatePresenterForm extends DialogWrapper {
         this.sourceEvent = sourceEvent;
 
         setTitle("Create GWTP Presenter");
+        hideTabsHeader();
 
         initHandlers();
         setDefaults();
@@ -94,6 +106,19 @@ public class CreatePresenterForm extends DialogWrapper {
     @Override
     protected JComponent createCenterPanel() {
         return contentPane;
+    }
+
+    private void hideTabsHeader() {
+        tabbedPanel.setUI(new MetalTabbedPaneUI() {
+            @Override
+            protected int calculateTabAreaHeight(int tabPlacement, int horizRunCount, int maxTabHeight) {
+                return 0;
+            }
+
+            @Override
+            protected void paintTabArea(Graphics g, int tabPlacement, int selectedIndex) {
+            }
+        });
     }
 
     private void initHandlers() {
