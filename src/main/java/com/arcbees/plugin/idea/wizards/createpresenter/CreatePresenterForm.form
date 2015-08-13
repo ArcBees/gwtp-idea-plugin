@@ -458,5 +458,11 @@
       <member id="6ebc6"/>
       <member id="fbc58"/>
     </group>
+    <group name="revealLocationType">
+      <member id="a7e8c"/>
+      <member id="a7e8c"/>
+      <member id="ee46c"/>
+      <member id="f5f89"/>
+    </group>
   </buttonGroups>
 </form>

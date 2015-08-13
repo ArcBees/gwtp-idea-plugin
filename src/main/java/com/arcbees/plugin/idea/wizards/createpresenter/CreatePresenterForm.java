@@ -142,9 +142,6 @@ public class CreatePresenterForm extends DialogWrapper {
         radioContentRoot.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                radioContentSlot.setSelected(false);
-                radioContentRoot.setSelected(true);
-                radioContentRootLayout.setSelected(false);
                 contentSlot.setEnabled(false);
                 selectContentSlot.setEnabled(false);
 
@@ -157,9 +154,6 @@ public class CreatePresenterForm extends DialogWrapper {
         radioContentRootLayout.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                radioContentSlot.setSelected(false);
-                radioContentRoot.setSelected(false);
-                radioContentRootLayout.setSelected(true);
                 contentSlot.setEnabled(false);
                 selectContentSlot.setEnabled(false);
 
@@ -172,9 +166,6 @@ public class CreatePresenterForm extends DialogWrapper {
         radioContentSlot.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                radioContentSlot.setSelected(true);
-                radioContentRoot.setSelected(false);
-                radioContentRootLayout.setSelected(false);
                 contentSlot.setEnabled(true);
                 selectContentSlot.setEnabled(true);
 
