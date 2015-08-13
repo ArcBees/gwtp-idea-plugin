@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import com.arcbees.plugin.idea.dialogs.ContentSlotDialog;
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.arcbees.plugin.idea.domain.PresenterType;
+import com.arcbees.plugin.idea.domain.RevealLocation;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.module.Module;
@@ -144,10 +145,7 @@ public class CreatePresenterForm extends DialogWrapper {
             public void actionPerformed(ActionEvent e) {
                 contentSlot.setEnabled(false);
                 selectContentSlot.setEnabled(false);
-
-                presenterConfigModel.setRevealInRoot(true);
-                presenterConfigModel.setRevealInRootLayout(false);
-                presenterConfigModel.setRevealInSlot(false);
+                presenterConfigModel.setRevealLocation(RevealLocation.ROOT);
             }
         });
 
@@ -156,10 +154,7 @@ public class CreatePresenterForm extends DialogWrapper {
             public void actionPerformed(ActionEvent e) {
                 contentSlot.setEnabled(false);
                 selectContentSlot.setEnabled(false);
-
-                presenterConfigModel.setRevealInRoot(false);
-                presenterConfigModel.setRevealInRootLayout(true);
-                presenterConfigModel.setRevealInSlot(false);
+                presenterConfigModel.setRevealLocation(RevealLocation.ROOT_LAYOUT);
             }
         });
 
@@ -168,10 +163,7 @@ public class CreatePresenterForm extends DialogWrapper {
             public void actionPerformed(ActionEvent e) {
                 contentSlot.setEnabled(true);
                 selectContentSlot.setEnabled(true);
-
-                presenterConfigModel.setRevealInRoot(false);
-                presenterConfigModel.setRevealInRootLayout(false);
-                presenterConfigModel.setRevealInSlot(true);
+                presenterConfigModel.setRevealLocation(RevealLocation.SLOT);
             }
         });
     }

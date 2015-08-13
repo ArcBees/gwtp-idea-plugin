@@ -34,9 +34,7 @@ public class PresenterConfigModel {
 
     // nested
     private String nameToken;
-    private boolean revealInRoot;
-    private boolean revealInRootLayout;
-    private boolean revealInSlot;
+    private RevealLocation revealLocation;
 
     // popup
     private boolean useOverrideDefaultPopup;
@@ -63,7 +61,7 @@ public class PresenterConfigModel {
 
         // default settings
         selectedPresenter = PresenterType.NESTED_PRESENTER;
-        revealInRoot = true;
+        revealLocation = RevealLocation.ROOT;
     }
 
     public String getProjectName() {
@@ -112,30 +110,6 @@ public class PresenterConfigModel {
 
     public void setGatekeeper(String gatekeeper) {
         this.gatekeeper = gatekeeper;
-    }
-
-    public boolean getRevealInRoot() {
-        return revealInRoot;
-    }
-
-    public void setRevealInRoot(boolean revealInRoot) {
-        this.revealInRoot = revealInRoot;
-    }
-
-    public boolean getRevealInRootLayout() {
-        return revealInRootLayout;
-    }
-
-    public void setRevealInRootLayout(boolean revealInRootLayout) {
-        this.revealInRootLayout = revealInRootLayout;
-    }
-
-    public boolean getRevealInSlot() {
-        return revealInSlot;
-    }
-
-    public void setRevealInSlot(boolean revealInSlot) {
-        this.revealInSlot = revealInSlot;
     }
 
     public Project getProject() {
@@ -303,5 +277,13 @@ public class PresenterConfigModel {
 
     public void setSelectedPresenter(PresenterType selectedPresenter) {
         this.selectedPresenter = selectedPresenter;
+    }
+
+    public RevealLocation getRevealLocation() {
+        return revealLocation;
+    }
+
+    public void setRevealLocation(RevealLocation revealLocation) {
+        this.revealLocation = revealLocation;
     }
 }

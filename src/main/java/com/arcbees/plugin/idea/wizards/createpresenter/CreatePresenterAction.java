@@ -33,6 +33,7 @@ import com.arcbees.plugin.idea.domain.PsiImportStatementModel;
 import com.arcbees.plugin.idea.domain.PsiMethodModel;
 import com.arcbees.plugin.idea.domain.PsiPackageModel;
 import com.arcbees.plugin.idea.domain.PsiStatementModel;
+import com.arcbees.plugin.idea.domain.RevealLocation;
 import com.arcbees.plugin.idea.icons.PluginIcons;
 import com.arcbees.plugin.idea.utils.PackageHierarchy;
 import com.arcbees.plugin.idea.utils.PackageHierarchyElement;
@@ -675,13 +676,13 @@ public class CreatePresenterAction extends AnAction {
         nestedPresenterOptions.setNameTokenImport(presenterConfigModel.getNameTokenUnitImport());
         nestedPresenterOptions.setContentSlotImport(presenterConfigModel.getContentSlotImport());
 
-        if (presenterConfigModel.getRevealInRoot()) {
+        if (presenterConfigModel.getRevealLocation() == RevealLocation.ROOT) {
             nestedPresenterOptions.setRevealType("Root");
-        } else if (presenterConfigModel.getRevealInRootLayout()) {
+        } else if (presenterConfigModel.getRevealLocation() == RevealLocation.ROOT_LAYOUT) {
             nestedPresenterOptions.setRevealType("RootLayout");
         } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.POPUP_PRESENTER) {
             nestedPresenterOptions.setRevealType("RootPopup");
-        } else if (presenterConfigModel.getRevealInSlot()) {
+        } else if (presenterConfigModel.getRevealLocation() == RevealLocation.SLOT) {
             nestedPresenterOptions.setRevealType(presenterConfigModel.getContentSlot());
         }
 
