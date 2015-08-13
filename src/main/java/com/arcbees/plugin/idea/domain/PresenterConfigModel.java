@@ -45,7 +45,6 @@ public class PresenterConfigModel {
 
     // extra
     private boolean useManualReveal;
-    private boolean usePrepareFromRequest;
     private String gatekeeper;
     private String packageName;
     private String contentSlot;
@@ -55,10 +54,6 @@ public class PresenterConfigModel {
     private boolean useSingleton;
 
     private boolean useAddUihandlers;
-    private boolean useAddOnbind;
-    private boolean useAddOnhide;
-    private boolean useAddOnreset;
-    private boolean useAddOnunbind;
     private Module module;
     private PsiDirectory baseDir;
     private PsiClass nameTokenPsiClass;
@@ -135,14 +130,6 @@ public class PresenterConfigModel {
 
     public void setUseManualReveal(boolean useManualReveal) {
         this.useManualReveal = useManualReveal;
-    }
-
-    public boolean getUsePrepareFromRequest() {
-        return usePrepareFromRequest;
-    }
-
-    public void setUsePrepareFromRequest(boolean usePrepareFromRequest) {
-        this.usePrepareFromRequest = usePrepareFromRequest;
     }
 
     public String getGatekeeper() {
@@ -251,38 +238,6 @@ public class PresenterConfigModel {
 
     public void setUseAddUihandlers(final boolean useAddUihandlers) {
         this.useAddUihandlers = useAddUihandlers;
-    }
-
-    public boolean isUseAddOnbind() {
-        return useAddOnbind;
-    }
-
-    public void setUseAddOnbind(final boolean useAddOnbind) {
-        this.useAddOnbind = useAddOnbind;
-    }
-
-    public boolean isUseAddOnhide() {
-        return useAddOnhide;
-    }
-
-    public void setUseAddOnhide(final boolean useAddOnhide) {
-        this.useAddOnhide = useAddOnhide;
-    }
-
-    public boolean isUseAddOnreset() {
-        return useAddOnreset;
-    }
-
-    public void setUseAddOnreset(final boolean useAddOnreset) {
-        this.useAddOnreset = useAddOnreset;
-    }
-
-    public boolean isUseAddOnunbind() {
-        return useAddOnunbind;
-    }
-
-    public void setUseAddOnunbind(final boolean useAddOnunbind) {
-        this.useAddOnunbind = useAddOnunbind;
     }
 
     public PsiPackage getSelectedPackageRoot() {
