@@ -63,9 +63,9 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>intellij-ce</artifactId>
             <version>${intellij.version}</version>
-            <type>tar</type>
+            <type>tar.gz</type>
             <scope>system</scope>
-            <systemPath>${basedir}/${ideaIC.filename}.tar</systemPath>
+            <systemPath>${basedir}/${ideaIC.filename}.tar.gz</systemPath>
         </dependency>
 
         <dependency>
@@ -110,7 +110,7 @@
                             <unpack>false</unpack>
                             <outputDirectory>${basedir}</outputDirectory>
                             <overwrite>false</overwrite>
-                            <outputFileName>${ideaIC.filename}.tar</outputFileName>
+                            <outputFileName>${ideaIC.filename}.tar.gz</outputFileName>
                         </configuration>
                     </execution>
                 </executions>
