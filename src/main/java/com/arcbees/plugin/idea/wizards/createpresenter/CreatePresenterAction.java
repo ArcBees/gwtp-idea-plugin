@@ -556,7 +556,7 @@ public class CreatePresenterAction extends AnAction {
 
     private void createPresenterPackage() {
         PsiDirectory baseDir = getBaseDir();
-        String presenterPackageName = presenterConfigModel.getSelectedPackageAndNameAsSubPackage();
+        String presenterPackageName = presenterConfigModel.getPackageName();
         createdPresenterPackage = createPackage(baseDir, presenterPackageName);
         logger.info("Created Package: " + presenterPackageName);
     }
@@ -634,7 +634,7 @@ public class CreatePresenterAction extends AnAction {
 
     private void fetchPresenterTemplates() throws Exception {
         PresenterOptions presenterOptions = new PresenterOptions();
-        presenterOptions.setPackageName(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
+        presenterOptions.setPackageName(presenterConfigModel.getPackageName());
         presenterOptions.setName(presenterConfigModel.getName());
         presenterOptions.setOnbind(presenterConfigModel.isUseAddOnbind());
         presenterOptions.setOnhide(presenterConfigModel.isUseAddOnhide());
