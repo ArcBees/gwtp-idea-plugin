@@ -107,6 +107,7 @@ public class CreatePresenterAction extends AnAction {
         super("Create Presenter", "Create GWTP Presenter", PluginIcons.GWTP_ICON_16x16);
     }
 
+    @Override
     public void actionPerformed(AnActionEvent e) {
         project = e.getProject();
         presenterConfigModel = new PresenterConfigModel(project);

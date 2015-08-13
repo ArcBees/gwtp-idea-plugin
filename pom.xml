@@ -19,11 +19,11 @@
         <intellij.libs>${intellij.path}/lib/</intellij.libs>
         <intellij.maven>${intellij.path}/plugins/maven/lib/</intellij.maven>
 
-        <intellij.build>141.713.2</intellij.build>
+        <intellij.build>141.1010.3</intellij.build>
         <rest-assured.version>2.4.1</rest-assured.version>
         <maven-invoker.version>2.2</maven-invoker.version>
         <ide-templates.version>1.0.0-SNAPSHOT</ide-templates.version>
-        <intellij.version>14.1.2</intellij.version>
+        <intellij.version>14.1.3</intellij.version>
 
         <download-maven-plugin.version>1.2.1</download-maven-plugin.version>
         <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
@@ -106,7 +106,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>http://download.jetbrains.com/idea/${ideaIC.filename}.tar.gz</url>
+                            <url>https://d1opms6zj7jotq.cloudfront.net/idea/ideaIC-14.1.3.tar.gz</url>
                             <unpack>false</unpack>
                             <outputDirectory>${basedir}</outputDirectory>
                             <overwrite>false</overwrite>
