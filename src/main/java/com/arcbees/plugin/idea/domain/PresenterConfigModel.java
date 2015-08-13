@@ -30,22 +30,17 @@ public class PresenterConfigModel {
 
     private String name;
     private String path;
-    private boolean nestedPresenter;
-    private boolean presenterWidget;
-    private boolean popupPresenter;
+    private PresenterType selectedPresenter;
 
     // nested
     private String nameToken;
-    private boolean revealInRoot;
-    private boolean revealInRootLayout;
-    private boolean revealInSlot;
+    private RevealLocation revealLocation;
 
     // popup
     private boolean useOverrideDefaultPopup;
 
     // extra
     private boolean useManualReveal;
-    private boolean usePrepareFromRequest;
     private String gatekeeper;
     private String packageName;
     private String contentSlot;
@@ -55,10 +50,6 @@ public class PresenterConfigModel {
     private boolean useSingleton;
 
     private boolean useAddUihandlers;
-    private boolean useAddOnbind;
-    private boolean useAddOnhide;
-    private boolean useAddOnreset;
-    private boolean useAddOnunbind;
     private Module module;
     private PsiDirectory baseDir;
     private PsiClass nameTokenPsiClass;
@@ -69,8 +60,8 @@ public class PresenterConfigModel {
         this.project = project;
 
         // default settings
-        nestedPresenter = true;
-        revealInRoot = true;
+        selectedPresenter = PresenterType.NESTED_PRESENTER;
+        revealLocation = RevealLocation.ROOT;
     }
 
     public String getProjectName() {
@@ -93,30 +84,6 @@ public class PresenterConfigModel {
         this.path = path;
     }
 
-    public boolean getNestedPresenter() {
-        return nestedPresenter;
-    }
-
-    public void setNestedPresenter(boolean nestedPresenter) {
-        this.nestedPresenter = nestedPresenter;
-    }
-
-    public boolean getPresenterWidget() {
-        return presenterWidget;
-    }
-
-    public void setPresenterWidget(boolean presenterWidget) {
-        this.presenterWidget = presenterWidget;
-    }
-
-    public boolean getPopupPresenter() {
-        return popupPresenter;
-    }
-
-    public void setPopupPresenter(boolean popupPresenter) {
-        this.popupPresenter = popupPresenter;
-    }
-
     public String getNameToken() {
         return nameToken;
     }
@@ -137,44 +104,12 @@ public class PresenterConfigModel {
         this.useManualReveal = useManualReveal;
     }
 
-    public boolean getUsePrepareFromRequest() {
-        return usePrepareFromRequest;
-    }
-
-    public void setUsePrepareFromRequest(boolean usePrepareFromRequest) {
-        this.usePrepareFromRequest = usePrepareFromRequest;
-    }
-
     public String getGatekeeper() {
         return gatekeeper;
     }
 
     public void setGatekeeper(String gatekeeper) {
         this.gatekeeper = gatekeeper;
-    }
-
-    public boolean getRevealInRoot() {
-        return revealInRoot;
-    }
-
-    public void setRevealInRoot(boolean revealInRoot) {
-        this.revealInRoot = revealInRoot;
-    }
-
-    public boolean getRevealInRootLayout() {
-        return revealInRootLayout;
-    }
-
-    public void setRevealInRootLayout(boolean revealInRootLayout) {
-        this.revealInRootLayout = revealInRootLayout;
-    }
-
-    public boolean getRevealInSlot() {
-        return revealInSlot;
-    }
-
-    public void setRevealInSlot(boolean revealInSlot) {
-        this.revealInSlot = revealInSlot;
     }
 
     public Project getProject() {
@@ -251,38 +186,6 @@ public class PresenterConfigModel {
 
     public void setUseAddUihandlers(final boolean useAddUihandlers) {
         this.useAddUihandlers = useAddUihandlers;
-    }
-
-    public boolean isUseAddOnbind() {
-        return useAddOnbind;
-    }
-
-    public void setUseAddOnbind(final boolean useAddOnbind) {
-        this.useAddOnbind = useAddOnbind;
-    }
-
-    public boolean isUseAddOnhide() {
-        return useAddOnhide;
-    }
-
-    public void setUseAddOnhide(final boolean useAddOnhide) {
-        this.useAddOnhide = useAddOnhide;
-    }
-
-    public boolean isUseAddOnreset() {
-        return useAddOnreset;
-    }
-
-    public void setUseAddOnreset(final boolean useAddOnreset) {
-        this.useAddOnreset = useAddOnreset;
-    }
-
-    public boolean isUseAddOnunbind() {
-        return useAddOnunbind;
-    }
-
-    public void setUseAddOnunbind(final boolean useAddOnunbind) {
-        this.useAddOnunbind = useAddOnunbind;
     }
 
     public PsiPackage getSelectedPackageRoot() {
@@ -366,5 +269,21 @@ public class PresenterConfigModel {
 
     public void setContentSlotClass(PsiClass contentSlotClass) {
         this.contentSlotClass = contentSlotClass;
+    }
+
+    public PresenterType getSelectedPresenter() {
+        return selectedPresenter;
+    }
+
+    public void setSelectedPresenter(PresenterType selectedPresenter) {
+        this.selectedPresenter = selectedPresenter;
+    }
+
+    public RevealLocation getRevealLocation() {
+        return revealLocation;
+    }
+
+    public void setRevealLocation(RevealLocation revealLocation) {
+        this.revealLocation = revealLocation;
     }
 }

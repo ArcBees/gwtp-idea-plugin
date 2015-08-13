@@ -16,7 +16,15 @@
 
 package com.arcbees.plugin.idea.wizards.createpresenter;
 
+import java.awt.EventQueue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.jetbrains.annotations.NotNull;
+
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
+import com.arcbees.plugin.idea.domain.PresenterType;
 import com.arcbees.plugin.idea.domain.PsiClassModel;
 import com.arcbees.plugin.idea.domain.PsiDirectoriesModel;
 import com.arcbees.plugin.idea.domain.PsiElementModel;
@@ -25,6 +33,7 @@ import com.arcbees.plugin.idea.domain.PsiImportStatementModel;
 import com.arcbees.plugin.idea.domain.PsiMethodModel;
 import com.arcbees.plugin.idea.domain.PsiPackageModel;
 import com.arcbees.plugin.idea.domain.PsiStatementModel;
+import com.arcbees.plugin.idea.domain.RevealLocation;
 import com.arcbees.plugin.idea.icons.PluginIcons;
 import com.arcbees.plugin.idea.utils.PackageHierarchy;
 import com.arcbees.plugin.idea.utils.PackageHierarchyElement;
@@ -76,12 +85,6 @@ import com.intellij.psi.PsiStatement;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.util.ui.UIUtil;
-import org.jetbrains.annotations.NotNull;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
 
 public class CreatePresenterAction extends AnAction {
     public final static Logger logger = Logger.getLogger(CreatePresenterAction.class.getName());
@@ -350,11 +353,11 @@ public class CreatePresenterAction extends AnAction {
 
     private void createPresenterViewUi() {
         RenderedTemplate renderedTemplate = null;
-        if (presenterConfigModel.getNestedPresenter()) {
+        if (presenterConfigModel.getSelectedPresenter() == PresenterType.NESTED_PRESENTER) {
             renderedTemplate = createdNestedPresenterTemplates.getViewui();
-        } else if (presenterConfigModel.getPresenterWidget()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.PRESENTER_WIDGET) {
             renderedTemplate = createdPresenterWidgetTemplates.getViewui();
-        } else if (presenterConfigModel.getPopupPresenter()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.POPUP_PRESENTER) {
             renderedTemplate = createdPopupPresenterTemplates.getViewui();
         }
 
@@ -407,11 +410,11 @@ public class CreatePresenterAction extends AnAction {
 
     private void createPresenter() {
         RenderedTemplate renderedTemplate = null;
-        if (presenterConfigModel.getNestedPresenter()) {
+        if (presenterConfigModel.getSelectedPresenter() == PresenterType.NESTED_PRESENTER) {
             renderedTemplate = createdNestedPresenterTemplates.getPresenter();
-        } else if (presenterConfigModel.getPresenterWidget()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.PRESENTER_WIDGET) {
             renderedTemplate = createdPresenterWidgetTemplates.getPresenter();
-        } else if (presenterConfigModel.getPopupPresenter()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.POPUP_PRESENTER) {
             renderedTemplate = createdPopupPresenterTemplates.getPresenter();
         }
 
@@ -426,11 +429,11 @@ public class CreatePresenterAction extends AnAction {
         }
 
         RenderedTemplate renderedTemplate = null;
-        if (presenterConfigModel.getNestedPresenter()) {
+        if (presenterConfigModel.getSelectedPresenter() == PresenterType.NESTED_PRESENTER) {
             renderedTemplate = createdNestedPresenterTemplates.getUihandlers();
-        } else if (presenterConfigModel.getPresenterWidget()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.PRESENTER_WIDGET) {
             renderedTemplate = createdPresenterWidgetTemplates.getUihandlers();
-        } else if (presenterConfigModel.getPopupPresenter()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.POPUP_PRESENTER) {
             renderedTemplate = createdPopupPresenterTemplates.getUihandlers();
         }
 
@@ -441,11 +444,11 @@ public class CreatePresenterAction extends AnAction {
 
     private void createPresenterView() {
         RenderedTemplate renderedTemplate = null;
-        if (presenterConfigModel.getNestedPresenter()) {
+        if (presenterConfigModel.getSelectedPresenter() == PresenterType.NESTED_PRESENTER) {
             renderedTemplate = createdNestedPresenterTemplates.getView();
-        } else if (presenterConfigModel.getPresenterWidget()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.PRESENTER_WIDGET) {
             renderedTemplate = createdPresenterWidgetTemplates.getView();
-        } else if (presenterConfigModel.getPopupPresenter()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.POPUP_PRESENTER) {
             renderedTemplate = createdPopupPresenterTemplates.getView();
         }
 
@@ -456,11 +459,11 @@ public class CreatePresenterAction extends AnAction {
 
     private void createPresenterModule() {
         RenderedTemplate renderedTemplate = null;
-        if (presenterConfigModel.getNestedPresenter()) {
+        if (presenterConfigModel.getSelectedPresenter() == PresenterType.NESTED_PRESENTER) {
             renderedTemplate = createdNestedPresenterTemplates.getModule();
-        } else if (presenterConfigModel.getPresenterWidget()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.PRESENTER_WIDGET) {
             renderedTemplate = createdPresenterWidgetTemplates.getModule();
-        } else if (presenterConfigModel.getPopupPresenter()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.POPUP_PRESENTER) {
             renderedTemplate = createdPopupPresenterTemplates.getModule();
         }
 
@@ -636,22 +639,14 @@ public class CreatePresenterAction extends AnAction {
         PresenterOptions presenterOptions = new PresenterOptions();
         presenterOptions.setPackageName(presenterConfigModel.getPackageName());
         presenterOptions.setName(presenterConfigModel.getName());
-        presenterOptions.setOnbind(presenterConfigModel.isUseAddOnbind());
-        presenterOptions.setOnhide(presenterConfigModel.isUseAddOnhide());
-        presenterOptions.setOnreset(presenterConfigModel.isUseAddOnreset());
-        presenterOptions.setOnunbind(presenterConfigModel.isUseAddOnunbind());
         presenterOptions.setManualreveal(presenterConfigModel.getUseManualReveal());
-        presenterOptions.setPrepareFromRequest(presenterConfigModel.getUsePrepareFromRequest());
         presenterOptions.setUihandlers(presenterConfigModel.isUseAddUihandlers());
 
-        // TODO future
-        //presenterOptions.setGatekeeper(presenterConfigModel.getGatekeeper());
-
-        if (presenterConfigModel.getNestedPresenter()) {
+        if (presenterConfigModel.getSelectedPresenter() == PresenterType.NESTED_PRESENTER) {
             fetchNestedTemplate(presenterOptions);
-        } else if (presenterConfigModel.getPresenterWidget()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.PRESENTER_WIDGET) {
             fetchPresenterWidgetTemplate(presenterOptions);
-        } else if (presenterConfigModel.getPopupPresenter()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.POPUP_PRESENTER) {
             fetchPopupPresenterTemplate(presenterOptions);
         }
     }
@@ -681,13 +676,13 @@ public class CreatePresenterAction extends AnAction {
         nestedPresenterOptions.setNameTokenImport(presenterConfigModel.getNameTokenUnitImport());
         nestedPresenterOptions.setContentSlotImport(presenterConfigModel.getContentSlotImport());
 
-        if (presenterConfigModel.getRevealInRoot()) {
+        if (presenterConfigModel.getRevealLocation() == RevealLocation.ROOT) {
             nestedPresenterOptions.setRevealType("Root");
-        } else if (presenterConfigModel.getRevealInRootLayout()) {
+        } else if (presenterConfigModel.getRevealLocation() == RevealLocation.ROOT_LAYOUT) {
             nestedPresenterOptions.setRevealType("RootLayout");
-        } else if (presenterConfigModel.getPopupPresenter()) {
+        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.POPUP_PRESENTER) {
             nestedPresenterOptions.setRevealType("RootPopup");
-        } else if (presenterConfigModel.getRevealInSlot()) {
+        } else if (presenterConfigModel.getRevealLocation() == RevealLocation.SLOT) {
             nestedPresenterOptions.setRevealType(presenterConfigModel.getContentSlot());
         }
 
