@@ -7,13 +7,10 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.plaf.metal.MetalTabbedPaneUI;
 
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +43,6 @@ public class CreatePresenterForm extends DialogWrapper {
     private JRadioButton radioNestedPresenter;
     private JRadioButton radioPresenterWidget;
     private JRadioButton radioPopupPresenter;
-    private JPanel buttonPanel;
     private JPanel chooseTypesPanel;
     private JTabbedPane tabbedPanel;
     private JRadioButton radioContentRoot;
@@ -59,16 +55,10 @@ public class CreatePresenterForm extends DialogWrapper {
     private JCheckBox useCrawlable;
     private JCheckBox useCodesplit;
     private JCheckBox useAddUihandlers;
-    private JCheckBox useAddOnbind;
     private JCheckBox useManualReveal;
-    private JCheckBox usePrepareFromRequest;
     private JCheckBox useSingleton;
     private JCheckBox useSingleton2;
     private JCheckBox useOverrideDefaultPopup;
-    private JCheckBox useAddOnhide;
-    private JCheckBox useAddOnreset;
-    private JCheckBox useAddOnunbind;
-    private JLabel lblQuerystring;
 
     public CreatePresenterForm(PresenterConfigModel presenterConfigModel, AnActionEvent sourceEvent) {
         super(presenterConfigModel.getProject());
@@ -123,7 +113,6 @@ public class CreatePresenterForm extends DialogWrapper {
 
     private void initHandlers() {
         initRadioHandlers();
-        initTabFoldersHandlers();
         initContentEventHandlers();
         initPlaceHandlers();
         initButtonHandlers();
@@ -217,9 +206,10 @@ public class CreatePresenterForm extends DialogWrapper {
         radioNestedPresenter.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean selected = radioNestedPresenter.isSelected();
-                if (selected) {
+                if (radioNestedPresenter.isSelected()) {
                     setSelectedIndex(0);
+
+                    presenterConfigModel.setNestedPresenter(true);
                 }
             }
         });
@@ -227,9 +217,10 @@ public class CreatePresenterForm extends DialogWrapper {
         radioPresenterWidget.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean selected = radioPresenterWidget.isSelected();
-                if (selected) {
+                if (radioPresenterWidget.isSelected()) {
                     setSelectedIndex(1);
+
+                    presenterConfigModel.setPresenterWidget(true);
                 }
             }
         });
@@ -237,82 +228,25 @@ public class CreatePresenterForm extends DialogWrapper {
         radioPopupPresenter.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean selected = radioPopupPresenter.isSelected();
-                if (selected) {
+                if (radioPopupPresenter.isSelected()) {
                     setSelectedIndex(2);
+
+                    presenterConfigModel.setPopupPresenter(true);
                 }
             }
         });
     }
 
     private void setSelectedIndex(Integer selectedIndex) {
+        clearSelectedPresenter();
+
         tabbedPanel.setSelectedIndex(selectedIndex);
-        setPresenterType(selectedIndex);
     }
 
-    private void initTabFoldersHandlers() {
-        tabbedPanel.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                int selectedIndex = tabbedPanel.getSelectedIndex();
-
-                setPresenterType(selectedIndex);
-
-                if (selectedIndex == 0) {
-                    radioNestedPresenter.setSelected(true);
-                    radioPresenterWidget.setSelected(false);
-                    radioPopupPresenter.setSelected(false);
-                } else if (selectedIndex == 1) {
-                    radioNestedPresenter.setSelected(false);
-                    radioPresenterWidget.setSelected(true);
-                    radioPopupPresenter.setSelected(false);
-                } else if (selectedIndex == 2) {
-                    radioNestedPresenter.setSelected(false);
-                    radioPresenterWidget.setSelected(false);
-                    radioPopupPresenter.setSelected(true);
-                }
-            }
-        });
-    }
-
-    private void setPresenterType(int selectedIndex) {
-        if (selectedIndex == 0) {
-            presenterConfigModel.setNestedPresenter(true);
-            presenterConfigModel.setPresenterWidget(false);
-            presenterConfigModel.setPopupPresenter(false);
-
-            if (lblQuerystring != null) {
-                lblQuerystring.setVisible(true);
-            }
-
-            if (usePrepareFromRequest != null) {
-                usePrepareFromRequest.setVisible(true);
-            }
-        } else if (selectedIndex == 1) {
-            presenterConfigModel.setNestedPresenter(false);
-            presenterConfigModel.setPresenterWidget(true);
-            presenterConfigModel.setPopupPresenter(false);
-
-            if (lblQuerystring != null) {
-                lblQuerystring.setVisible(false);
-            }
-
-            if (usePrepareFromRequest != null) {
-                usePrepareFromRequest.setVisible(false);
-            }
-        } else if (selectedIndex == 2) {
-            presenterConfigModel.setNestedPresenter(false);
-            presenterConfigModel.setPresenterWidget(false);
-            presenterConfigModel.setPopupPresenter(true);
-
-            if (lblQuerystring != null) {
-                lblQuerystring.setVisible(false);
-            }
-
-            if (usePrepareFromRequest != null) {
-                usePrepareFromRequest.setVisible(false);
-            }
-        }
+    private void clearSelectedPresenter() {
+        presenterConfigModel.setNestedPresenter(false);
+        presenterConfigModel.setPresenterWidget(false);
+        presenterConfigModel.setPopupPresenter(false);
     }
 
     private void showContentSlotDialog() {
@@ -340,12 +274,7 @@ public class CreatePresenterForm extends DialogWrapper {
         useSingleton2.setSelected(data.isUseSingleton());
         useOverrideDefaultPopup.setSelected(data.isUseOverrideDefaultPopup());
         useAddUihandlers.setSelected(data.isUseAddUihandlers());
-        useAddOnbind.setSelected(data.isUseAddOnbind());
-        useAddOnhide.setSelected(data.isUseAddOnhide());
-        useAddOnreset.setSelected(data.isUseAddOnreset());
-        useAddOnunbind.setSelected(data.isUseAddOnunbind());
         useManualReveal.setSelected(data.getUseManualReveal());
-        usePrepareFromRequest.setSelected(data.getUsePrepareFromRequest());
     }
 
     public void getData(PresenterConfigModel data) {
@@ -360,12 +289,7 @@ public class CreatePresenterForm extends DialogWrapper {
         data.setUseSingleton2(useSingleton2.isSelected());
         data.setUseOverrideDefaultPopup(useOverrideDefaultPopup.isSelected());
         data.setUseAddUihandlers(useAddUihandlers.isSelected());
-        data.setUseAddOnbind(useAddOnbind.isSelected());
-        data.setUseAddOnhide(useAddOnhide.isSelected());
-        data.setUseAddOnreset(useAddOnreset.isSelected());
-        data.setUseAddOnunbind(useAddOnunbind.isSelected());
         data.setUseManualReveal(useManualReveal.isSelected());
-        data.setUsePrepareFromRequest(usePrepareFromRequest.isSelected());
         data.setSelectedPackageRoot(getSelectedPackageRoot());
     }
 
@@ -384,12 +308,7 @@ public class CreatePresenterForm extends DialogWrapper {
         if (useSingleton2.isSelected() != data.isUseSingleton()) return true;
         if (useOverrideDefaultPopup.isSelected() != data.isUseOverrideDefaultPopup()) return true;
         if (useAddUihandlers.isSelected() != data.isUseAddUihandlers()) return true;
-        if (useAddOnbind.isSelected() != data.isUseAddOnbind()) return true;
-        if (useAddOnhide.isSelected() != data.isUseAddOnhide()) return true;
-        if (useAddOnreset.isSelected() != data.isUseAddOnreset()) return true;
-        if (useAddOnunbind.isSelected() != data.isUseAddOnunbind()) return true;
         if (useManualReveal.isSelected() != data.getUseManualReveal()) return true;
-        if (usePrepareFromRequest.isSelected() != data.getUsePrepareFromRequest()) return true;
         return false;
     }
 
