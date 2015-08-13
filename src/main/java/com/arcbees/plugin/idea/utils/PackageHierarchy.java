@@ -188,7 +188,7 @@ public class PackageHierarchy {
         return foundUnit;
     }
 
-    public PsiClass findInterfaceTypeInParentPackage(final PsiPackage packageSelected, final String findTypeName) {
+    public PsiClass findInterfaceTypeInPackage(final PsiPackage packageSelected, final String findTypeName) {
         final PsiClassModel psiClassModel = new PsiClassModel();
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override

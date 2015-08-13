@@ -1,16 +1,10 @@
 package com.arcbees.plugin.idea.wizards.createpresenter;
 
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.plaf.metal.MetalTabbedPaneUI;
 
 import org.jetbrains.annotations.Nullable;
@@ -19,6 +13,7 @@ import com.arcbees.plugin.idea.dialogs.ContentSlotDialog;
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.arcbees.plugin.idea.domain.PresenterType;
 import com.arcbees.plugin.idea.domain.RevealLocation;
+import com.arcbees.plugin.idea.utils.PackageUtilExt;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.module.Module;
@@ -27,12 +22,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.psi.JavaDirectoryService;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiPackage;
 
 public class CreatePresenterForm extends DialogWrapper {
@@ -125,9 +115,13 @@ public class CreatePresenterForm extends DialogWrapper {
         useCrawlable.setEnabled(false);
         nameToken.grabFocus();
 
-        PsiPackage selectedPackageRoot = getSelectedPackageRoot();
-        presenterConfigModel.setSelectedPackageRoot(selectedPackageRoot);
-        packageName.setText(presenterConfigModel.getSelectedPackage());
+        PsiElement psiElement = sourceEvent.getData(LangDataKeys.PSI_ELEMENT);
+        Module module = ModuleUtil.findModuleForPsiElement(psiElement);
+        presenterConfigModel.setModule(module);
+
+        PsiPackage selectedPackageRoot =
+                PackageUtilExt.getSelectedPackageRoot(presenterConfigModel.getProject(), sourceEvent);
+        packageName.setText(selectedPackageRoot.getQualifiedName());
     }
 
     private void initButtonHandlers() {
@@ -251,7 +245,8 @@ public class CreatePresenterForm extends DialogWrapper {
 
     public void getData(PresenterConfigModel data) {
         data.setName(name.getText());
-        data.setPackageName(packageName.getText());
+        String packageName = this.packageName.getText();
+        data.setPackageName(packageName);
         data.setContentSlot(contentSlot.getText());
         data.setUsePlace(usePlace.isSelected());
         data.setNameToken(nameToken.getText());
@@ -262,44 +257,48 @@ public class CreatePresenterForm extends DialogWrapper {
         data.setUseOverrideDefaultPopup(useOverrideDefaultPopup.isSelected());
         data.setUseAddUihandlers(useAddUihandlers.isSelected());
         data.setUseManualReveal(useManualReveal.isSelected());
-        data.setSelectedPackageRoot(getSelectedPackageRoot());
     }
 
     public boolean isModified(PresenterConfigModel data) {
-        if (name.getText() != null ? !name.getText().equals(data.getName()) : data.getName() != null) return true;
-        if (packageName.getText() != null ? !packageName.getText().equals(data.getPackageName()) : data.getPackageName() != null)
+        if (name.getText() != null ? !name.getText().equals(data.getName()) : data.getName() != null) {
             return true;
-        if (contentSlot.getText() != null ? !contentSlot.getText().equals(data.getContentSlot()) : data.getContentSlot() != null)
-            return true;
-        if (usePlace.isSelected() != data.isUsePlace()) return true;
-        if (nameToken.getText() != null ? !nameToken.getText().equals(data.getNameToken()) : data.getNameToken() != null)
-            return true;
-        if (useCrawlable.isSelected() != data.isUseCrawlable()) return true;
-        if (useCodesplit.isSelected() != data.isUseCodesplit()) return true;
-        if (useSingleton.isSelected() != data.isUseSingleton()) return true;
-        if (useSingleton2.isSelected() != data.isUseSingleton()) return true;
-        if (useOverrideDefaultPopup.isSelected() != data.isUseOverrideDefaultPopup()) return true;
-        if (useAddUihandlers.isSelected() != data.isUseAddUihandlers()) return true;
-        if (useManualReveal.isSelected() != data.getUseManualReveal()) return true;
-        return false;
-    }
-
-    public PsiPackage getSelectedPackageRoot() {
-        PsiElement e = sourceEvent.getData(LangDataKeys.PSI_ELEMENT);
-
-        PsiPackage selectedPackage = null;
-        if (e instanceof PsiClass) {
-            PsiClass clazz = (PsiClass) e;
-            PsiJavaFile javaFile = (PsiJavaFile) clazz.getContainingFile();
-            selectedPackage = JavaPsiFacade.getInstance(presenterConfigModel.getProject()).findPackage(javaFile.getPackageName());
-
-        } else if (e instanceof PsiDirectory) {
-            selectedPackage = JavaDirectoryService.getInstance().getPackage((PsiDirectory) e);
         }
-
-        Module module = ModuleUtil.findModuleForPsiElement(e);
-        presenterConfigModel.setModule(module);
-
-        return selectedPackage;
+        if (packageName.getText() != null ? !packageName.getText().equals(
+                data.getPackageName()) : data.getPackageName() != null) {
+            return true;
+        }
+        if (contentSlot.getText() != null ? !contentSlot.getText().equals(
+                data.getContentSlot()) : data.getContentSlot() != null) {
+            return true;
+        }
+        if (usePlace.isSelected() != data.isUsePlace()) {
+            return true;
+        }
+        if (nameToken.getText() != null ? !nameToken.getText().equals(
+                data.getNameToken()) : data.getNameToken() != null) {
+            return true;
+        }
+        if (useCrawlable.isSelected() != data.isUseCrawlable()) {
+            return true;
+        }
+        if (useCodesplit.isSelected() != data.isUseCodesplit()) {
+            return true;
+        }
+        if (useSingleton.isSelected() != data.isUseSingleton()) {
+            return true;
+        }
+        if (useSingleton2.isSelected() != data.isUseSingleton()) {
+            return true;
+        }
+        if (useOverrideDefaultPopup.isSelected() != data.isUseOverrideDefaultPopup()) {
+            return true;
+        }
+        if (useAddUihandlers.isSelected() != data.isUseAddUihandlers()) {
+            return true;
+        }
+        if (useManualReveal.isSelected() != data.getUseManualReveal()) {
+            return true;
+        }
+        return false;
     }
 }

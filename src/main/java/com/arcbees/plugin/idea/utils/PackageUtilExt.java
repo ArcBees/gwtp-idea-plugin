@@ -15,206 +15,58 @@
  */
 package com.arcbees.plugin.idea.utils;
 
-import com.intellij.ide.IdeBundle;
-import com.intellij.ide.util.DirectoryChooserUtil;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.CommandProcessor;
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectBundle;
-import com.intellij.openapi.projectRoots.impl.ProjectRootUtil;
-import com.intellij.openapi.roots.ModulePackageIndex;
-import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.roots.ProjectFileIndex;
-import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.roots.ui.configuration.CommonContentEntriesEditor;
-import com.intellij.openapi.roots.ui.configuration.ProjectSettingsService;
-import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.Computable;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.JavaDirectoryService;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.PsiPackage;
-import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.ActionRunner;
-import com.intellij.util.IncorrectOperationException;
-import com.intellij.util.Query;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import com.intellij.ide.IdeBundle;
+import com.intellij.ide.util.DirectoryChooserUtil;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.LangDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectBundle;
+import com.intellij.openapi.roots.ModulePackageIndex;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.roots.ui.configuration.CommonContentEntriesEditor;
+import com.intellij.openapi.roots.ui.configuration.ProjectSettingsService;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.JavaDirectoryService;
+import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiJavaFile;
+import com.intellij.psi.PsiManager;
+import com.intellij.psi.PsiPackage;
+import com.intellij.util.ActionRunner;
+import com.intellij.util.IncorrectOperationException;
+import com.intellij.util.Query;
+
 public class PackageUtilExt {
     private static final Logger LOG = Logger.getInstance("com.intellij.ide.util.PackageUtilExt");
 
     @Nullable
-    public static PsiDirectory findPossiblePackageDirectoryInModule(Module module, String packageName) {
-        PsiDirectory psiDirectory = null;
-        if (!"".equals(packageName)) {
-            PsiPackage rootPackage = findLongestExistingPackage(module.getProject(), packageName);
-            if (rootPackage != null) {
-                final PsiDirectory[] psiDirectories = getPackageDirectoriesInModule(rootPackage, module);
-                if (psiDirectories.length > 0) {
-                    psiDirectory = psiDirectories[0];
-                }
-            }
-        }
-        if (psiDirectory == null) {
-            if (checkSourceRootsConfigured(module)) {
-                final VirtualFile[] sourceRoots = ModuleRootManager.getInstance(module).getSourceRoots();
-                for (VirtualFile sourceRoot : sourceRoots) {
-                    final PsiDirectory directory = PsiManager.getInstance(module.getProject()).findDirectory(sourceRoot);
-                    if (directory != null) {
-                        psiDirectory = directory;
-                        break;
-                    }
-                }
-            }
-        }
-        return psiDirectory;
-    }
-
-    /**
-     * @deprecated
-     */
-    @Nullable
-    public static PsiDirectory findOrCreateDirectoryForPackage(Project project,
-                                                               String packageName,
-                                                               PsiDirectory baseDir,
-                                                               boolean askUserToCreate) throws IncorrectOperationException {
-        return findOrCreateDirectoryForPackage(project, packageName, baseDir, askUserToCreate, false);
-    }
-
-    /**
-     * @deprecated
-     */
-    @Nullable
-    public static PsiDirectory findOrCreateDirectoryForPackage(Project project,
-                                                               String packageName,
-                                                               PsiDirectory baseDir,
-                                                               boolean askUserToCreate,
-                                                               boolean filterSourceDirsForTestBaseDir)
-            throws IncorrectOperationException {
-        PsiDirectory psiDirectory = null;
-
-        if (!"".equals(packageName)) {
-            PsiPackage rootPackage = findLongestExistingPackage(project, packageName);
-            if (rootPackage != null) {
-                int beginIndex = rootPackage.getQualifiedName().length() + 1;
-                packageName = beginIndex < packageName.length() ? packageName.substring(beginIndex) : "";
-                String postfixToShow = packageName.replace('.', File.separatorChar);
-                if (packageName.length() > 0) {
-                    postfixToShow = File.separatorChar + postfixToShow;
-                }
-                PsiDirectory[] directories = rootPackage.getDirectories();
-                if (filterSourceDirsForTestBaseDir) {
-                    directories = filterSourceDirectories(baseDir, project, directories);
-                }
-                psiDirectory = DirectoryChooserUtil.selectDirectory(project, directories, baseDir, postfixToShow);
-                if (psiDirectory == null) return null;
-            }
-        }
-
-        if (psiDirectory == null) {
-            PsiDirectory[] sourceDirectories = ProjectRootUtil.getSourceRootDirectories(project);
-            psiDirectory = DirectoryChooserUtil.selectDirectory(project, sourceDirectories, baseDir,
-                    File.separatorChar + packageName.replace('.', File.separatorChar));
-            if (psiDirectory == null) return null;
-        }
-
-        String restOfName = packageName;
-        boolean askedToCreate = false;
-        while (restOfName.length() > 0) {
-            final String name = getLeftPart(restOfName);
-            PsiDirectory foundExistingDirectory = psiDirectory.findSubdirectory(name);
-            if (foundExistingDirectory == null) {
-                if (!askedToCreate && askUserToCreate) {
-                    int toCreate = Messages.showYesNoDialog(project,
-                            IdeBundle.message("prompt.create.non.existing.package", packageName),
-                            IdeBundle.message("title.package.not.found"),
-                            Messages.getQuestionIcon());
-                    if (toCreate != 0) {
-                        return null;
-                    }
-                    askedToCreate = true;
-                }
-                psiDirectory = createSubdirectory(psiDirectory, name, project);
-            } else {
-                psiDirectory = foundExistingDirectory;
-            }
-            restOfName = cutLeftPart(restOfName);
-        }
-        return psiDirectory;
-    }
-
-    private static PsiDirectory createSubdirectory(final PsiDirectory oldDirectory,
-                                                   final String name, Project project) throws IncorrectOperationException {
-        final PsiDirectory[] psiDirectory = new PsiDirectory[1];
-        final IncorrectOperationException[] exception = new IncorrectOperationException[1];
-
-        CommandProcessor.getInstance().executeCommand(project, new Runnable() {
-            public void run() {
-                psiDirectory[0] = ApplicationManager.getApplication().runWriteAction(new Computable<PsiDirectory>() {
-                    public PsiDirectory compute() {
-                        try {
-                            return oldDirectory.createSubdirectory(name);
-                        } catch (IncorrectOperationException e) {
-                            exception[0] = e;
-                            return null;
-                        }
-                    }
-                });
-            }
-        }, IdeBundle.message("command.create.new.subdirectory"), null);
-
-        if (exception[0] != null) throw exception[0];
-
-        return psiDirectory[0];
-    }
-
-    @Nullable
-    public static PsiDirectory findOrCreateDirectoryForPackage(@NotNull Module module,
-                                                               String packageName,
-                                                               @Nullable PsiDirectory baseDir,
-                                                               boolean askUserToCreate) throws IncorrectOperationException {
-        return findOrCreateDirectoryForPackage(module, packageName, baseDir, askUserToCreate, false);
-    }
-
-    @Nullable
-    public static PsiDirectory findOrCreateDirectoryForPackage(@NotNull Module module,
-                                                               String packageName,
-                                                               PsiDirectory baseDir,
-                                                               boolean askUserToCreate,
-                                                               boolean filterSourceDirsForBaseTestDirectory) throws IncorrectOperationException {
+    public static PsiDirectory findOrCreateDirectoryForPackage(
+            @NotNull Module module,
+            String packageName,
+            PsiDirectory baseDir,
+            boolean askUserToCreate) throws IncorrectOperationException {
         final Project project = module.getProject();
         PsiDirectory psiDirectory = baseDir;
-//    if (!packageName.isEmpty()) {
-//      PsiPackage rootPackage = findLongestExistingPackage(module, packageName);
-//      if (rootPackage != null) {
-//        int beginIndex = rootPackage.getQualifiedName().length() + 1;
-//        packageName = beginIndex < packageName.length() ? packageName.substring(beginIndex) : "";
-//        String postfixToShow = packageName.replace('.', File.separatorChar);
-//        if (packageName.length() > 0) {
-//          postfixToShow = File.separatorChar + postfixToShow;
-//        }
-//        PsiDirectory[] moduleDirectories = getPackageDirectoriesInModule(rootPackage, module);
-//        if (filterSourceDirsForBaseTestDirectory) {
-//          moduleDirectories = filterSourceDirectories(baseDir, project, moduleDirectories);
-//        }
-//        psiDirectory = DirectoryChooserUtil.selectDirectory(project, moduleDirectories, baseDir, postfixToShow);
-//        if (psiDirectory == null) return null;
-//      }
-//    }
 
         if (psiDirectory == null) {
-            if (!checkSourceRootsConfigured(module, askUserToCreate)) return null;
+            if (!checkSourceRootsConfigured(module, askUserToCreate)) {
+                return null;
+            }
             final VirtualFile[] sourceRoots = ModuleRootManager.getInstance(module).getSourceRoots();
             List<PsiDirectory> directoryList = new ArrayList<PsiDirectory>();
             for (VirtualFile sourceRoot : sourceRoots) {
@@ -226,7 +78,9 @@ public class PackageUtilExt {
             PsiDirectory[] sourceDirectories = directoryList.toArray(new PsiDirectory[directoryList.size()]);
             psiDirectory = DirectoryChooserUtil.selectDirectory(project, sourceDirectories, baseDir,
                     File.separatorChar + packageName.replace('.', File.separatorChar));
-            if (psiDirectory == null) return null;
+            if (psiDirectory == null) {
+                return null;
+            }
         }
 
         String restOfName = packageName;
@@ -238,11 +92,12 @@ public class PackageUtilExt {
             final PsiDirectory passDir = psiDirectory;
             PsiDirectory foundExistingDirectory = null;
             try {
-                foundExistingDirectory = ActionRunner.runInsideWriteAction(new ActionRunner.InterruptibleRunnableWithResult<PsiDirectory>() {
-                    public PsiDirectory run() throws Exception {
-                        return passDir.findSubdirectory(name);
-                    }
-                });
+                foundExistingDirectory = ActionRunner.runInsideWriteAction(
+                        new ActionRunner.InterruptibleRunnableWithResult<PsiDirectory>() {
+                            public PsiDirectory run() throws Exception {
+                                return passDir.findSubdirectory(name);
+                            }
+                        });
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -263,11 +118,12 @@ public class PackageUtilExt {
 
                 final PsiDirectory psiDirectory1 = psiDirectory;
                 try {
-                    psiDirectory = ActionRunner.runInsideWriteAction(new ActionRunner.InterruptibleRunnableWithResult<PsiDirectory>() {
-                        public PsiDirectory run() throws Exception {
-                            return psiDirectory1.createSubdirectory(name);
-                        }
-                    });
+                    psiDirectory = ActionRunner.runInsideWriteAction(
+                            new ActionRunner.InterruptibleRunnableWithResult<PsiDirectory>() {
+                                public PsiDirectory run() throws Exception {
+                                    return psiDirectory1.createSubdirectory(name);
+                                }
+                            });
                 } catch (IncorrectOperationException e) {
                     throw e;
                 } catch (IOException e) {
@@ -283,37 +139,20 @@ public class PackageUtilExt {
         return psiDirectory;
     }
 
-    private static PsiDirectory[] filterSourceDirectories(PsiDirectory baseDir, Project project, PsiDirectory[] moduleDirectories) {
-        final ProjectFileIndex fileIndex = ProjectRootManager.getInstance(project).getFileIndex();
-        if (fileIndex.isInTestSourceContent(baseDir.getVirtualFile())) {
-            List<PsiDirectory> result = new ArrayList<PsiDirectory>();
-            for (PsiDirectory moduleDirectory : moduleDirectories) {
-                if (fileIndex.isInTestSourceContent(moduleDirectory.getVirtualFile())) {
-                    result.add(moduleDirectory);
-                }
-            }
-            moduleDirectories = result.toArray(new PsiDirectory[result.size()]);
-        }
-        return moduleDirectories;
-    }
+    public static PsiPackage getSelectedPackageRoot(Project project, AnActionEvent event) {
+        PsiElement e = event.getData(LangDataKeys.PSI_ELEMENT);
 
-    private static PsiDirectory[] getPackageDirectoriesInModule(PsiPackage rootPackage, Module module) {
-        return rootPackage.getDirectories(GlobalSearchScope.moduleScope(module));
-    }
-
-    private static PsiPackage findLongestExistingPackage(Project project, String packageName) {
-        PsiManager manager = PsiManager.getInstance(project);
-        String nameToMatch = packageName;
-        while (true) {
-            PsiPackage aPackage = JavaPsiFacade.getInstance(manager.getProject()).findPackage(nameToMatch);
-            if (aPackage != null && isWritablePackage(aPackage)) return aPackage;
-            int lastDotIndex = nameToMatch.lastIndexOf('.');
-            if (lastDotIndex >= 0) {
-                nameToMatch = nameToMatch.substring(0, lastDotIndex);
-            } else {
-                return null;
-            }
+        PsiPackage selectedPackage = null;
+        if (e instanceof PsiClass) {
+            PsiClass clazz = (PsiClass) e;
+            PsiJavaFile javaFile = (PsiJavaFile) clazz.getContainingFile();
+            selectedPackage =
+                    JavaPsiFacade.getInstance(project).findPackage(javaFile.getPackageName());
+        } else if (e instanceof PsiDirectory) {
+            selectedPackage = JavaDirectoryService.getInstance().getPackage((PsiDirectory) e);
         }
+
+        return selectedPackage;
     }
 
     private static boolean isWritablePackage(PsiPackage aPackage) {
@@ -326,9 +165,12 @@ public class PackageUtilExt {
         return false;
     }
 
-    private static PsiDirectory getWritableModuleDirectory(@NotNull Query<VirtualFile> vFiles, @NotNull Module module, PsiManager manager) {
+    private static PsiDirectory getWritableModuleDirectory(@NotNull Query<VirtualFile> vFiles, @NotNull Module module,
+            PsiManager manager) {
         for (VirtualFile vFile : vFiles) {
-            if (ModuleUtil.findModuleForFile(vFile, module.getProject()) != module) continue;
+            if (ModuleUtil.findModuleForFile(vFile, module.getProject()) != module) {
+                continue;
+            }
             PsiDirectory directory = manager.findDirectory(vFile);
             if (directory != null && directory.isValid() && directory.isWritable()) {
                 return directory;
@@ -344,7 +186,9 @@ public class PackageUtilExt {
         while (true) {
             Query<VirtualFile> vFiles = ModulePackageIndex.getInstance(module).getDirsByPackageName(nameToMatch, false);
             PsiDirectory directory = getWritableModuleDirectory(vFiles, module, manager);
-            if (directory != null) return JavaDirectoryService.getInstance().getPackage(directory);
+            if (directory != null) {
+                return JavaDirectoryService.getInstance().getPackage(directory);
+            }
 
             int lastDotIndex = nameToMatch.lastIndexOf('.');
             if (lastDotIndex >= 0) {
@@ -381,7 +225,8 @@ public class PackageUtilExt {
                     ProjectBundle.message("module.source.roots.not.configured.error", module.getName()),
                     ProjectBundle.message("module.source.roots.not.configured.title"));
 
-            ProjectSettingsService.getInstance(project).showModuleConfigurationDialog(module.getName(), CommonContentEntriesEditor.NAME);
+            ProjectSettingsService.getInstance(project).showModuleConfigurationDialog(module.getName(),
+                    CommonContentEntriesEditor.NAME);
 
             sourceRoots = ModuleRootManager.getInstance(module).getSourceRoots();
             if (sourceRoots.length == 0) {
@@ -392,7 +237,8 @@ public class PackageUtilExt {
     }
 
     @NotNull
-    public static PsiDirectory findOrCreateSubdirectory(@NotNull PsiDirectory directory, @NotNull String directoryName) {
+    public static PsiDirectory findOrCreateSubdirectory(@NotNull PsiDirectory directory,
+            @NotNull String directoryName) {
         PsiDirectory subDirectory = directory.findSubdirectory(directoryName);
         if (subDirectory == null) {
             subDirectory = directory.createSubdirectory(directoryName);

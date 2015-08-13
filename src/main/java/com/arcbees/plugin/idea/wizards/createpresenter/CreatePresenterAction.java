@@ -16,7 +16,7 @@
 
 package com.arcbees.plugin.idea.wizards.createpresenter;
 
-import java.awt.EventQueue;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -67,9 +67,11 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.Computable;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
@@ -87,7 +89,8 @@ import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.util.ui.UIUtil;
 
 public class CreatePresenterAction extends AnAction {
-    public final static Logger logger = Logger.getLogger(CreatePresenterAction.class.getName());
+    private static final Logger logger = Logger.getLogger(CreatePresenterAction.class.getName());
+    private static final String ABSTRACT_GIN_MODULE = "AbstractGinModule";
 
     // project model settings
     private PresenterConfigModel presenterConfigModel;
@@ -111,7 +114,7 @@ public class CreatePresenterAction extends AnAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent e) {
+    public void actionPerformed(final AnActionEvent e) {
         project = e.getProject();
         presenterConfigModel = new PresenterConfigModel(project);
 
@@ -126,13 +129,13 @@ public class CreatePresenterAction extends AnAction {
         new Task.Backgroundable(project, "Create Presenter", true) {
             public void run(ProgressIndicator indicator) {
                 indicator.setFraction(0.0);
-                CreatePresenterAction.this.run(indicator);
+                CreatePresenterAction.this.run(indicator, e);
                 indicator.setFraction(1.0);
             }
         }.setCancelText("Cancel Presenter Creation").queue();
     }
 
-    private void run(ProgressIndicator indicator) {
+    private void run(ProgressIndicator indicator, AnActionEvent event) {
         indicator.setText("Creating presenter started");
 
         indicator.setFraction(.5);
@@ -141,7 +144,9 @@ public class CreatePresenterAction extends AnAction {
 
         indicator.setFraction(.1);
         indicator.setText("Creating name tokens package");
-        createNameTokensPackage();
+        PsiPackage selectedPackageRoot =
+                PackageUtilExt.getSelectedPackageRoot(presenterConfigModel.getProject(), event);
+        createNameTokensPackage(selectedPackageRoot);
 
         try {
             indicator.setFraction(.25);
@@ -176,7 +181,7 @@ public class CreatePresenterAction extends AnAction {
         indicator.setFraction(.8);
         indicator.setText("Generating classes");
         createNameTokensFieldAndMethods();
-        createPresenterPackage();
+        createPresenterPackage(selectedPackageRoot);
         createPresenterModule();
         createPresenter();
         indicator.setFraction(.9);
@@ -216,25 +221,25 @@ public class CreatePresenterAction extends AnAction {
      */
     private void createPresenterModuleLinkForGin() {
         // 1. first search parent
-        PsiClass unit = packageHierarchy.findInterfaceTypeInParentPackage(
-                presenterConfigModel.getSelectedPackageRoot(), "GinModule");
+        PsiClass unit = packageHierarchy.findInterfaceTypeInPackage(
+                createdPresenterPackage.getParentPackage(), ABSTRACT_GIN_MODULE);
 
         // 2. next check if the parent is client and if so, scan all packages for ginModule
-        String selectedPackageElementName = presenterConfigModel.getSelectedPackageRoot().getQualifiedName();
+        String selectedPackageElementName = createdPresenterPackage.getQualifiedName();
         if (unit == null && packageHierarchy.isParentTheClientPackage(selectedPackageElementName)) {
             // first check for a gin package with GinModule
             PackageHierarchyElement hierarchyElement = packageHierarchy.findParentClientAndAddPackage(
                     selectedPackageElementName, "gin");
             if (hierarchyElement != null) {
                 PsiPackage clienPackage = hierarchyElement.getPackageFragment();
-                unit = packageHierarchy.findInterfaceTypeInParentPackage(clienPackage, "GinModule");
+                unit = packageHierarchy.findInterfaceTypeInPackage(clienPackage, ABSTRACT_GIN_MODULE);
             }
 
             // If no gin package check for any existence of a GinModule
-            // TODO could make this smarter in the future, this is a last resort, to install it somewhere.
             if (unit == null) {
-                unit = packageHierarchy.findFirstInterfaceType("GinModule");
-                logger.info("Warning: This didn't find a ideal place to put the gin install for the new presenter module");
+                unit = packageHierarchy.findFirstInterfaceType(ABSTRACT_GIN_MODULE);
+                logger.info(
+                        "Warning: This didn't find a ideal place to put the gin install for the new presenter module");
             }
         }
 
@@ -245,7 +250,7 @@ public class CreatePresenterAction extends AnAction {
 
                 if (hierarchyElement.getPackageFragment() != null) {
                     PsiPackage parentParentPackage = hierarchyElement.getPackageFragment();
-                    unit = packageHierarchy.findInterfaceTypeInParentPackage(parentParentPackage, "GinModule");
+                    unit = packageHierarchy.findInterfaceTypeInPackage(parentParentPackage, ABSTRACT_GIN_MODULE);
                 }
             }
         }
@@ -254,7 +259,7 @@ public class CreatePresenterAction extends AnAction {
         // If no gin package check for any existence of a GinModule
         // TODO could make this smarter in the future, this is a last resort, to install it somewhere.
         if (unit == null) {
-            unit = packageHierarchy.findFirstInterfaceType("GinModule");
+            unit = packageHierarchy.findFirstInterfaceType(ABSTRACT_GIN_MODULE);
             logger.info("Warning: This didn't find a ideal place to put the gin install for the new presenter module");
         }
 
@@ -271,10 +276,9 @@ public class CreatePresenterAction extends AnAction {
      * TODO extract this possibly, but I think I'll wait till I get into slots before I do it see what is common.
      */
     private void createPresenterGinlink(final PsiClass parentModulePsiClass) {
-        // find the configure method
-        final PsiMethod method = findMethod(parentModulePsiClass, "configure");
+        final PsiMethod configureMethod = findMethod(parentModulePsiClass, "configure");
 
-        if (method == null) {
+        if (configureMethod == null) {
             warn("Wasn't able to findMethod Configure in unit: " + parentModulePsiClass.getName());
             logger.severe("createPresenterGinLink() unit did not have configure implementation.");
             return;
@@ -301,7 +305,22 @@ public class CreatePresenterAction extends AnAction {
         final String moduleName = createdModulePsiClass.getName() + "()";
         final String installModuleStatement = "install(new " + moduleName + ");";
 
-        // module statement for configure method
+        PsiStatement installStatement = findStatement(configureMethod.getBody(), installModuleStatement, false);
+        if (installStatement == null) {
+            addIntallStatement(parentModulePsiClass, configureMethod, factory, importStatementModel,
+                    installModuleStatement);
+        }
+
+        navigateToClass(parentModulePsiClass);
+    }
+
+    private void addIntallStatement(
+            final PsiClass parentModulePsiClass,
+            final PsiMethod configureMethod,
+            final PsiElementFactory factory,
+            final PsiImportStatementModel importStatementModel,
+            final String installModuleStatement) {
+
         final PsiStatementModel psiStatementModel = new PsiStatementModel();
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
@@ -309,7 +328,8 @@ public class CreatePresenterAction extends AnAction {
                 ApplicationManager.getApplication().runReadAction(new Runnable() {
                     @Override
                     public void run() {
-                        PsiStatement installModuleStatementElement = factory.createStatementFromText(installModuleStatement, null);
+                        PsiStatement installModuleStatementElement = factory.createStatementFromText(
+                                installModuleStatement, null);
                         psiStatementModel.set(installModuleStatementElement);
                     }
                 });
@@ -323,11 +343,20 @@ public class CreatePresenterAction extends AnAction {
                     @Override
                     protected void run(@NotNull Result<Void> result) throws Throwable {
                         PsiJavaFile parentmoduleFile = (PsiJavaFile) parentModulePsiClass.getContainingFile();
-                        PsiImportStatement[] importStatements = parentmoduleFile.getImportList().getImportStatements();
-                        parentmoduleFile.getImportList().addAfter(importStatementModel.get(), importStatements[importStatements.length - 1]);
+                        PsiImportStatement[] importStatements =
+                                parentmoduleFile.getImportList().getImportStatements();
+                        parentmoduleFile.getImportList().addAfter(importStatementModel.get(),
+                                importStatements[importStatements.length - 1]);
 
-                        // TODO add to top of install order
-                        method.getBody().add(psiStatementModel.get());
+                        PsiCodeBlock body = configureMethod.getBody();
+                        PsiStatement statement = findStatement(body, "install(new ", true);
+                        PsiStatement newInstallStatement = psiStatementModel.get();
+
+                        if (statement != null) {
+                            body.addBefore(newInstallStatement, statement);
+                        } else {
+                            body.add(newInstallStatement);
+                        }
 
                         CodeStyleManager.getInstance(project).reformat(parentModulePsiClass);
                         JavaCodeStyleManager.getInstance(project).optimizeImports(parentmoduleFile);
@@ -335,8 +364,29 @@ public class CreatePresenterAction extends AnAction {
                 }.execute();
             }
         }, ModalityState.NON_MODAL);
+    }
 
-        navigateToClass(parentModulePsiClass);
+    private PsiStatement findStatement(
+            final PsiCodeBlock block,
+            final String statementToSearch,
+            final boolean partial) {
+        if (block != null) {
+            return ApplicationManager.getApplication().runReadAction(new Computable<PsiStatement>() {
+                @Override
+                public PsiStatement compute() {
+                    for (PsiStatement statement : block.getStatements()) {
+                        if (statement.textMatches(statementToSearch)
+                                || (partial && statement.getText().startsWith(statementToSearch))) {
+                            return statement;
+                        }
+                    }
+
+                    return null;
+                }
+            });
+        }
+
+        return null;
     }
 
     private PsiMethod findMethod(PsiClass unit, String methodName) {
@@ -392,7 +442,6 @@ public class CreatePresenterAction extends AnAction {
                 });
             }
         }, ModalityState.NON_MODAL);
-
 
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
@@ -458,16 +507,21 @@ public class CreatePresenterAction extends AnAction {
     }
 
     private void createPresenterModule() {
-        RenderedTemplate renderedTemplate = null;
-        if (presenterConfigModel.getSelectedPresenter() == PresenterType.NESTED_PRESENTER) {
-            renderedTemplate = createdNestedPresenterTemplates.getModule();
-        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.PRESENTER_WIDGET) {
-            renderedTemplate = createdPresenterWidgetTemplates.getModule();
-        } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.POPUP_PRESENTER) {
-            renderedTemplate = createdPopupPresenterTemplates.getModule();
-        }
+        createdModulePsiClass =
+                packageHierarchy.findInterfaceTypeInPackage(createdPresenterPackage, ABSTRACT_GIN_MODULE);
+        
+        if (createdModulePsiClass == null) {
+            RenderedTemplate renderedTemplate = null;
+            if (presenterConfigModel.getSelectedPresenter() == PresenterType.NESTED_PRESENTER) {
+                renderedTemplate = createdNestedPresenterTemplates.getModule();
+            } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.PRESENTER_WIDGET) {
+                renderedTemplate = createdPresenterWidgetTemplates.getModule();
+            } else if (presenterConfigModel.getSelectedPresenter() == PresenterType.POPUP_PRESENTER) {
+                renderedTemplate = createdPopupPresenterTemplates.getModule();
+            }
 
-        createdModulePsiClass = createPsiClass(createdPresenterPackage, renderedTemplate);
+            createdModulePsiClass = createPsiClass(createdPresenterPackage, renderedTemplate);
+        }
 
         navigateToClass(createdModulePsiClass);
     }
@@ -548,7 +602,8 @@ public class CreatePresenterAction extends AnAction {
                 new WriteCommandAction<Void>(project) {
                     @Override
                     protected void run(@NotNull Result<Void> result) throws Throwable {
-                        JavaCodeStyleManager.getInstance(project).optimizeImports(psiClassModelModel.get().getContainingFile());
+                        JavaCodeStyleManager.getInstance(project).optimizeImports(
+                                psiClassModelModel.get().getContainingFile());
                     }
                 }.execute();
             }
@@ -557,8 +612,9 @@ public class CreatePresenterAction extends AnAction {
         return psiClassModelModel.get();
     }
 
-    private void createPresenterPackage() {
-        PsiDirectory baseDir = getBaseDir();
+    private void createPresenterPackage(PsiPackage selectedPackage) {
+        PsiDirectory baseDir = getBaseDir(selectedPackage);
+
         String presenterPackageName = presenterConfigModel.getPackageName();
         createdPresenterPackage = createPackage(baseDir, presenterPackageName);
         logger.info("Created Package: " + presenterPackageName);
@@ -713,16 +769,15 @@ public class CreatePresenterAction extends AnAction {
         packageHierarchy.run();
     }
 
-    private void createNameTokensPackage() {
+    private void createNameTokensPackage(PsiPackage selectedPackageRoot) {
         if (!presenterConfigModel.isUsePlace()) {
             return;
         }
 
-        PsiPackage selectedPackage = presenterConfigModel.getSelectedPackageRoot();
-        String selectedPackageString = selectedPackage.getQualifiedName();
+        String selectedPackageString = selectedPackageRoot.getQualifiedName();
         PackageHierarchyElement clientPackage = packageHierarchy.findParentClient(selectedPackageString);
         final String clientPackageString = clientPackage.getPackageFragment().getQualifiedName() + ".place";
-        final PsiDirectory baseDir = getBaseDir();
+        final PsiDirectory baseDir = getBaseDir(selectedPackageRoot);
 
         PackageHierarchyElement nameTokensPackageExists = packageHierarchy.find(clientPackageString);
 
@@ -735,7 +790,8 @@ public class CreatePresenterAction extends AnAction {
 
     private PsiPackage createPackage(PsiDirectory baseDir, String packageName) {
         Module module = presenterConfigModel.getModule();
-        PsiDirectory psiDir = PackageUtilExt.findOrCreateDirectoryForPackage(module, packageName, baseDir, false, false);
+        PsiDirectory psiDir = PackageUtilExt.findOrCreateDirectoryForPackage(module, packageName, baseDir, false
+        );
 
         return JavaDirectoryService.getInstance().getPackage(psiDir);
     }
@@ -778,8 +834,7 @@ public class CreatePresenterAction extends AnAction {
         return createPsiClass(createdNameTokensPackage, renderedTemplate);
     }
 
-    private PsiDirectory getBaseDir() {
-        PsiPackage selectedPackage = presenterConfigModel.getSelectedPackageRoot();
+    private PsiDirectory getBaseDir(PsiPackage selectedPackage) {
         String selectedPackageString = selectedPackage.getQualifiedName();
         final PackageHierarchyElement clientPackage = packageHierarchy.findParentClient(selectedPackageString);
 

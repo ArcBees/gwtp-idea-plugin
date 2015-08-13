@@ -21,12 +21,9 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiPackage;
 
 public class PresenterConfigModel {
     private final Project project;
-
-    private PsiPackage selectedPackageRoot;
 
     private String name;
     private String path;
@@ -188,14 +185,6 @@ public class PresenterConfigModel {
         this.useAddUihandlers = useAddUihandlers;
     }
 
-    public PsiPackage getSelectedPackageRoot() {
-        return selectedPackageRoot;
-    }
-
-    public void setSelectedPackageRoot(PsiPackage selectedPackageRoot) {
-        this.selectedPackageRoot = selectedPackageRoot;
-    }
-
     public void setModule(Module module) {
         this.module = module;
     }
@@ -210,19 +199,6 @@ public class PresenterConfigModel {
 
     public PsiClass getNameTokenPsiClass() {
         return nameTokenPsiClass;
-    }
-
-    public String getSelectedPackage() {
-        final StringModel stringModel = new StringModel();
-        ApplicationManager.getApplication().runReadAction(new Runnable() {
-            @Override
-            public void run() {
-                String qualifiedClassName = selectedPackageRoot.getQualifiedName();
-                stringModel.set(qualifiedClassName);
-            }
-        });
-
-        return stringModel.get();
     }
 
     public String getNameTokenWithClass() {
