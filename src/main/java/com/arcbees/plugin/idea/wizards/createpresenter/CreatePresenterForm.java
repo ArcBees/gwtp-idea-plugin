@@ -84,17 +84,8 @@ public class CreatePresenterForm extends DialogWrapper {
 
         initHandlers();
         setDefaults();
-        name.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                super.keyReleased(e);
 
-                CreatePresenterForm.this.presenterConfigModel.setName(name.getText());
-                packageName.setText(CreatePresenterForm.this.presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
-            }
-        });
-
-        // TODO focus on name input
+        name.requestFocusInWindow();
     }
 
     @Nullable
@@ -147,7 +138,7 @@ public class CreatePresenterForm extends DialogWrapper {
 
         PsiPackage selectedPackageRoot = getSelectedPackageRoot();
         presenterConfigModel.setSelectedPackageRoot(selectedPackageRoot);
-        packageName.setText(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
+        packageName.setText(presenterConfigModel.getSelectedPackage());
     }
 
     private void initButtonHandlers() {
