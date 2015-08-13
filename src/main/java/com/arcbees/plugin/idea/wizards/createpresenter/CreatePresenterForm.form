@@ -451,4 +451,12 @@
       </grid>
     </children>
   </grid>
+  <buttonGroups>
+    <group name="presenterType">
+      <member id="deb25"/>
+      <member id="deb25"/>
+      <member id="6ebc6"/>
+      <member id="fbc58"/>
+    </group>
+  </buttonGroups>
 </form>

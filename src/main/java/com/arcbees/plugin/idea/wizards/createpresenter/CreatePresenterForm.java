@@ -208,7 +208,7 @@ public class CreatePresenterForm extends DialogWrapper {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (radioNestedPresenter.isSelected()) {
-                    setSelectedIndex(0);
+                    tabbedPanel.setSelectedIndex(0);
 
                     presenterConfigModel.setSelectedPresenter(PresenterType.NESTED_PRESENTER);
                 }
@@ -219,7 +219,7 @@ public class CreatePresenterForm extends DialogWrapper {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (radioPresenterWidget.isSelected()) {
-                    setSelectedIndex(1);
+                    tabbedPanel.setSelectedIndex(1);
 
                     presenterConfigModel.setSelectedPresenter(PresenterType.PRESENTER_WIDGET);
                 }
@@ -230,16 +230,12 @@ public class CreatePresenterForm extends DialogWrapper {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (radioPopupPresenter.isSelected()) {
-                    setSelectedIndex(2);
+                    tabbedPanel.setSelectedIndex(2);
 
                     presenterConfigModel.setSelectedPresenter(PresenterType.POPUP_PRESENTER);
                 }
             }
         });
-    }
-
-    private void setSelectedIndex(Integer selectedIndex) {
-        tabbedPanel.setSelectedIndex(selectedIndex);
     }
 
     private void showContentSlotDialog() {
