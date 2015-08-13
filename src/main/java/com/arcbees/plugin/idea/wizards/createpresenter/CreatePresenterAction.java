@@ -301,7 +301,6 @@ public class CreatePresenterAction extends AnAction {
         final String installModuleStatement = "install(new " + moduleName + ");";
 
         PsiStatement installStatement = findStatement(configureMethod.getBody(), installModuleStatement);
-
         if (installStatement == null) {
             addIntallStatement(parentModulePsiClass, configureMethod, factory, importStatementModel,
                     installModuleStatement);
