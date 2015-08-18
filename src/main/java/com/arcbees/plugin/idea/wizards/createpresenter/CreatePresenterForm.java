@@ -64,8 +64,12 @@ public class CreatePresenterForm extends DialogWrapper {
 
         initHandlers();
         setDefaults();
+    }
 
-        name.requestFocusInWindow();
+    @Nullable
+    @Override
+    public JComponent getPreferredFocusedComponent() {
+        return name;
     }
 
     @Nullable
@@ -120,7 +124,7 @@ public class CreatePresenterForm extends DialogWrapper {
         presenterConfigModel.setModule(module);
 
         PsiPackage selectedPackageRoot =
-                PackageUtilExt.getSelectedPackageRoot(presenterConfigModel.getProject(), sourceEvent);
+                PackageUtilExt.getSelectedPackageRoot(presenterConfigModel.getProject(), psiElement);
         packageName.setText(selectedPackageRoot.getQualifiedName());
     }
 

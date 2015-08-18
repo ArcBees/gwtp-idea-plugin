@@ -139,9 +139,7 @@ public class PackageUtilExt {
         return psiDirectory;
     }
 
-    public static PsiPackage getSelectedPackageRoot(Project project, AnActionEvent event) {
-        PsiElement e = event.getData(LangDataKeys.PSI_ELEMENT);
-
+    public static PsiPackage getSelectedPackageRoot(Project project, PsiElement e) {
         PsiPackage selectedPackage = null;
         if (e instanceof PsiClass) {
             PsiClass clazz = (PsiClass) e;

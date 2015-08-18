@@ -108,15 +108,24 @@ public class CreatePresenterAction extends AnAction {
     private CreatedNestedPresenter createdNestedPresenterTemplates;
     private CreatedPopupPresenter createdPopupPresenterTemplates;
     private CreatedPresenterWidget createdPresenterWidgetTemplates;
+    private PsiPackage selectedPackageRoot;
+    private PsiElement selectedPackageElement;
 
     public CreatePresenterAction() {
         super("Create Presenter", "Create GWTP Presenter", PluginIcons.GWTP_ICON_16x16);
     }
 
     @Override
-    public void actionPerformed(final AnActionEvent e) {
+    public void beforeActionPerformedUpdate(@NotNull AnActionEvent e) {
+        selectedPackageElement = e.getData(LangDataKeys.PSI_ELEMENT);
+    }
+
+    @Override
+    public void actionPerformed(AnActionEvent e) {
         project = e.getProject();
         presenterConfigModel = new PresenterConfigModel(project);
+        this.selectedPackageRoot =
+                PackageUtilExt.getSelectedPackageRoot(presenterConfigModel.getProject(), selectedPackageElement);
 
         CreatePresenterForm dialog = new CreatePresenterForm(presenterConfigModel, e);
         if (!dialog.showAndGet()) {
@@ -129,13 +138,13 @@ public class CreatePresenterAction extends AnAction {
         new Task.Backgroundable(project, "Create Presenter", true) {
             public void run(ProgressIndicator indicator) {
                 indicator.setFraction(0.0);
-                CreatePresenterAction.this.run(indicator, e);
+                CreatePresenterAction.this.run(indicator);
                 indicator.setFraction(1.0);
             }
         }.setCancelText("Cancel Presenter Creation").queue();
     }
 
-    private void run(ProgressIndicator indicator, AnActionEvent event) {
+    private void run(ProgressIndicator indicator) {
         indicator.setText("Creating presenter started");
 
         indicator.setFraction(.5);
@@ -144,8 +153,7 @@ public class CreatePresenterAction extends AnAction {
 
         indicator.setFraction(.1);
         indicator.setText("Creating name tokens package");
-        PsiPackage selectedPackageRoot =
-                PackageUtilExt.getSelectedPackageRoot(presenterConfigModel.getProject(), event);
+
         createNameTokensPackage(selectedPackageRoot);
 
         try {
@@ -348,14 +356,16 @@ public class CreatePresenterAction extends AnAction {
                         parentmoduleFile.getImportList().addAfter(importStatementModel.get(),
                                 importStatements[importStatements.length - 1]);
 
-                        PsiCodeBlock body = configureMethod.getBody();
+                        final PsiCodeBlock body = configureMethod.getBody();
                         PsiStatement statement = findStatement(body, "install(new ", true);
                         PsiStatement newInstallStatement = psiStatementModel.get();
 
                         if (statement != null) {
                             body.addBefore(newInstallStatement, statement);
                         } else {
-                            body.add(newInstallStatement);
+                            PsiElement addedElement = body.addBefore(newInstallStatement, body.getFirstBodyElement());
+                            PsiElement newLine = createNewLine(factory);
+                            body.addAfter(newLine, addedElement);
                         }
 
                         CodeStyleManager.getInstance(project).reformat(parentModulePsiClass);
@@ -364,6 +374,14 @@ public class CreatePresenterAction extends AnAction {
                 }.execute();
             }
         }, ModalityState.NON_MODAL);
+    }
+
+    @NotNull
+    private PsiElement createNewLine(PsiElementFactory factory) {
+        PsiElement newLine = factory.createCodeBlockFromText("{\n\n}", null);
+        newLine.getFirstChild().delete();
+        newLine.getLastChild().delete();
+        return newLine;
     }
 
     private PsiStatement findStatement(
@@ -509,7 +527,7 @@ public class CreatePresenterAction extends AnAction {
     private void createPresenterModule() {
         createdModulePsiClass =
                 packageHierarchy.findInterfaceTypeInPackage(createdPresenterPackage, ABSTRACT_GIN_MODULE);
-        
+
         if (createdModulePsiClass == null) {
             RenderedTemplate renderedTemplate = null;
             if (presenterConfigModel.getSelectedPresenter() == PresenterType.NESTED_PRESENTER) {
