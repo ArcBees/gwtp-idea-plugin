@@ -95,6 +95,7 @@ public class CreatePresenterAction extends AnAction {
     // project model settings
     private PresenterConfigModel presenterConfigModel;
     private Project project;
+    private Module module;
     private PackageHierarchy packageHierarchy;
 
     // created elements
@@ -123,7 +124,13 @@ public class CreatePresenterAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         project = e.getProject();
-        presenterConfigModel = new PresenterConfigModel(project);
+        module = e.getData(LangDataKeys.MODULE);
+        if(module == null) {
+            Messages.showErrorDialog("You must choose a package inside a valid module.", "Invalid Module");
+            return;
+        }
+
+        presenterConfigModel = new PresenterConfigModel(module);
         this.selectedPackageRoot =
                 PackageUtilExt.getSelectedPackageRoot(presenterConfigModel.getProject(), selectedPackageElement);
 

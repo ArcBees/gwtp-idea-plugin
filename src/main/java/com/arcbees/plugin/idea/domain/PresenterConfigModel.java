@@ -53,8 +53,9 @@ public class PresenterConfigModel {
     private PsiClass contentSlotClass;
     private boolean useSingleton2;
 
-    public PresenterConfigModel(Project project) {
-        this.project = project;
+    public PresenterConfigModel(Module module) {
+        this.module = module;
+        this.project = module.getProject();
 
         // default settings
         selectedPresenter = PresenterType.NESTED_PRESENTER;

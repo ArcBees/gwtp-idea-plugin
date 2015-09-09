@@ -17,15 +17,15 @@
 package com.arcbees.plugin.idea.dialogs;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiMember;
+import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AnnotatedMembersSearch;
+import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.util.Processor;
-import com.intellij.util.Query;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -37,21 +37,23 @@ import java.util.Set;
 
 public class ContentSlotDialog extends DialogWrapper {
     // project
+    private final Module module;
     private final Project project;
     private final AnActionEvent sourceEvent;
 
     // panels
     private JPanel contentPanel;
-    private JList contentSlotsList;
+    private JList slotsList;
 
     // vars
     private String selection;
     private Map<String, PsiMember> slots;
 
-    public ContentSlotDialog(@Nullable Project project, boolean canBeParent, AnActionEvent sourceEvent) {
-        super(project, canBeParent);
+    public ContentSlotDialog(@NotNull Module module, boolean canBeParent, AnActionEvent sourceEvent) {
+        super(module.getProject(), canBeParent);
 
-        this.project = project;
+        this.module = module;
+        this.project = module.getProject();
         this.sourceEvent = sourceEvent;
 
         init();
@@ -59,11 +61,11 @@ public class ContentSlotDialog extends DialogWrapper {
         setSize(500, 600);
         findSlots();
 
-        contentSlotsList.addListSelectionListener(new ListSelectionListener() {
+        slotsList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                int selected = contentSlotsList.getSelectedIndex();
-                ListModel list = contentSlotsList.getModel();
+                int selected = slotsList.getSelectedIndex();
+                ListModel list = slotsList.getModel();
                 selection = (String) list.getElementAt(selected);
             }
         });
@@ -90,28 +92,46 @@ public class ContentSlotDialog extends DialogWrapper {
 
     private void findSlots() {
         GlobalSearchScope scope = GlobalSearchScope.allScope(project);
-        PsiClass psiClass = JavaPsiFacade.getInstance(project)
-                .findClass("com.gwtplatform.mvp.client.annotations.ContentSlot", scope);
+        PsiClass contentSlotClass = JavaPsiFacade.getInstance(project)
+            .findClass("com.gwtplatform.mvp.client.annotations.ContentSlot", scope);
+        PsiClass nestedSlotClass = JavaPsiFacade.getInstance(project)
+            .findClass("com.gwtplatform.mvp.client.presenter.slots.NestedSlot", scope);
 
         slots = new HashMap<String, PsiMember>();
-        Query<PsiMember> query = AnnotatedMembersSearch.search(psiClass, GlobalSearchScope.allScope(project));
-        query.forEach(new Processor<PsiMember>() {
+
+        AnnotatedMembersSearch.search(contentSlotClass,
+            GlobalSearchScope.allScope(project)).forEach(new Processor<PsiMember>() {
             public boolean process(PsiMember psiMember) {
                 slots.put(getSlot(psiMember), psiMember);
+                return true;
+            }
+        });
 
+        ReferencesSearch.search(nestedSlotClass,
+            GlobalSearchScope.moduleScope(module), false).forEach(new Processor<PsiReference>() {
+            public boolean process(PsiReference psiReference) {
+                if(psiReference instanceof PsiQualifiedReferenceElement) {
+                    PsiElement parent = ((PsiQualifiedReferenceElement) psiReference).getParent();
+                    if(parent instanceof PsiNewExpression) {
+                        PsiElement field = parent.getParent();
+                        if(field instanceof PsiField) {
+                            slots.put(getSlot((PsiField)field), (PsiField)field);
+                        }
+                    }
+                }
                 return true;
             }
         });
 
         String[] listData = new String[slots.size()];
         Set<String> set = slots.keySet();
-        int i=0;
+        int i = 0;
         for (String item : set) {
             listData[i] = item;
             i++;
         }
 
-        contentSlotsList.setListData(listData);
+        slotsList.setListData(listData);
     }
 
     private String getSlot(PsiMember psiMember) {

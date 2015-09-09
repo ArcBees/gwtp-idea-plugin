@@ -16,16 +16,23 @@
 
 package com.arcbees.plugin.idea.utils;
 
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiPackage;
 
 public class PackageRoot {
+    private final Module module;
     private final VirtualFile root;
     private final PsiPackage psiPackage;
 
-    public PackageRoot(VirtualFile root, PsiPackage psiPackage) {
+    public PackageRoot(Module module, VirtualFile root, PsiPackage psiPackage) {
+        this.module = module;
         this.root = root;
         this.psiPackage = psiPackage;
+    }
+
+    public Module getModule() {
+        return module;
     }
 
     public VirtualFile getRoot() {
@@ -39,17 +46,19 @@ public class PackageRoot {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PackageRoot)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         PackageRoot that = (PackageRoot) o;
 
-        if (psiPackage != null ? !psiPackage.equals(that.psiPackage) : that.psiPackage != null) return false;
+        if (module != null ? !module.equals(that.module) : that.module != null) return false;
+        return !(psiPackage != null ? !psiPackage.equals(that.psiPackage) : that.psiPackage != null);
 
-        return true;
     }
 
     @Override
     public int hashCode() {
-        return psiPackage != null ? psiPackage.hashCode() : 0;
+        int result = module != null ? module.hashCode() : 0;
+        result = 31 * result + (psiPackage != null ? psiPackage.hashCode() : 0);
+        return result;
     }
 }
