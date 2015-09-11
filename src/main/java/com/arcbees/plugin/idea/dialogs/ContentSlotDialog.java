@@ -20,7 +20,14 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.psi.*;
+import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiMember;
+import com.intellij.psi.PsiNewExpression;
+import com.intellij.psi.PsiQualifiedReferenceElement;
+import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AnnotatedMembersSearch;
 import com.intellij.psi.search.searches.ReferencesSearch;
@@ -101,27 +108,27 @@ public class ContentSlotDialog extends DialogWrapper {
 
         AnnotatedMembersSearch.search(contentSlotClass,
             GlobalSearchScope.allScope(project)).forEach(new Processor<PsiMember>() {
-            public boolean process(PsiMember psiMember) {
-                slots.put(getSlot(psiMember), psiMember);
-                return true;
-            }
-        });
+                public boolean process(PsiMember psiMember) {
+                    slots.put(getSlot(psiMember), psiMember);
+                    return true;
+                }
+            });
 
         ReferencesSearch.search(nestedSlotClass,
             GlobalSearchScope.moduleScope(module), false).forEach(new Processor<PsiReference>() {
-            public boolean process(PsiReference psiReference) {
-                if(psiReference instanceof PsiQualifiedReferenceElement) {
-                    PsiElement parent = ((PsiQualifiedReferenceElement) psiReference).getParent();
-                    if(parent instanceof PsiNewExpression) {
-                        PsiElement field = parent.getParent();
-                        if(field instanceof PsiField) {
-                            slots.put(getSlot((PsiField)field), (PsiField)field);
+                public boolean process(PsiReference psiReference) {
+                    if (psiReference instanceof PsiQualifiedReferenceElement) {
+                        PsiElement parent = ((PsiQualifiedReferenceElement) psiReference).getParent();
+                        if (parent instanceof PsiNewExpression) {
+                            PsiElement field = parent.getParent();
+                            if (field instanceof PsiField) {
+                                slots.put(getSlot((PsiField)field), (PsiField)field);
+                            }
                         }
                     }
+                    return true;
                 }
-                return true;
-            }
-        });
+            });
 
         String[] listData = new String[slots.size()];
         Set<String> set = slots.keySet();

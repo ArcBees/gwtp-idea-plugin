@@ -125,7 +125,7 @@ public class CreatePresenterAction extends AnAction {
     public void actionPerformed(AnActionEvent e) {
         project = e.getProject();
         module = e.getData(LangDataKeys.MODULE);
-        if(module == null) {
+        if (module == null) {
             Messages.showErrorDialog("You must choose a package inside a valid module.", "Invalid Module");
             return;
         }

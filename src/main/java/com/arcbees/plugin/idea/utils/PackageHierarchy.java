@@ -290,9 +290,8 @@ public class PackageHierarchy {
         final Set<PackageRoot> topLevelPackages = new HashSet<PackageRoot>();
 
         Module[] modules = ModuleManager.getInstance(myProject).getModules();
-        for(Module module : modules) {
+        for (Module module : modules) {
             final ModuleRootManager rootManager = ModuleRootManager.getInstance(module);
-
             final PsiManager psiManager = PsiManager.getInstance(myProject);
 
             for (final VirtualFile root : rootManager.getSourceRoots()) {
