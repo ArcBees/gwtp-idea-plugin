@@ -306,7 +306,6 @@ public class PackageHierarchy {
                     for (PsiDirectory subdirectory : subdirectories) {
                         final PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(subdirectory);
                         if (aPackage != null && !PackageUtil.isPackageDefault(aPackage)) {
-
                             PackageRoot packageRoot = new PackageRoot(module, root, aPackage);
                             topLevelPackages.add(packageRoot);
                         }
