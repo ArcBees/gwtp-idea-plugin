@@ -16,6 +16,15 @@
 
 package com.arcbees.plugin.idea.utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import com.arcbees.plugin.idea.domain.PresenterConfigModel;
 import com.arcbees.plugin.idea.domain.PsiClassModel;
 import com.arcbees.plugin.idea.domain.PsiClassesModel;
@@ -38,16 +47,6 @@ import com.intellij.psi.PsiPackage;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
-
-import java.com.arcbees.plugin.idea.utils.PackageIndex;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
 
 public class PackageHierarchy {
     private static final Logger logger = Logger.getLogger(PackageHierarchy.class.getName());

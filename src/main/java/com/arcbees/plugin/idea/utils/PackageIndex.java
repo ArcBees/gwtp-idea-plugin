@@ -1,5 +1,5 @@
-/**
- * Copyright 2013 ArcBees Inc.
+/*
+ * Copyright 2015 ArcBees Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,7 +14,7 @@
  * the License.
  */
 
-package java.com.arcbees.plugin.idea.utils;
+package com.arcbees.plugin.idea.utils;
 
 import com.intellij.openapi.module.Module;
 
