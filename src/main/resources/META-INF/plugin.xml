@@ -9,7 +9,10 @@
       ]]></description>
 
     <change-notes><![CDATA[
-      Updated for IntelliJ 14
+      - Fixed Presenter package location in multi-module projects
+      - Added NestedSlot support
+
+      Thanks to BenDol
       ]]>
     </change-notes>
 
