@@ -24,8 +24,10 @@ import com.intellij.ide.projectView.impl.nodes.ProjectViewDirectoryHelper;
 import com.intellij.ide.util.treeView.AbstractTreeNode;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiClass;
@@ -36,8 +38,8 @@ import com.intellij.psi.PsiPackage;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
-import com.intellij.util.containers.ContainerUtil;
 
+import java.com.arcbees.plugin.idea.utils.PackageIndex;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,14 +53,14 @@ public class PackageHierarchy {
     private static final Logger logger = Logger.getLogger(PackageHierarchy.class.getName());
 
     private final PresenterConfigModel presenterConfigModel;
-    private Map<String, PackageHierarchyElement> packagesIndex;
+    private Map<PackageIndex, PackageHierarchyElement> packagesIndex;
 
     public PackageHierarchy(PresenterConfigModel presenterConfigModel) {
         this.presenterConfigModel = presenterConfigModel;
     }
 
     public void run() {
-        packagesIndex = new HashMap<String, PackageHierarchyElement>();
+        packagesIndex = new HashMap<PackageIndex, PackageHierarchyElement>();
 
         logger.info("Creating package index.");
 
@@ -78,7 +80,15 @@ public class PackageHierarchy {
     }
 
     public PackageHierarchyElement find(String packageElementName) {
-        return packagesIndex.get(packageElementName);
+        return find(presenterConfigModel.getModule(), packageElementName);
+    }
+
+    public PackageHierarchyElement find(Module module, String packageElementName) {
+        return find(new PackageIndex(module, packageElementName));
+    }
+
+    public PackageHierarchyElement find(PackageIndex packageIndex) {
+        return packagesIndex.get(packageIndex);
     }
 
     public PackageHierarchyElement findParent(String packageElementName) {
@@ -94,7 +104,7 @@ public class PackageHierarchy {
                 parentPackageElementName += ".";
             }
         }
-        return find(parentPackageElementName);
+        return find(presenterConfigModel.getModule(), parentPackageElementName);
     }
 
     public PackageHierarchyElement findParentClient(String packageElementName) {
@@ -104,10 +114,11 @@ public class PackageHierarchy {
 
         String parentPackageElementName = getClientPackageElementName(packageElementName);
 
-        return find(parentPackageElementName);
+        return find(presenterConfigModel.getModule(), parentPackageElementName);
     }
 
-    public PackageHierarchyElement findParentClientAndAddPackage(String packageElementName, String andFindPackage) {
+    public PackageHierarchyElement findParentClientAndAddPackage(String packageElementName,
+                                                                 String andFindPackage) {
         if (!packageElementName.contains(".")) {
             return null;
         }
@@ -115,7 +126,7 @@ public class PackageHierarchy {
         String parentPackageElementName = getClientPackageElementName(packageElementName);
         parentPackageElementName += "." + andFindPackage;
 
-        return find(parentPackageElementName);
+        return find(presenterConfigModel.getModule(), parentPackageElementName);
     }
 
     /**
@@ -161,8 +172,8 @@ public class PackageHierarchy {
 
     public PsiClass findFirstInterfaceType(String findType) {
         PsiClass unit = null;
-        for (String packageElementName : packagesIndex.keySet()) {
-            unit = findFirstInterfaceTypeInPackage(packageElementName, findType);
+        for (PackageIndex index : packagesIndex.keySet()) {
+            unit = findFirstInterfaceTypeInPackage(index.getName(), findType);
             if (unit != null) {
                 break;
             }
@@ -230,23 +241,23 @@ public class PackageHierarchy {
         List<PackageRoot> packages = getTopLevelPackages();
 
         for (PackageRoot rootPackage : packages) {
-            indexPackage(rootPackage.getRoot(), rootPackage.getPackage());
+            indexPackage(rootPackage.getModule(), rootPackage.getRoot(), rootPackage.getPackage());
         }
     }
 
-    private void indexPackage(VirtualFile root, PsiPackage packageFragment) {
+    private void indexPackage(Module module, VirtualFile root, PsiPackage packageFragment) {
         String packageName = packageFragment.getQualifiedName();
         PackageHierarchyElement packageIndex = new PackageHierarchyElement(root, packageName, packageFragment);
-        packagesIndex.put(packageName, packageIndex);
+        packagesIndex.put(new PackageIndex(module, packageName), packageIndex);
 
         PsiClass[] classes = packageFragment.getClasses();
         packageIndex.add(classes);
 
-        GlobalSearchScope scope = GlobalSearchScope.projectScope(presenterConfigModel.getProject());
+        GlobalSearchScope scope = GlobalSearchScope.moduleScope(module);
         PsiPackage[] children = packageFragment.getSubPackages(scope);
 
         for (PsiPackage aChildren : children) {
-            indexPackage(root, aChildren);
+            indexPackage(module, root, aChildren);
         }
     }
 
@@ -274,37 +285,38 @@ public class PackageHierarchy {
         Project myProject = presenterConfigModel.getProject();
         ProjectViewSettings viewSettings = new ProjectViewSettings();
 
-        final List<VirtualFile> sourceRoots = new ArrayList<VirtualFile>();
-        final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(myProject);
-        ContainerUtil.addAll(sourceRoots, projectRootManager.getContentSourceRoots());
-
-        final PsiManager psiManager = PsiManager.getInstance(myProject);
+        // TODO: Are children going to be referenced?
         final List<AbstractTreeNode> children = new ArrayList<AbstractTreeNode>();
         final Set<PackageRoot> topLevelPackages = new HashSet<PackageRoot>();
 
-        for (final VirtualFile root : sourceRoots) {
-            final PsiDirectory directory = psiManager.findDirectory(root);
-            if (directory == null) {
-                continue;
-            }
-            final PsiPackage directoryPackage = JavaDirectoryService.getInstance().getPackage(directory);
-            if (directoryPackage == null || PackageUtil.isPackageDefault(directoryPackage)) {
-                // add subpackages
-                final PsiDirectory[] subdirectories = directory.getSubdirectories();
-                for (PsiDirectory subdirectory : subdirectories) {
-                    final PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(subdirectory);
-                    if (aPackage != null && !PackageUtil.isPackageDefault(aPackage)) {
+        Module[] modules = ModuleManager.getInstance(myProject).getModules();
+        for (Module module : modules) {
+            final ModuleRootManager rootManager = ModuleRootManager.getInstance(module);
+            final PsiManager psiManager = PsiManager.getInstance(myProject);
 
-                        PackageRoot packageRoot = new PackageRoot(root, aPackage);
-                        topLevelPackages.add(packageRoot);
-                    }
+            for (final VirtualFile root : rootManager.getSourceRoots()) {
+                final PsiDirectory directory = psiManager.findDirectory(root);
+                if (directory == null) {
+                    continue;
                 }
-                // add non-dir items
-                children.addAll(ProjectViewDirectoryHelper.getInstance(myProject).getDirectoryChildren(directory, viewSettings, false));
-            } else {
-                // this is the case when a source root has package prefix assigned
-                PackageRoot packageRoot = new PackageRoot(root, directoryPackage);
-                topLevelPackages.add(packageRoot);
+                final PsiPackage directoryPackage = JavaDirectoryService.getInstance().getPackage(directory);
+                if (directoryPackage == null || PackageUtil.isPackageDefault(directoryPackage)) {
+                    // add subpackages
+                    final PsiDirectory[] subdirectories = directory.getSubdirectories();
+                    for (PsiDirectory subdirectory : subdirectories) {
+                        final PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(subdirectory);
+                        if (aPackage != null && !PackageUtil.isPackageDefault(aPackage)) {
+                            PackageRoot packageRoot = new PackageRoot(module, root, aPackage);
+                            topLevelPackages.add(packageRoot);
+                        }
+                    }
+                    // add non-dir items
+                    children.addAll(ProjectViewDirectoryHelper.getInstance(myProject).getDirectoryChildren(directory, viewSettings, false));
+                } else {
+                    // this is the case when a source root has package prefix assigned
+                    PackageRoot packageRoot = new PackageRoot(module, root, directoryPackage);
+                    topLevelPackages.add(packageRoot);
+                }
             }
         }
 

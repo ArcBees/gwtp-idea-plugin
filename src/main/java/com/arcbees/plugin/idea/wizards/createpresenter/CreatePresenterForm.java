@@ -120,9 +120,6 @@ public class CreatePresenterForm extends DialogWrapper {
         nameToken.grabFocus();
 
         PsiElement psiElement = sourceEvent.getData(LangDataKeys.PSI_ELEMENT);
-        Module module = ModuleUtil.findModuleForPsiElement(psiElement);
-        presenterConfigModel.setModule(module);
-
         PsiPackage selectedPackageRoot =
                 PackageUtilExt.getSelectedPackageRoot(presenterConfigModel.getProject(), psiElement);
         packageName.setText(selectedPackageRoot.getQualifiedName());
@@ -220,9 +217,9 @@ public class CreatePresenterForm extends DialogWrapper {
     }
 
     private void showContentSlotDialog() {
-        Project project = presenterConfigModel.getProject();
+        Module module = presenterConfigModel.getModule();
 
-        ContentSlotDialog dialog = new ContentSlotDialog(project, true, sourceEvent);
+        ContentSlotDialog dialog = new ContentSlotDialog(module, true, sourceEvent);
         dialog.show();
 
         String contentSlotSelection = dialog.getContentSlot();

@@ -14,33 +14,27 @@
  * the License.
  */
 
-package com.arcbees.plugin.idea.utils;
+package java.com.arcbees.plugin.idea.utils;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiPackage;
 
-public class PackageRoot {
-    private final Module module;
-    private final VirtualFile root;
-    private final PsiPackage psiPackage;
+public class PackageIndex {
+    private Module module;
+    private String name;
 
-    public PackageRoot(Module module, VirtualFile root, PsiPackage psiPackage) {
+    public PackageIndex() {}
+
+    public PackageIndex(Module module, String name) {
         this.module = module;
-        this.root = root;
-        this.psiPackage = psiPackage;
+        this.name = name;
     }
 
     public Module getModule() {
         return module;
     }
 
-    public VirtualFile getRoot() {
-        return root;
-    }
-
-    public PsiPackage getPackage() {
-        return psiPackage;
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -48,17 +42,16 @@ public class PackageRoot {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        PackageRoot that = (PackageRoot) o;
+        PackageIndex that = (PackageIndex) o;
 
         if (module != null ? !module.equals(that.module) : that.module != null) return false;
-        return !(psiPackage != null ? !psiPackage.equals(that.psiPackage) : that.psiPackage != null);
-
+        return !(name != null ? !name.equals(that.name) : that.name != null);
     }
 
     @Override
     public int hashCode() {
         int result = module != null ? module.hashCode() : 0;
-        result = 31 * result + (psiPackage != null ? psiPackage.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
     }
 }
